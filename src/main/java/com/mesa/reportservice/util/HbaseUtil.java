@@ -74,11 +74,11 @@ public class HbaseUtil {
     }
 
 
-    public  void setColume_exception(String colume_exception) {
+    public void setColume_exception(String colume_exception) {
         HbaseUtil.colume_exception = colume_exception;
     }
 
-    public  void setColume_sql(String colume_sql) {
+    public void setColume_sql(String colume_sql) {
         HbaseUtil.colume_sql = colume_sql;
     }
 }

@@ -42,9 +42,8 @@ public class DataBaseBusiness {
     public List<JobEntity> getJobForExcute() {
 
 
-
         String sql = " select * from report_result where status =1  order by end_time ";
-        int resultid=0;
+        int resultid = 0;
         List<JobEntity> sqllist = new ArrayList<JobEntity>();
         try {
             //connection = manager.getConnection("idb");
@@ -65,7 +64,7 @@ public class DataBaseBusiness {
 
         } catch (Exception e) {
             Logs.error(sql + "获取进度列表发生异常!");
-            updateStatue(resultid,4);
+            updateStatue(resultid, 4);
             e.printStackTrace();
             throw new RuntimeException("获取进度列表发生异常!", e);
         } finally {
@@ -86,11 +85,10 @@ public class DataBaseBusiness {
     }
 
 
-
     public List<JobEntity> getJobLimitRows(int row) {
 
         String current_time = DateUtil.getDate();
-        int resultid=0;
+        int resultid = 0;
         String sql = " select * from report_result where status =0 and end_time<'" + current_time + "' order by end_time limit " + row;
 
         List<JobEntity> sqllist = new ArrayList<JobEntity>();
@@ -114,7 +112,7 @@ public class DataBaseBusiness {
 
         } catch (Exception e) {
             Logs.error(sql + "获取任务列表发生异常!");
-            updateStatue(resultid,4);
+            updateStatue(resultid, 4);
             e.printStackTrace();
             throw new RuntimeException("获取任务列表发生异常!", e);
 
@@ -134,8 +132,6 @@ public class DataBaseBusiness {
         }
         return sqllist;
     }
-
-
 
 
     public int getJobStatueFromId(int id) {
@@ -243,7 +239,6 @@ public class DataBaseBusiness {
             }
         }
     }
-
 
 
 }

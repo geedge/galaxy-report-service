@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by wk1 on 2019/5/28.
@@ -18,8 +16,8 @@ import java.util.concurrent.Executors;
 public class ConfigUtil {
 
 
-   // public static ExecutorService pool = Executors.newFixedThreadPool(30);
-   // public static int query_log_sleep;
+    // public static ExecutorService pool = Executors.newFixedThreadPool(30);
+    // public static int query_log_sleep;
     //public static int loop_number;
     public static int job_thread;
     public static int ck_timeout;
@@ -29,7 +27,6 @@ public class ConfigUtil {
     public void setCk_timeout(int ck_timeout) {
         ConfigUtil.ck_timeout = ck_timeout;
     }
-
 
 
     public void setJob_thread(int job_thread) {

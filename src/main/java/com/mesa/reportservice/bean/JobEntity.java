@@ -3,7 +3,7 @@ package com.mesa.reportservice.bean;
 /**
  * Created by wk1 on 2019/5/20.
  */
-public class JobEntity implements Cloneable{
+public class JobEntity implements Cloneable {
 
     private int result_id;
     private String result_name;

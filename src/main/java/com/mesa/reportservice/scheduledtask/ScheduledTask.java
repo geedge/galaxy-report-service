@@ -34,48 +34,10 @@ public class ScheduledTask {
     @Autowired
     private DataBaseBusiness hb;
 
-   /* @Scheduled(cron = "${scan.mysql.scheduled.plan}")
-    public void run() {
-
-        System.out.print(Thread.currentThread());
-        Logs.debug("jobthread=000000000000000" + ConfigUtil.job_thread);
-        try {
-            if (ConfigUtil.job_thread > 0) {
-                List<JobEntity> joblist = hb.getJobLimitRows(ConfigUtil.job_thread);
-                Logs.debug("joblist size=" + joblist.size());
-
-                for (JobEntity jl : joblist) {
-                   // Thread.sleep(2000);
-                    ConfigUtil.job_thread--;
-                    Logs.debug("jobthread--=" + ConfigUtil.job_thread + "---jobid=" + jl.getResult_id());
-                    pool.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            Logs.debug("threadname" + Thread.currentThread());
-                            JobTask jt = new JobTask(hp, hb);
-                            try {
-                                jt.dotask(jl);
-                            } catch (Exception e) {
-                                Logs.error(e.toString());
-                            }
-                        }
-                    });
-
-                }
-            }
-        } catch (Exception e) {
-            Logs.error(e.toString());
-        }
-    }
-*/
-
-
     @Scheduled(cron = "${scan.mysql.scheduled.plan}")
     public void scanmysql() {
 
         try {
-
-
             List<JobEntity> joblist = hb.getJobLimitRows(ConfigUtil.job_thread);
             Logs.debug("joblist size=" + joblist.size());
 
@@ -91,9 +53,7 @@ public class ScheduledTask {
                 jl.setExcute_detail("");
                 JobEntity jt = (JobEntity) jl.clone();
                 ConfigUtil.mapresult.put(queryid, jt);
-
                 hb.updateStatue(jl.getResult_id(), 1);
-
                 pool.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -104,8 +64,6 @@ public class ScheduledTask {
                     }
                 });
                 ConfigUtil.job_thread--;
-
-
             }
 
         } catch (Exception e) {
@@ -118,8 +76,6 @@ public class ScheduledTask {
     public void scanmysqlresult() {
 
         try {
-
-
             List<JobEntity> joblist = hb.getJobForExcute();
             Logs.debug("joblist size=" + joblist.size());
 
@@ -130,23 +86,15 @@ public class ScheduledTask {
                     String killurl = ClickhouseConfig.getKillUrl(queryid);
                     hp.doPost(killurl);
                     updateErrorMessage(jk.getResult_id(), 0, "执行结果不存在重新执行");
-
                     break;
                 }
-
-
                 JobEntity je = (JobEntity) ConfigUtil.mapresult.get(queryid).clone();
-               /* if (je == null) {
-                    break;
-                }*/
-                if (je.getStatus() == 2 ) {
+                if (je.getStatus() == 2) {
                     try {
                         je = getQueryLogMessage(je);
                         HttpResult h1 = saveToHbase(je);
 
                         if (h1.getCode() == 200) {
-                            //Thread.sleep(5000);
-                            // Logs.debug(entity.getJob_id() + entity.getStatue());
 
                             je.setExcute_detail("success");
                             je.setExcute_time(0);
@@ -202,7 +150,7 @@ public class ScheduledTask {
 
                 } else {
                     JobEntity jo = getProcessMessage(je);
-                    if(jo.getExcute_row()!=0 || jo.getExcute_time()!=0) {
+                    if (jo.getExcute_row() != 0 || jo.getExcute_time() != 0) {
                         hb.updateProcesses(jo);
                     }
                 }
@@ -212,8 +160,6 @@ public class ScheduledTask {
 
         } catch (Exception e) {
             Logs.error(e.toString());
-            // ConfigUtil.job_thread++;
-
         }
     }
 
@@ -245,13 +191,10 @@ public class ScheduledTask {
                 long read_rows = Long.parseLong(map.get("read_rows").toString());
                 int ftime = (int) (elapsed * total_rows_approx / read_rows);
                 ftime = Math.round((ftime - elapsed) * 10 * 1000) / 10;
-                if(ftime<0){
-                    ftime=0;
+                if (ftime < 0) {
+                    ftime = 0;
                 }
                 Logs.info("total_rows_approx" + total_rows_approx + "read_rows" + read_rows + "elapsed" + elapsed + "ftime" + ftime);
-                // NumberFormat numberFormat = NumberFormat.getInstance();
-                //numberFormat.setMaximumFractionDigits(0);
-
                 double persent = (read_rows * 1.00 / total_rows_approx);
                 int result = (int) (persent * 100);
                 job.setExcute_row(total_rows_approx);
@@ -265,9 +208,7 @@ public class ScheduledTask {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return job;
-
     }
 
     public HttpResult saveToHbase(JobEntity entity) {
@@ -289,20 +230,12 @@ public class ScheduledTask {
             }
         }
         while (k >= 0);
-
-        //String h2 = hp.doGet("http://192.168.10.224:4444/tsg:report_result/" + queryid + "/response:result");
-        //   Map<String, Object> aaa = h2.queryData("tsg:report_result",query_id);
-        // System.out.print(h2);
         return h1;
     }
 
 
     public JobEntity getQueryLogMessage(JobEntity job) {
 
-
-       // JobEntity job = (JobEntity) jb.clone();
-    /*    job.setResult_id(resultid);
-        job.setQuery_id(queryid);*/
         String finishurl = ClickhouseConfig.getFinishUrl(job.getQuery_id());
         HttpResult num = new HttpResult();
         int j = 0;
@@ -325,13 +258,13 @@ public class ScheduledTask {
                             break;
                         case 3:
                             job.setStatus(type);
-                            job.setExcute_detail("语法错误"+mapresult.get("exception").toString());
+                            job.setExcute_detail("语法错误" + mapresult.get("exception").toString());
                             job.setQuery_sql(mapresult.get("query").toString());
                             job.setException(mapresult.get("exception").toString());
                             break;
                         case 4:
                             job.setStatus(type);
-                            job.setExcute_detail("性能问题"+mapresult.get("exception").toString());
+                            job.setExcute_detail("性能问题" + mapresult.get("exception").toString());
                             job.setQuery_sql(mapresult.get("query").toString());
                             job.setException(mapresult.get("exception").toString());
                             break;

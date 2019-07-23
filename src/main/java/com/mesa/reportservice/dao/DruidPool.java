@@ -5,13 +5,9 @@ package com.mesa.reportservice.dao;
  */
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
-import com.google.common.collect.Maps;
 import com.mesa.reportservice.util.Logs;
-import org.junit.Test;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -19,10 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.io.InputStream;
-import java.sql.*;
-import java.util.Arrays;
-import java.util.Properties;
+import java.sql.SQLException;
 
 
 @Component
@@ -154,59 +147,5 @@ public class DruidPool {
     }
 
 }
-/*
 
-    @Test
-    public void demo02() {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-
-            //使用配置文件来配置文件
-            Properties pr = new Properties();
-            //   pr.load(new FileInputStream("config/druid.properties"));
-
-            InputStream is = DruidPool.class.getClassLoader().getResourceAsStream("druid.properties");
-            //InputStream is = new FileInputStream(System.getProperty("user.dir")+File.separator+"config"+File.separator+"db.properties");
-
-            pr.load(is);
-            DataSource dataSource = DruidDataSourceFactory.createDataSource(pr);
-
-
-            //1,创建Druid连接池对象
-            //DruidDataSource dataSource = new DruidDataSource();
-            //dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-            //dataSource.setUrl("jdbc:mysql://localhost:3306/mytest-day08");
-            //dataSource.setUsername("root");
-            //dataSource.setPassword("123");
-
-
-            //工具类中获得连接
-            //conn = MyUtils.getConnertion01();
-
-            //用Druid来连接
-            conn = dataSource.getConnection();
-
-
-            //2,执行数据库语句
-            String sql = "SELECT * FROM accoumt";
-
-            //3,用prepareStatement获取sql语句
-            ps = conn.prepareStatement(sql);
-
-            //4,执行sql语句,查询用executeQuery,增删改用executeUpdate
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                System.out.println(rs.getInt("id") + " " + rs.getString("name") + " " + rs.getDouble("money"));
-            }
-
-        } catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace();
-        } finally {
-
-        }
-    }*/
 

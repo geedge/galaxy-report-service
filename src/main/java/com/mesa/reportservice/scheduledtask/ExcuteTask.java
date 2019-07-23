@@ -38,12 +38,11 @@ public class ExcuteTask {
         do {
             try {
                 hr = hp.doPost(joburl);
-                if(hr.getCode()!=200 && hr.getBody().toLowerCase().contains("timeout")){
+                if (hr.getCode() != 200 && hr.getBody().toLowerCase().contains("timeout")) {
                     k--;
                     String killurl = ClickhouseConfig.getKillUrl(je.getQuery_id());
                     hp.doPost(killurl);
-                }
-                else {
+                } else {
                     break;
                 }
             } catch (SocketException e) {
