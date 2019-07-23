@@ -3,7 +3,7 @@ package com.mesa.reportservice.bean;
 /**
  * Created by wk1 on 2019/5/20.
  */
-public class JobEntity {
+public class JobEntity implements Cloneable{
 
     private int result_id;
     private String result_name;
@@ -22,7 +22,35 @@ public class JobEntity {
     private String query_duration_ms;
     private long read_rows;
     private String memory_usage;
+    private String result;
+    private int excute_status;
+    private String issued_time;
+    private String exception;
 
+
+    public String getException() {
+        return exception;
+    }
+
+    public void setException(String exception) {
+        this.exception = exception;
+    }
+
+    public String getIssued_time() {
+        return issued_time;
+    }
+
+    public void setIssued_time(String issued_time) {
+        this.issued_time = issued_time;
+    }
+
+    public int getExcute_status() {
+        return excute_status;
+    }
+
+    public void setExcute_status(int excute_status) {
+        this.excute_status = excute_status;
+    }
 
     public int getResult_id() {
         return result_id;
@@ -159,5 +187,25 @@ public class JobEntity {
 
     public void setMemory_usage(String memory_usage) {
         this.memory_usage = memory_usage;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+
+    @Override
+    public Object clone() {
+        JobEntity o = null;
+        try {
+            o = (JobEntity) super.clone();
+        } catch (CloneNotSupportedException e) {
+            System.out.println(e.toString());
+        }
+        return o;
     }
 }

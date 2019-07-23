@@ -63,7 +63,7 @@ public class ClickhouseConfig {
         // String logsql = "select elapsed,total_rows_approx,read_rows from `system`.processes where query_id='" + query_id + "' FORMAT JSONEachRow";
         try {
 
-            String sql = URLEncoder.encode("select type,read_rows,query_duration_ms,query,memory_usage,event_time from `system`.query_log where type>1 and query_id='" + query_id + "' order by event_time desc limit 1 FORMAT JSONEachRow", "utf8");
+            String sql = URLEncoder.encode("select type,read_rows,query_duration_ms,query,exception,memory_usage,event_time from `system`.query_log where type>1 and query_id='" + query_id + "' order by event_time desc limit 1 FORMAT JSONEachRow", "utf8");
             finishsql = url + sql;
         } catch (UnsupportedEncodingException e) {
             Logs.error(e.toString());

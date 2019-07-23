@@ -1,31 +1,13 @@
 package com.mesa.reportservice.scheduledtask;
 
-import com.alibaba.fastjson.JSON;
-import com.mesa.reportservice.bean.HttpResult;
-import com.mesa.reportservice.bean.JobEntity;
-import com.mesa.reportservice.service.DataBaseBusiness;
-import com.mesa.reportservice.service.HttpAPIService;
-import com.mesa.reportservice.util.ClickhouseConfig;
-import com.mesa.reportservice.util.ConfigUtil;
-import com.mesa.reportservice.util.HbaseUtil;
-import com.mesa.reportservice.util.Logs;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-
 /**
  * Created by wk1 on 2019/5/31.
  */
 
-@Component
+//@Component
 
 public class JobTask {
-
+/*
     protected ExecutorService pool = ConfigUtil.pool;
     private HttpAPIService hp;
     private DataBaseBusiness hb;
@@ -57,7 +39,7 @@ public class JobTask {
         int id = jl.getResult_id();
         String sql = jl.getQuery_sql().trim();
         String hbaseid = DigestUtils.md5Hex(id + sql);
-        sql = sql.replace("$exe_time", "toDateTime('" + jl.getEnd_time().trim() + "')");
+        sql = sql.replace("$exe_time", "toDateTime('" + jl.getIssued_time().trim() + "')");
         String query_id = UUID.randomUUID().toString().replaceAll("-", "");
         String httpQuery = ClickhouseConfig.getJobUrl(sql, query_id);
         hb.updateStatue(id, 1);
@@ -154,9 +136,7 @@ public class JobTask {
                         throw new Exception("查询clickhouse失败" + hr.getBody());
                     }
                 }
-       /*     String h2=hp.doGet("http://192.168.10.202:4444/tsg:report_result/"+query_id+"/response:result");
-            // Map<String, Object> aaa = hs.queryData("tsg:report_result",query_id);
-            System.out.print(h2);*/
+
 
             } catch (InterruptedException w) {
                 Logs.error(w.toString());
@@ -248,6 +228,10 @@ public class JobTask {
             }
         }
         while (k >= 0);
+
+      //  String h2 = hp.doGet("http://192.168.10.224:4444/tsg:report_result/" + hbaseid + "/response:result");
+        //   Map<String, Object> aaa = h2.queryData("tsg:report_result",query_id);
+   //     System.out.print(h2);
         return h1;
     }
 
@@ -257,7 +241,7 @@ public class JobTask {
 
         JobEntity job = new JobEntity();
         String finishurl = ClickhouseConfig.getFinishUrl(query_id);
-        HttpResult num = null;
+        HttpResult num = new HttpResult();
         int j = 3;
         do {
             try {
@@ -306,6 +290,6 @@ public class JobTask {
         }
         while (job.getStatus() == 5 && j >= 0);
         return job;
-    }
+    }*/
 
 }

@@ -38,10 +38,59 @@ public class DataBaseBusiness {
 
     }
 
+
+    public List<JobEntity> getJobForExcute() {
+
+
+
+        String sql = " select * from report_result where status =1  order by end_time ";
+        int resultid=0;
+        List<JobEntity> sqllist = new ArrayList<JobEntity>();
+        try {
+            //connection = manager.getConnection("idb");
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+            pstmt = connection.prepareStatement(sql);
+            rset = pstmt.executeQuery();
+            while (rset.next()) {
+                JobEntity je = new JobEntity();
+                resultid = rset.getInt("result_id");
+                je.setResult_id(rset.getInt("result_id"));
+                je.setEnd_time(rset.getString("end_time").trim().substring(0, 19));
+                je.setIssued_time(rset.getString("issued_time").trim().substring(0, 19));
+                je.setQuery_sql(rset.getString("query_sql").trim());
+                sqllist.add(je);
+            }
+            Logs.debug("-----------success----------" + sql);
+
+        } catch (Exception e) {
+            Logs.error(sql + "获取进度列表发生异常!");
+            updateStatue(resultid,4);
+            e.printStackTrace();
+            throw new RuntimeException("获取进度列表发生异常!", e);
+        } finally {
+            clear(pstmt, null, rset);
+            //	manager.freeConnection("idb", connection);
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    Logs.error(e.toString());
+                    e.printStackTrace();
+                }
+
+            }
+        }
+        return sqllist;
+
+    }
+
+
+
     public List<JobEntity> getJobLimitRows(int row) {
 
         String current_time = DateUtil.getDate();
-
+        int resultid=0;
         String sql = " select * from report_result where status =0 and end_time<'" + current_time + "' order by end_time limit " + row;
 
         List<JobEntity> sqllist = new ArrayList<JobEntity>();
@@ -53,8 +102,11 @@ public class DataBaseBusiness {
             rset = pstmt.executeQuery();
             while (rset.next()) {
                 JobEntity je = new JobEntity();
+                resultid = rset.getInt("result_id");
+                je.setExcute_detail("");
                 je.setResult_id(rset.getInt("result_id"));
                 je.setEnd_time(rset.getString("end_time").trim().substring(0, 19));
+                je.setIssued_time(rset.getString("issued_time").trim().substring(0, 19));
                 je.setQuery_sql(rset.getString("query_sql").trim());
                 sqllist.add(je);
             }
@@ -62,8 +114,11 @@ public class DataBaseBusiness {
 
         } catch (Exception e) {
             Logs.error(sql + "获取任务列表发生异常!");
+            updateStatue(resultid,4);
             e.printStackTrace();
             throw new RuntimeException("获取任务列表发生异常!", e);
+
+
         } finally {
             clear(pstmt, null, rset);
             //	manager.freeConnection("idb", connection);
@@ -79,6 +134,9 @@ public class DataBaseBusiness {
         }
         return sqllist;
     }
+
+
+
 
     public int getJobStatueFromId(int id) {
 
@@ -168,9 +226,9 @@ public class DataBaseBusiness {
             Logs.debug("-----------success----------" + sql);
 
         } catch (Exception e) {
-            Logs.error(sql + "存储结果日志发生异常!");
+            Logs.error(sql + "更新状态发生异常!");
             e.printStackTrace();
-            throw new RuntimeException("存储结果日志发生异常!", e);
+            throw new RuntimeException("更新状态发生异常!", e);
         } finally {
             clear(pstmt, null, null);
             //	manager.freeConnection("idb", connection);
@@ -185,6 +243,7 @@ public class DataBaseBusiness {
             }
         }
     }
+
 
 
 }

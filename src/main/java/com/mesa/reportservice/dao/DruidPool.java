@@ -5,9 +5,13 @@ package com.mesa.reportservice.dao;
  */
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
+import com.google.common.collect.Maps;
 import com.mesa.reportservice.util.Logs;
+import org.junit.Test;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -15,7 +19,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
+import java.io.InputStream;
+import java.sql.*;
+import java.util.Arrays;
+import java.util.Properties;
 
 
 @Component
@@ -94,12 +101,12 @@ public class DruidPool {
             dataSourcedb.setMaxActive(maxactive);
             //连接泄漏监测
             dataSourcedb.setRemoveAbandoned(true);
-            dataSourcedb.setRemoveAbandonedTimeout(30);
+            dataSourcedb.setRemoveAbandonedTimeout(1800);
             dataSourcedb.setDefaultAutoCommit(false);
             //配置获取连接等待超时的时间
-            dataSourcedb.setMaxWait(300000);
+            dataSourcedb.setMaxWait(30000);
             //配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
-            dataSourcedb.setTimeBetweenEvictionRunsMillis(60000);
+            dataSourcedb.setTimeBetweenEvictionRunsMillis(30000);
             //防止过期
             dataSourcedb.setValidationQuery("SELECT 'x'");
             dataSourcedb.setTestWhileIdle(true);

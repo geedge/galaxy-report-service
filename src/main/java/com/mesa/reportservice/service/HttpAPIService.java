@@ -38,7 +38,7 @@ public class HttpAPIService {
     public String doGet(String url) throws Exception {
         // 声明 http get 请求
         HttpGet httpGet = new HttpGet(url);
-
+        httpGet.setHeader("Accept","application/json");
         // 装载配置信息
         httpGet.setConfig(config);
 
@@ -91,7 +91,7 @@ public class HttpAPIService {
         HttpPost httpPost = new HttpPost(url);
         // 加入配置信息
         httpPost.setConfig(config);
-
+      //  httpPost.setHeader("Accept","application/json");
         // 判断map是否为空，不为空则进行遍历，封装from表单对象
         if (!json.equals("") && !json.isEmpty()) {
 
