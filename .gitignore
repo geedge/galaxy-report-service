@@ -27,3 +27,5 @@ HELP.md
 
 ### VS Code ###
 .vscode/
+logs/galaxy-report-service.log
+logs/galaxy-report-service.log.2019-07-30

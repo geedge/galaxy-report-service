@@ -44,7 +44,7 @@ public class ScheduledTask {
             for (JobEntity jl : joblist) {
                 String sql = jl.getQuery_sql().trim();
                 String queryid = DigestUtils.md5Hex(jl.getResult_id() + sql);
-                sql = sql.replace("$exe_time", "toDateTime('" + jl.getEnd_time().trim() + "')");
+                sql = sql.replace("$exe_time", "toDateTime('" + jl.getIssued_time().trim() + "')");
                 jl.setQuery_id(queryid);
                 jl.setQuery_sql(sql);
                 jl.setStatus(1);
