@@ -4,6 +4,7 @@ package com.mesa.reportservice.service;
 import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.util.DateUtil;
 import com.mesa.reportservice.util.Logs;
+import com.mesa.reportservice.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,10 +64,10 @@ public class DataBaseBusiness {
             Logs.debug("-----------success----------" + sql);
 
         } catch (Exception e) {
-            Logs.error(sql + "获取进度列表发生异常!");
-            updateStatue(resultid, 4);
+            Logs.error(sql + "获取正在执行任务信息失败!");
+            updateStatue(resultid, 7,"获取正在执行任务信息失败");
             e.printStackTrace();
-            throw new RuntimeException("获取进度列表发生异常!", e);
+            throw new RuntimeException("获取正在执行任务信息失败!", e);
         } finally {
             clear(pstmt, null, rset);
             //	manager.freeConnection("idb", connection);
@@ -111,10 +112,10 @@ public class DataBaseBusiness {
             Logs.debug("-----------success----------" + sql);
 
         } catch (Exception e) {
-            Logs.error(sql + "获取任务列表发生异常!");
-            updateStatue(resultid, 4);
+            Logs.error(sql + "获取待执行任务信息失败!");
+            updateStatue(resultid, 7,"获取待执行任务信息失败");
             e.printStackTrace();
-            throw new RuntimeException("获取任务列表发生异常!", e);
+            throw new RuntimeException("获取待执行任务信息失败!", e);
 
 
         } finally {
@@ -173,9 +174,12 @@ public class DataBaseBusiness {
     public int updateProcesses(JobEntity job) {
         int a = 0;
         String current_time = DateUtil.getDate();
-        String sql = "update report_result set op_time ='" + current_time + "',excute_detail = \"" + job.getExcute_detail() + "\", status = " + job.getStatus() + " ,excute_time =" + job.getExcute_time() + ",excute_row =" + job.getExcute_row() + ",excute_process=" + job.getExcute_process() + "  where result_id = " + job.getResult_id();
+        String sql="";
         try {
-
+            if(job.getExcute_detail().length()>500) {
+                job.setExcute_detail(StringUtil.bSubstring(job.getExcute_detail(), 500));
+            }
+            sql = "update report_result set op_time ='" + current_time + "',excute_detail = \"" + job.getExcute_detail() + "\", status = " + job.getStatus() + " ,excute_time =" + job.getExcute_time() + ",excute_row =" + job.getExcute_row() + ",excute_process=" + job.getExcute_process() + "  where result_id = " + job.getResult_id();
             //connection = manager.getConnection("idb");
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
@@ -206,12 +210,16 @@ public class DataBaseBusiness {
         return a;
     }
 
-    public void updateStatue(int id, int status) {
+    public void updateStatue(int id, int status,String excute_detail) {
 
         String current_time = DateUtil.getDate();
-        String sql = "update report_result set status =" + status + ",op_time ='" + current_time + "'  where result_id = " + id;
-
+        String sql="";
         try {
+            if(excute_detail.length()>500){
+                excute_detail=StringUtil.bSubstring(excute_detail,500);
+            }
+            sql = "update report_result set excute_detail = '"+excute_detail+"',status =" + status + ",op_time ='" + current_time + "'  where result_id = " + id;
+
             //connection = manager.getConnection("idb");
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);

@@ -39,10 +39,14 @@ public class ScheduledTask {
 
         try {
             List<JobEntity> joblist = hb.getJobLimitRows(ConfigUtil.job_thread);
-            Logs.debug("joblist size=" + joblist.size());
+            Logs.debug("等待执行任务数" + joblist.size());
 
             for (JobEntity jl : joblist) {
                 String sql = jl.getQuery_sql().trim();
+                if (sql.equals("")) {
+                    hb.updateStatue(jl.getResult_id(), 3, "sql语句有错误");
+                    break;
+                }
                 String queryid = DigestUtils.md5Hex(jl.getResult_id() + sql);
                 sql = sql.replace("$exe_time", "toDateTime('" + jl.getIssued_time().trim() + "')");
                 jl.setQuery_id(queryid);
@@ -53,7 +57,9 @@ public class ScheduledTask {
                 jl.setExcute_detail("");
                 JobEntity jt = (JobEntity) jl.clone();
                 ConfigUtil.mapresult.put(queryid, jt);
-                hb.updateStatue(jl.getResult_id(), 1);
+                Logs.info("start queryid=" + queryid + " sql=" + sql);
+                hb.updateStatue(jl.getResult_id(), 1, "executing");
+
                 pool.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -77,7 +83,7 @@ public class ScheduledTask {
 
         try {
             List<JobEntity> joblist = hb.getJobForExcute();
-            Logs.debug("joblist size=" + joblist.size());
+            Logs.debug("正在执行任务数" + joblist.size());
 
             for (JobEntity jk : joblist) {
                 String sql = jk.getQuery_sql().trim();
@@ -92,9 +98,9 @@ public class ScheduledTask {
                 if (je.getStatus() == 2) {
                     try {
                         je = getQueryLogMessage(je);
-                        HttpResult h1 = saveToHbase(je);
+                        HttpResult hr = saveToHbase(je);
 
-                        if (h1.getCode() == 200) {
+                        if (hr.getCode() == 200) {
 
                             je.setExcute_detail("success");
                             je.setExcute_time(0);
@@ -113,6 +119,7 @@ public class ScheduledTask {
                             Logs.error("写入hbase失败");
                         }
                     } catch (Exception e) {
+                        updateErrorMessage(je.getResult_id(), 7, "结果写入数据库失败");
                         Logs.error(e.toString());
 
                     } finally {
@@ -141,6 +148,7 @@ public class ScheduledTask {
                             Logs.error("错误日志写入hbase失败");
                         }
                     } catch (Exception e) {
+                        updateErrorMessage(je.getResult_id(), 7, "错误结果写入数据库失败");
                         Logs.error(e.toString());
 
                     } finally {
@@ -194,7 +202,7 @@ public class ScheduledTask {
                 if (ftime < 0) {
                     ftime = 0;
                 }
-                Logs.info("total_rows_approx" + total_rows_approx + "read_rows" + read_rows + "elapsed" + elapsed + "ftime" + ftime);
+                //Logs.info("total_rows_approx" + total_rows_approx + "read_rows" + read_rows + "elapsed" + elapsed + "ftime" + ftime);
                 double persent = (read_rows * 1.00 / total_rows_approx);
                 int result = (int) (persent * 100);
                 job.setExcute_row(total_rows_approx);
@@ -202,11 +210,11 @@ public class ScheduledTask {
                 //  job.setStatus(1);
                 job.setExcute_time(ftime);
                 job.setExcute_detail("");
-                System.out.println("%+++++++++++++" + result + "%");
-                System.out.println("needtime--------" + ftime);
+               /* System.out.println("%+++++++++++++" + result + "%");
+                System.out.println("needtime--------" + ftime);*/
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logs.error(e.toString());
         }
         return job;
     }
@@ -214,23 +222,22 @@ public class ScheduledTask {
     public HttpResult saveToHbase(JobEntity entity) {
 
         int k = 3;
-        HttpResult h1 = new HttpResult();
+        HttpResult hr = new HttpResult();
 
         do {
             try {
                 String hbasejson = HbaseUtil.getHbaseJson(entity.getQuery_id(), entity.getResult(), entity);
                 String hbaseurl = HbaseUtil.getHbasePostUrl();
                 k--;
-                h1 = hp.doPost(hbaseurl, hbasejson);
+                hr = hp.doPost(hbaseurl, hbasejson);
                 break;
             } catch (Exception e) {
                 Logs.error("写入hbase报错重试次数" + (3 - k));
                 k--;
-                e.printStackTrace();
             }
         }
         while (k >= 0);
-        return h1;
+        return hr;
     }
 
 
