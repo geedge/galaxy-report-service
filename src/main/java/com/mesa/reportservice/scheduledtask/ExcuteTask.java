@@ -39,7 +39,8 @@ public class ExcuteTask {
                 hp.doPost(killurl);
                 if (hr.getCode() != 200 && hr.getBody().toLowerCase().contains("timeout")) {
                     k--;
-                } else {
+                }
+                else {
                     break;
                 }
             } catch (SocketException e) {
@@ -63,13 +64,13 @@ public class ExcuteTask {
             je.setExcute_time(0);
             je.setExcute_process(100);
             je.setStatus(2);
-            Logs.info("success queryid=" + je.getQuery_id() + " sql=" + je.getQuery_sql());
+          //  Logs.info("success queryid=" + je.getQuery_id() + " sql=" + je.getQuery_sql());
         } else {
             je.setResult("");
             je.setStatus(4);
             je.setExcute_detail("查询clickhouse失败" + hr.getBody());
             Logs.error("查询clickhouse失败" + hr.getBody());
-            Logs.info("error queryid=" + je.getQuery_id() + " sql=" + je.getQuery_sql());
+          //  Logs.info("error queryid=" + je.getQuery_id() + " sql=" + je.getQuery_sql());
 
         }
         JobEntity ji = (JobEntity) je.clone();

@@ -10,13 +10,19 @@
 	</parent>
 	<groupId>com.mesa</groupId>
 	<artifactId>galaxy-report-service</artifactId>
-	<version>0.0.1</version>
+	<version>2.0</version>
 	<name>galaxy-report-service</name>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-		<docker.image.prefix>springboot</docker.image.prefix>
 		<java.version>1.8</java.version>
+		<docker.build>192.168.40.153</docker.build>
+		<docker.build.port>2375</docker.build.port>
+		<!--docker-registry地址-->
+		<docker.registry>192.168.40.153</docker.registry>
+		<!--docker-registry的端口-->
+		<docker.registry.port>9080</docker.registry.port>
+		<docker.image.prefix>tsg/galaxy</docker.image.prefix>
 	</properties>
 
 
@@ -31,7 +37,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
+		<dependency>
+			<groupId>com.github.jsqlparser</groupId>
+			<artifactId>jsqlparser</artifactId>
+			<version>1.4</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.hbase</groupId>
 			<artifactId>hbase-client</artifactId>
@@ -105,7 +115,27 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-framework</artifactId>
+			<version>2.12.0</version>
+		</dependency>
 
+		<dependency>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-recipes</artifactId>
+			<version>2.12.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+			<version>3.4.9</version>
+		</dependency>
 	</dependencies>
 
 
@@ -115,6 +145,47 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<configuration>
+					<serverId>153-docker-repo</serverId>
+					<registryUrl>${docker.registry}:${docker.registry.port}</registryUrl>
+					<!--是否向镜像registry(harbor)中推送镜像,如果为false则需要在mvn命令时添加-DpushImage参数-->
+					<pushImage>true</pushImage>
+
+					<imageName>${docker.registry}:${docker.registry.port}/${docker.image.prefix}/${project.artifactId}</imageName>
+					<forceTags>true</forceTags>
+
+					<imageTags>
+						<imageTag>2.0</imageTag>
+					</imageTags>
+					<!--远程docker构建，供dockerfile使用-->
+					<dockerHost>http://192.168.40.153:2375</dockerHost>
+					<dockerDirectory>docker</dockerDirectory>
+					<buildArgs>
+						<JDK_IMAGE>192.168.40.153:9080/common/jdk:1.8.0_73</JDK_IMAGE>
+						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+					</buildArgs>
+
+
+					<!--将构建jar拷贝到/target/docker 目录下与dockerfile一起-->
+					<resources>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+
+						<resource>
+							<targetPath>/config</targetPath>
+							<directory>config</directory>
+						</resource>
+					</resources>
+
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

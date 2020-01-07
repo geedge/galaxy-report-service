@@ -1,20 +1,30 @@
 package com.mesa.reportservice.scheduledtask;
 
 import com.alibaba.fastjson.JSON;
+import com.mesa.reportservice.bean.DBTypeEnum;
 import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.service.DataBaseBusiness;
 import com.mesa.reportservice.service.HttpAPIService;
-import com.mesa.reportservice.util.ClickhouseConfig;
-import com.mesa.reportservice.util.ConfigUtil;
-import com.mesa.reportservice.util.HbaseUtil;
-import com.mesa.reportservice.util.Logs;
+import com.mesa.reportservice.service.ZkService;
+import com.mesa.reportservice.util.*;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.Select;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.leader.LeaderLatch;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -33,144 +43,152 @@ public class ScheduledTask {
     private HttpAPIService hp;
     @Autowired
     private DataBaseBusiness hb;
-
+    @Autowired
+    private ZkService zs ;
+    //按照配置的线程数执行sql
     @Scheduled(cron = "${scan.mysql.scheduled.plan}")
     public void scanmysql() {
 
         try {
-            List<JobEntity> joblist = hb.getJobLimitRows(ConfigUtil.job_thread);
-            Logs.debug("等待执行任务数" + joblist.size());
 
-            for (JobEntity jl : joblist) {
-                String sql = jl.getQuery_sql().trim();
-                if (sql.equals("")) {
-                    hb.updateStatue(jl.getResult_id(), 3, "sql语句有错误");
-                    break;
-                }
-                String queryid = DigestUtils.md5Hex(jl.getResult_id() + sql);
-                sql = sql.replace("$exe_time", "toDateTime('" + jl.getIssued_time().trim() + "')");
-                jl.setQuery_id(queryid);
-                jl.setQuery_sql(sql);
-                jl.setStatus(1);
-                jl.setResult("");
-                jl.setException("");
-                jl.setExcute_detail("");
-                JobEntity jt = (JobEntity) jl.clone();
-                ConfigUtil.mapresult.put(queryid, jt);
-                Logs.info("start queryid=" + queryid + " sql=" + sql);
-                hb.updateStatue(jl.getResult_id(), 1, "executing");
+                if(zs.isMaster()){
+                // 定时任务的业务逻辑代码
 
-                pool.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        JobEntity je = (JobEntity) jl.clone();
-                        ExcuteTask ex = new ExcuteTask(hp);
-                        ex.dotask(je);
+                List<JobEntity> joblist = hb.getJobLimitRows(ConfigUtil.job_thread);
+                Logs.debug("等待执行任务数" + joblist.size());
+                for (JobEntity jl : joblist) {
+                    String sql = jl.getQuery_sql().trim();
+                    String queryid = DigestUtils.md5Hex(jl.getResult_id() + sql);
+                    sql = sql.replace("$exe_time", "toDateTime('" + jl.getIssued_time().trim() + "')");
+                    sql = SQLDateFunctionUtil.generateDateFunction(sql, DBTypeEnum.CLICKHOUSE.getValue());
 
+                    Statement statement = CCJSqlParserUtil.parse(sql);
+                    Select selectStatement = (Select) statement;
+
+                    if (sql.equals("")) {
+                        hb.updateStatue(jl.getResult_id(), 3, "sql语句有错误");
+                        break;
                     }
-                });
-                ConfigUtil.job_thread--;
+
+                    jl.setQuery_id(queryid);
+                    jl.setQuery_sql(sql);
+                    jl.setStatus(1);
+                    jl.setResult("");
+                    jl.setException("");
+                    jl.setExcute_detail("");
+                    JobEntity jt = (JobEntity) jl.clone();
+                    ConfigUtil.mapresult.put(queryid, jt);
+                    Logs.info("start queryid=" + queryid + " sql=" + sql);
+                    hb.updateStatue(jl.getResult_id(), 1, "executing");
+
+                    pool.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            JobEntity je = (JobEntity) jl.clone();
+                            ExcuteTask ex = new ExcuteTask(hp);
+                            ex.dotask(je);
+
+                        }
+                    });
+                    ConfigUtil.job_thread--;
+                }
             }
 
         } catch (Exception e) {
             Logs.error(e.toString());
         }
+
+
     }
 
-
+//扫描数据库中正在执行的查询
     @Scheduled(cron = "${scan.job.scheduled.plan}")
     public void scanmysqlresult() {
 
         try {
-            List<JobEntity> joblist = hb.getJobForExcute();
-            Logs.debug("正在执行任务数" + joblist.size());
+            if(zs.isMaster()){
 
-            for (JobEntity jk : joblist) {
-                String sql = jk.getQuery_sql().trim();
-                String queryid = DigestUtils.md5Hex(jk.getResult_id() + sql);
-                if (!ConfigUtil.mapresult.containsKey(queryid)) {
-                    String killurl = ClickhouseConfig.getKillUrl(queryid);
-                    hp.doPost(killurl);
-                    updateErrorMessage(jk.getResult_id(), 0, "执行结果不存在重新执行");
-                    break;
-                }
-                JobEntity je = (JobEntity) ConfigUtil.mapresult.get(queryid).clone();
-                if (je.getStatus() == 2) {
-                    try {
-                        je = getQueryLogMessage(je);
-                        HttpResult hr = saveToHbase(je);
+                List<JobEntity> joblist = hb.getJobForExcute();
+                Logs.debug("正在执行任务数" + joblist.size());
 
-                        if (hr.getCode() == 200) {
+                for (JobEntity jk : joblist) {
+                    String sql = jk.getQuery_sql().trim();
+                    String queryid = DigestUtils.md5Hex(jk.getResult_id() + sql);
+                    //程序异常停止重启后kill正在进行的查询，更新数据库状态重新执行
+                    if (!ConfigUtil.mapresult.containsKey(queryid)) {
+                        String killurl = ClickhouseConfig.getKillUrl(queryid);
+                        hp.doPost(killurl);
+                        updateErrorMessage(jk.getResult_id(), 0, "执行结果不存在重新执行");
+                        break;
+                    }
+                    JobEntity je = (JobEntity) ConfigUtil.mapresult.get(queryid).clone();
+                    if (je.getStatus() == 2) {
+                        try {
+                            je = getQueryLogMessage(je);
+                            HttpResult hr = saveToHbase(je);
 
-                            je.setExcute_detail("success");
-                            je.setExcute_time(0);
-                            je.setExcute_process(100);
-                            je.setStatus(2);
-                            int number = 0;
-                            int z = 3;
-                            do {
-                                number = hb.updateProcesses(je);
-                                z--;
+                            if (hr.getCode() == 200) {
+
+                                je.setExcute_detail("success");
+                                je.setExcute_time(0);
+                                je.setExcute_process(100);
+                                je.setStatus(2);
+                                int number = 0;
+                                int z = 3;
+                                do {
+                                    number = hb.updateProcesses(je);
+                                    z--;
+                                }
+                                while (number != 1 && z >= 0);
+                                Logs.info("success save to hbase queryid=" + je.getQuery_id() + " sql=" + je.getQuery_sql());
+                            } else {
+                                updateErrorMessage(je.getResult_id(), 5, "写入hbase失败" + hr.getBody());
+                                Logs.error("save hbase error" + hr.getBody());
                             }
-                            while (number != 1 && z >= 0);
+                        } catch (Exception e) {
+                            updateErrorMessage(je.getResult_id(), 7, "结果写入数据库失败");
+                            Logs.error("queryid=" + je.getResult_id() + e.toString());
 
-                        } else {
-                            updateErrorMessage(je.getResult_id(), 5, "写入hbase失败");
-                            Logs.error("写入hbase失败");
+                        } finally {
+                            ConfigUtil.mapresult.remove(queryid);
+                            ConfigUtil.job_thread++;
                         }
-                    } catch (Exception e) {
-                        updateErrorMessage(je.getResult_id(), 7, "结果写入数据库失败");
-                        Logs.error(e.toString());
-
-                    } finally {
-                        ConfigUtil.mapresult.remove(queryid);
-                        ConfigUtil.job_thread++;
-                    }
 
 
-                } else if (je.getStatus() > 2) {
+                    } else if (je.getStatus() > 2) {
 
-                    try {
-                        je = getQueryLogMessage(je);
-                        HttpResult h1 = saveToHbase(je);
-                        if (h1.getCode() == 200) {
-
-                            int number = 0;
-                            int z = 3;
-                            do {
-                                number = hb.updateProcesses(je);
-                                z--;
-                            }
-                            while (number != 1 && z >= 0);
-
-                        } else {
-                            updateErrorMessage(je.getResult_id(), 5, "错误日志写入hbase失败");
-                            Logs.error("错误日志写入hbase失败");
+                        try {
+                            je = getQueryLogMessage(je);
+                            updateErrorMessage(je.getResult_id(), je.getStatus(), je.getExcute_detail());
+                        } catch (Exception e) {
+                            Logs.error(e.toString());
+                        } finally {
+                            ConfigUtil.mapresult.remove(queryid);
+                            ConfigUtil.job_thread++;
                         }
-                    } catch (Exception e) {
-                        updateErrorMessage(je.getResult_id(), 7, "错误结果写入数据库失败");
-                        Logs.error(e.toString());
 
-                    } finally {
-                        ConfigUtil.mapresult.remove(queryid);
-                        ConfigUtil.job_thread++;
+                    } else {
+                        JobEntity jo = getProcessMessage(je);
+                        if (jo.getExcute_row() != 0 || jo.getExcute_time() != 0) {
+                            hb.updateProcesses(jo);
+                        }
                     }
 
-                } else {
-                    JobEntity jo = getProcessMessage(je);
-                    if (jo.getExcute_row() != 0 || jo.getExcute_time() != 0) {
-                        hb.updateProcesses(jo);
-                    }
+
                 }
 
 
             }
+
 
         } catch (Exception e) {
             Logs.error(e.toString());
         }
     }
 
+/**
+ * 记录查询中的错误更新数据库
+ */
 
     public void updateErrorMessage(int id, int status, String error) {
 
@@ -184,6 +202,14 @@ public class ScheduledTask {
     }
 
 
+
+
+
+
+
+    /**
+     * 获取进度条信息
+     */
     public JobEntity getProcessMessage(JobEntity jb) {
         JobEntity job = (JobEntity) jb.clone();
         String queryProccess = ClickhouseConfig.getProcessUrl(job.getQuery_id());
@@ -207,11 +233,9 @@ public class ScheduledTask {
                 int result = (int) (persent * 100);
                 job.setExcute_row(total_rows_approx);
                 job.setExcute_process(result);
-                //  job.setStatus(1);
                 job.setExcute_time(ftime);
                 job.setExcute_detail("");
-               /* System.out.println("%+++++++++++++" + result + "%");
-                System.out.println("needtime--------" + ftime);*/
+
             }
         } catch (Exception e) {
             Logs.error(e.toString());
@@ -219,6 +243,9 @@ public class ScheduledTask {
         return job;
     }
 
+    /**
+     * 结果存入hbase
+     */
     public HttpResult saveToHbase(JobEntity entity) {
 
         int k = 3;
@@ -232,7 +259,7 @@ public class ScheduledTask {
                 hr = hp.doPost(hbaseurl, hbasejson);
                 break;
             } catch (Exception e) {
-                Logs.error("写入hbase报错重试次数" + (3 - k));
+                Logs.error("写入hbase报错重试次数" + (3 - k)+e.toString());
                 k--;
             }
         }
@@ -240,7 +267,9 @@ public class ScheduledTask {
         return hr;
     }
 
-
+    /**
+     * 获取查询log中的信息
+     */
     public JobEntity getQueryLogMessage(JobEntity job) {
 
         String finishurl = ClickhouseConfig.getFinishUrl(job.getQuery_id());

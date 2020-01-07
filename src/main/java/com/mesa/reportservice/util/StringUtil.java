@@ -804,4 +804,53 @@ public final class StringUtil extends StringUtils {
         return value;
     }
 
+
+
+    /**
+     * 获取第一个括号对应右括号的索引以及包含括号的个数,向后匹配
+     * @param str
+     * @param bracketL 支持：( OR [ OR {
+     * @param bool 是否将传入的字符串全部匹配完成,若不需要则在匹配到第一个括号匹配完成时结束
+     * @return int[0]:匹配括号的个数,int[1]:第一个括号对应右括号的索引;若无匹配括号返回{0,-1};若有其中一个不成对则返回{-1,index}
+     */
+    public static int[] getBracketsMatch(String str, String bracketL, boolean bool) {
+        int[] result = {0, -1};
+        if (str == null) {
+            return result;
+        }
+        String bracketR = ")";
+        if (bracketL == null) {
+            bracketL = "(";
+        } else if (bracketL.equals("[")) {
+            bracketR = "]";
+        } else if (bracketL.equals("{")) {
+            bracketR = "}";
+        }
+        StringBuffer sb = new StringBuffer(str);
+        int countL = 0, countR = 0;
+        for (int a = 0; a < sb.length(); a++) {
+            if (sb.indexOf(bracketR) == a) {
+                ++countR;
+                sb.replace(a, a + 1, "$");
+            } else if (sb.indexOf(bracketL) == a) {
+                ++countL;
+                sb.replace(a, a + 1, "$");
+            }
+            if (countR > countL) {
+                result[0] = -1;
+                result[1] = -1;
+                return result;
+            }
+            result[0] = countL;
+            result[1] = a;
+            if (countL != 0 && (countL == countR) && !bool) {
+                return result;
+            }
+        }
+        if (countR != countL) {
+            result[0] = -1;
+        }
+        return result;
+    }
+
 }

@@ -52,9 +52,10 @@ public class DataBaseBusiness {
             connection.setAutoCommit(false);
             pstmt = connection.prepareStatement(sql);
             rset = pstmt.executeQuery();
+
             while (rset.next()) {
                 JobEntity je = new JobEntity();
-                resultid = rset.getInt("result_id");
+            //    resultid = rset.getInt("result_id");
                 je.setResult_id(rset.getInt("result_id"));
                 je.setEnd_time(rset.getString("end_time").trim().substring(0, 19));
                 je.setIssued_time(rset.getString("issued_time").trim().substring(0, 19));
@@ -65,10 +66,11 @@ public class DataBaseBusiness {
 
         } catch (Exception e) {
             Logs.error(sql + "获取正在执行任务信息失败!");
-            updateStatue(resultid, 7,"获取正在执行任务信息失败");
+           // updateStatue(resultid, 7,"获取正在执行任务信息失败");
             e.printStackTrace();
             throw new RuntimeException("获取正在执行任务信息失败!", e);
         } finally {
+
             clear(pstmt, null, rset);
             //	manager.freeConnection("idb", connection);
             if (connection != null) {
@@ -101,10 +103,11 @@ public class DataBaseBusiness {
             rset = pstmt.executeQuery();
             while (rset.next()) {
                 JobEntity je = new JobEntity();
-                resultid = rset.getInt("result_id");
+              //  resultid = rset.getInt("result_id");
                 je.setExcute_detail("");
                 je.setResult_id(rset.getInt("result_id"));
                 je.setEnd_time(rset.getString("end_time").trim().substring(0, 19));
+                je.setStart_time(rset.getString("start_time").trim().substring(0, 19));
                 je.setIssued_time(rset.getString("issued_time").trim().substring(0, 19));
                 je.setQuery_sql(rset.getString("query_sql").trim());
                 sqllist.add(je);
@@ -113,13 +116,14 @@ public class DataBaseBusiness {
 
         } catch (Exception e) {
             Logs.error(sql + "获取待执行任务信息失败!");
-            updateStatue(resultid, 7,"获取待执行任务信息失败");
+      //      updateStatue(resultid, 7,"获取待执行任务信息失败");
             e.printStackTrace();
             throw new RuntimeException("获取待执行任务信息失败!", e);
 
 
         } finally {
             clear(pstmt, null, rset);
+
             //	manager.freeConnection("idb", connection);
             if (connection != null) {
                 try {
@@ -156,6 +160,7 @@ public class DataBaseBusiness {
             e.printStackTrace();
             throw new RuntimeException("获取job状态发生异常!", e);
         } finally {
+
             clear(pstmt, null, rset);
             //	manager.freeConnection("idb", connection);
             if (connection != null) {
@@ -179,14 +184,14 @@ public class DataBaseBusiness {
             if(job.getExcute_detail().length()>500) {
                 job.setExcute_detail(StringUtil.bSubstring(job.getExcute_detail(), 500));
             }
-            sql = "update report_result set op_time ='" + current_time + "',excute_detail = \"" + job.getExcute_detail() + "\", status = " + job.getStatus() + " ,excute_time =" + job.getExcute_time() + ",excute_row =" + job.getExcute_row() + ",excute_process=" + job.getExcute_process() + "  where result_id = " + job.getResult_id();
+            sql = "update report_result set op_time ='" + current_time + "',excute_detail = \"" + job.getExcute_detail() + "\", status = " + job.getStatus() + " ,excute_time =" + job.getExcute_time() + ",excute_row =" + job.getExcute_row() + ",excute_process=" + job.getExcute_process() + "  where status = 1 and result_id = " + job.getResult_id();
             //connection = manager.getConnection("idb");
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
             pstmt = connection.prepareStatement(sql);
             a = pstmt.executeUpdate();
 
-            connection.commit();
+        //    connection.commit();
             Logs.debug("-----------success----------" + sql);
 
         } catch (Exception e) {
@@ -195,9 +200,11 @@ public class DataBaseBusiness {
             throw new RuntimeException("更新进度条发生异常!", e);
         } finally {
             clear(pstmt, null, null);
+
             //	manager.freeConnection("idb", connection);
             if (connection != null) {
                 try {
+                    connection.commit();
                     connection.close();
                 } catch (SQLException e) {
                     Logs.error(e.toString());
@@ -226,7 +233,6 @@ public class DataBaseBusiness {
             pstmt = connection.prepareStatement(sql);
             int a = pstmt.executeUpdate();
 
-            connection.commit();
             Logs.debug("-----------success----------" + sql);
 
         } catch (Exception e) {
@@ -234,10 +240,12 @@ public class DataBaseBusiness {
             e.printStackTrace();
             throw new RuntimeException("更新状态发生异常!", e);
         } finally {
+
             clear(pstmt, null, null);
             //	manager.freeConnection("idb", connection);
             if (connection != null) {
                 try {
+                    connection.commit();
                     connection.close();
                 } catch (SQLException e) {
                     Logs.error(e.toString());
