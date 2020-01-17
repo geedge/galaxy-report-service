@@ -5,157 +5,170 @@ package com.mesa.reportservice.bean;
  */
 public class JobEntity implements Cloneable {
 
-    private int result_id;
-    private String result_name;
-    private String task_id;
-    private String start_time;
-    private String end_time;
-    private String query_sql;
-    private int status;
-    private int excute_time;
-    private long excute_row;
-    private int excute_process;
-    private String excute_detail;
-    private int is_send_notice;
-    private String op_time;
+    private Integer resultId;
+
+    private String resultName;
+
+    private Integer jobId;
+
+    private String startTime;
+
+    private String endTime;
+
+    private String querySql;
+
+    private Integer status;
+
+    private Integer excuteTime;
+
+    private Long excuteRow;
+
+    private Integer excuteProcess;
+
+    private String excuteDetail;
+
+    private Integer isSendNotice;
+
+    private String opTime;
+
+    private String chartType;
+
+    private String issuedTime;
+
     private String query_id;
+
     private String query_duration_ms;
+
     private long read_rows;
+
     private String memory_usage;
+
     private String result;
+
     private int excute_status;
+
     private String issued_time;
-    private String exception;
 
 
-    public String getException() {
-        return exception;
+    public Integer getResultId() {
+        return resultId;
     }
 
-    public void setException(String exception) {
-        this.exception = exception;
+    public void setResultId(Integer resultId) {
+        this.resultId = resultId;
     }
 
-    public String getIssued_time() {
-        return issued_time;
+    public String getResultName() {
+        return resultName;
     }
 
-    public void setIssued_time(String issued_time) {
-        this.issued_time = issued_time;
+    public void setResultName(String resultName) {
+        this.resultName = resultName;
     }
 
-    public int getExcute_status() {
-        return excute_status;
+    public Integer getJobId() {
+        return jobId;
     }
 
-    public void setExcute_status(int excute_status) {
-        this.excute_status = excute_status;
+    public void setJobId(Integer jobId) {
+        this.jobId = jobId;
     }
 
-    public int getResult_id() {
-        return result_id;
+    public String getStartTime() {
+        return startTime;
     }
 
-    public void setResult_id(int result_id) {
-        this.result_id = result_id;
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
     }
 
-    public String getResult_name() {
-        return result_name;
+    public String getEndTime() {
+        return endTime;
     }
 
-    public void setResult_name(String result_name) {
-        this.result_name = result_name;
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
-    public int getStatus() {
+    public String getQuerySql() {
+        return querySql;
+    }
+
+    public void setQuerySql(String querySql) {
+        this.querySql = querySql;
+    }
+
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public String getTask_id() {
-        return task_id;
+    public Integer getExcuteTime() {
+        return excuteTime;
     }
 
-    public void setTask_id(String task_id) {
-        this.task_id = task_id;
+    public void setExcuteTime(Integer excuteTime) {
+        this.excuteTime = excuteTime;
     }
 
-    public String getStart_time() {
-        return start_time;
+    public Long getExcuteRow() {
+        return excuteRow;
     }
 
-    public void setStart_time(String start_time) {
-        this.start_time = start_time;
+    public void setExcuteRow(Long excuteRow) {
+        this.excuteRow = excuteRow;
     }
 
-    public String getEnd_time() {
-        return end_time;
+    public Integer getExcuteProcess() {
+        return excuteProcess;
     }
 
-    public void setEnd_time(String end_time) {
-        this.end_time = end_time;
+    public void setExcuteProcess(Integer excuteProcess) {
+        this.excuteProcess = excuteProcess;
     }
 
-    public String getQuery_sql() {
-        return query_sql;
+    public String getExcuteDetail() {
+        return excuteDetail;
     }
 
-    public void setQuery_sql(String query_sql) {
-        this.query_sql = query_sql;
+    public void setExcuteDetail(String excuteDetail) {
+        this.excuteDetail = excuteDetail;
     }
 
-    public int getExcute_time() {
-        return excute_time;
+    public Integer getIsSendNotice() {
+        return isSendNotice;
     }
 
-    public void setExcute_time(int excute_time) {
-        this.excute_time = excute_time;
+    public void setIsSendNotice(Integer isSendNotice) {
+        this.isSendNotice = isSendNotice;
     }
 
-    public long getExcute_row() {
-        return excute_row;
+    public String getOpTime() {
+        return opTime;
     }
 
-    public void setExcute_row(long excute_row) {
-        this.excute_row = excute_row;
+    public void setOpTime(String opTime) {
+        this.opTime = opTime;
     }
 
-    public int getExcute_process() {
-        return excute_process;
+    public String getChartType() {
+        return chartType;
     }
 
-    public void setExcute_process(int excute_process) {
-        this.excute_process = excute_process;
+    public void setChartType(String chartType) {
+        this.chartType = chartType;
     }
 
-    public String getExcute_detail() {
-        return excute_detail;
+    public String getIssuedTime() {
+        return issuedTime;
     }
 
-    public void setExcute_detail(String excute_detail) {
-        this.excute_detail = excute_detail;
+    public void setIssuedTime(String issuedTime) {
+        this.issuedTime = issuedTime;
     }
-
-    public int getIs_send_notice() {
-        return is_send_notice;
-    }
-
-    public void setIs_send_notice(int is_send_notice) {
-        this.is_send_notice = is_send_notice;
-    }
-
-    public String getOp_time() {
-        return op_time;
-    }
-
-    public void setOp_time(String op_time) {
-        this.op_time = op_time;
-    }
-
 
     public String getQuery_id() {
         return query_id;
@@ -195,6 +208,22 @@ public class JobEntity implements Cloneable {
 
     public void setResult(String result) {
         this.result = result;
+    }
+
+    public int getExcute_status() {
+        return excute_status;
+    }
+
+    public void setExcute_status(int excute_status) {
+        this.excute_status = excute_status;
+    }
+
+    public String getIssued_time() {
+        return issued_time;
+    }
+
+    public void setIssued_time(String issued_time) {
+        this.issued_time = issued_time;
     }
 
 

@@ -29,7 +29,8 @@ public class SQLDateFunctionUtil {
 
     /**
      * 解析mysql函数替换为对应数据库类型函数
-     * @param sql   要解析的sql
+     *
+     * @param sql    要解析的sql
      * @param dbType 数据库类型
      * @return
      */
@@ -49,10 +50,10 @@ public class SQLDateFunctionUtil {
     }
 
 
-
     /**
      * 匹配范围：FROM_UNIXTIME(、DATE_FORMAT(、STR_TO_DATE(
-     * @param sql 需要解析的sql
+     *
+     * @param sql    需要解析的sql
      * @param dbType
      * @return
      */
@@ -69,13 +70,14 @@ public class SQLDateFunctionUtil {
             if (bracketsMatch[0] >= 1) {
                 --bracketsMatch[0];
             }
-            String str = dateFormatHavaMark(sqlParse, bracketsMatch[0],false, dbType);
+            String str = dateFormatHavaMark(sqlParse, bracketsMatch[0], false, dbType);
             sql = sql.substring(0, start) + str;
         }
     }
 
     /**
      * 匹配格式化 FROM_UNIXTIME(、DATE_FORMAT(、STR_TO_DATE(
+     *
      * @param sql
      * @param dbType
      * @return
@@ -100,6 +102,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 匹配 SUBDATE(、SUBDATE(、SUBDATE(、ADDDATE(、DATE_SUB(、DATE_ADD(
+     *
      * @param sql
      * @param dbType
      * @return
@@ -124,6 +127,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 匹配 UNIX_TIMESTAMP(
+     *
      * @param sql
      * @param dbType
      * @return
@@ -148,6 +152,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 匹配 DATE(
+     *
      * @param sql
      * @param dbType
      * @return
@@ -172,15 +177,16 @@ public class SQLDateFunctionUtil {
 
     /**
      * 匹配 YEAR(、QUARTER(、MONTH(、DAY(、HOUR(、MINUTE(、SECOND、DAYOFYEAR(、DAYOFMONTH(、DAYOFWEEK(
+     *
      * @param sql
      * @param dbType
      * @return
      */
-    public static String parseUnitFuncGetNum(String sql, String dbType){
+    public static String parseUnitFuncGetNum(String sql, String dbType) {
         int count = 0;
-        while (true){
+        while (true) {
             Matcher matcher = pUnitFuncGetNum.matcher(sql);
-            if(!matcher.find() || count++ >= 30){
+            if (!matcher.find() || count++ >= 30) {
                 return sql;
             }
             int start = matcher.start() + 1;
@@ -196,6 +202,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 匹配 pMarkDate(
+     *
      * @param sql
      * @param dbType
      * @return
@@ -220,11 +227,12 @@ public class SQLDateFunctionUtil {
 
     /**
      * 匹配 LAST_DAY(
+     *
      * @param sql
      * @param dbType
      * @return
      */
-    public static String parseLastDayFunc(String sql, String dbType){
+    public static String parseLastDayFunc(String sql, String dbType) {
         int count = 0;
         while (true) {
             Matcher matcher = pLastDateFunc.matcher(sql);
@@ -244,21 +252,22 @@ public class SQLDateFunctionUtil {
 
     /**
      * 匹配 涉及DATE()-、DATE()+
+     *
      * @param sql
      * @param dbType
      * @return
      */
-    public static String parseDateCalculateNum(String sql, String dbType){
+    public static String parseDateCalculateNum(String sql, String dbType) {
         int count = 0;
         String sqlTmp = "";
         while (true) {
             Matcher matcher = pDateCalculateNum.matcher(sql);
             if (!matcher.find() || count++ >= 30) {
-                sql = sql.replace("##","(");
+                sql = sql.replace("##", "(");
                 return sql;
             }
             String sqlParse = sql.substring(matcher.start());
-            if(sqlTmp.equals(sqlParse)){
+            if (sqlTmp.equals(sqlParse)) {
                 sqlParse = "##" + sqlParse.substring(1);
                 sql = sql.substring(0, matcher.start()) + sqlParse;
                 continue;
@@ -268,21 +277,22 @@ public class SQLDateFunctionUtil {
             if (bracketsMatch[0] >= 1) {
                 --bracketsMatch[0];
             }
-            String sqlParse2 = sql.substring(matcher.start()+1);
+            String sqlParse2 = sql.substring(matcher.start() + 1);
             int[] bracketsMatch2 = StringUtil.getBracketsMatch(sqlParse2, "(", false);
             if (bracketsMatch2[0] >= 1) {
                 --bracketsMatch2[0];
             }
-            String str = parseDateCalculateNumHaveMark(sqlParse, bracketsMatch[0],bracketsMatch2[0], dbType);
+            String str = parseDateCalculateNumHaveMark(sqlParse, bracketsMatch[0], bracketsMatch2[0], dbType);
             sql = sql.substring(0, matcher.start()) + str;
         }
     }
 
     /**
      * 替换 涉及DATE()-、DATE()+
+     *
      * @param sqlParse
-     * @param num 括号总个数
-     * @param num2 date函数内括号数
+     * @param num      括号总个数
+     * @param num2     date函数内括号数
      * @param dbType
      * @return
      */
@@ -297,13 +307,13 @@ public class SQLDateFunctionUtil {
             if (StringUtil.getBracketsMatch(group0.substring(0, group0.length() - 1), "(", true)[0] == num) {
                 String[] split = group4.split(",");
                 String replaceValue = "";
-                if(DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)){
+                if (DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)) {
                     if (split.length == 1) {
                         replaceValue = "toStartOfDay#[toDateTime#[" + group2 + "]]+[" + group4 + "]*86400 )";
                     } else if (split.length == 2) {
                         replaceValue = "toStartOfDay#[toDateTime#[" + group2 + "]]+[" + split[0] + "]*86400 ," + split[1] + ")";
                     }
-                }else if(DBTypeEnum.DRUID.getValue().equals(dbType)){
+                } else if (DBTypeEnum.DRUID.getValue().equals(dbType)) {
                     if (split.length == 1) {
                         replaceValue = "TIME_SHIFT#[FLOOR#[ TIMESTAMP " + group2 + " to day],'P1D'," + group4 + "])";
                     } else if (split.length == 2) {
@@ -320,8 +330,9 @@ public class SQLDateFunctionUtil {
 
     /**
      * 替换 LAST_DAY(date)
+     *
      * @param sqlParse
-     * @param num 包含括号个数
+     * @param num      包含括号个数
      * @param dbType
      * @return
      */
@@ -339,6 +350,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 实现替换：LAST_DAY(date)
+     *
      * @param unit
      * @param param
      * @param dbType
@@ -346,10 +358,10 @@ public class SQLDateFunctionUtil {
      */
     private static String lastDayRealize(String unit, String param, String dbType) {
         String replaceValue = null;
-        if("LAST_DAY".equals(unit.toUpperCase())){
-            if(DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)){
+        if ("LAST_DAY".equals(unit.toUpperCase())) {
+            if (DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)) {
                 replaceValue = "addDays#[addMonths#[toStartOfMonth#[toDateTime#[" + param + "]],1],-1]";
-            }else if(DBTypeEnum.DRUID.getValue().equals(dbType)){
+            } else if (DBTypeEnum.DRUID.getValue().equals(dbType)) {
                 replaceValue = "TIME_SHIFT#[FLOOR#[TIME_SHIFT#[ TIMESTAMP " + param + ", 'P1M', 1] to month], 'P1D', -1]";
             }
         }
@@ -358,8 +370,9 @@ public class SQLDateFunctionUtil {
 
     /**
      * 替换：MAKEDATE(year,dayofyear)
-      * @param sqlParse
-     * @param num 函数参数包含括号的个数
+     *
+     * @param sqlParse
+     * @param num      函数参数包含括号的个数
      * @param dbType
      * @return
      */
@@ -377,6 +390,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 实现替换：MAKEDATE(year,dayofyear)
+     *
      * @param func
      * @param expr
      * @param dbType
@@ -428,6 +442,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 替换 YEAR(expr)、QUARTER(expr)、MONTH(expr)、DAY(expr)、HOUR(expr)、MINUTE(expr)、SECONDexpr)、DAYOFYEAR(expr)、DAYOFMONTH(expr)、DAYOFWEEK(expr)
+     *
      * @param sqlParse
      * @param num
      * @param dbType
@@ -447,41 +462,84 @@ public class SQLDateFunctionUtil {
 
     /**
      * 实现替换：YEAR(expr)、QUARTER(expr)、MONTH(expr)、DAY(expr)、HOUR(expr)、MINUTE(expr)、SECONDexpr)、DAYOFYEAR(expr)、DAYOFMONTH(expr)、DAYOFWEEK(expr)
+     *
      * @param unit
      * @param expr
      * @param dbType
      * @return
      */
-    private static String unitFuncGetNumRealize(String unit,String expr, String dbType) {
+    private static String unitFuncGetNumRealize(String unit, String expr, String dbType) {
         String replaceValue = null;
         unit = unit.toUpperCase();
-        if(DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)){
-            switch (unit){
-                case "YEAR": replaceValue = "toYear#[toDateTime#[" + expr + "]]"; break;
-                case "QUARTER": replaceValue = "toQuarter#[toDateTime#[" + expr + "]]"; break;
-                case "MONTH": replaceValue = "toMonth#[toDateTime#[" + expr + "]]"; break;
-                case "DAY": replaceValue = "toDayOfMonth#[toDateTime#[" + expr + "]]"; break;
-                case "HOUR": replaceValue = "toHour#[toDateTime#[" + expr + "]]"; break;
-                case "MINUTE": replaceValue = "toMinute#[toDateTime#[" + expr + "]]"; break;
-                case "SECOND": replaceValue = "toSecond#[toDateTime#[" + expr + "]]"; break;
-                case "DAYOFYEAR": replaceValue = "toDayOfYear#[toDateTime#["+ expr + "]]";break;
-                case "DAYOFMONTH": replaceValue = "toDayOfMonth#[toDateTime#["+ expr + "]]";break;
-                case "DAYOFWEEK": replaceValue = "toDayOfWeek#[addDays#[toDateTime#["+ expr + "],1]]";break;
-                default: replaceValue = unit+"#[" + expr + "]";
+        if (DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)) {
+            switch (unit) {
+                case "YEAR":
+                    replaceValue = "toYear#[toDateTime#[" + expr + "]]";
+                    break;
+                case "QUARTER":
+                    replaceValue = "toQuarter#[toDateTime#[" + expr + "]]";
+                    break;
+                case "MONTH":
+                    replaceValue = "toMonth#[toDateTime#[" + expr + "]]";
+                    break;
+                case "DAY":
+                    replaceValue = "toDayOfMonth#[toDateTime#[" + expr + "]]";
+                    break;
+                case "HOUR":
+                    replaceValue = "toHour#[toDateTime#[" + expr + "]]";
+                    break;
+                case "MINUTE":
+                    replaceValue = "toMinute#[toDateTime#[" + expr + "]]";
+                    break;
+                case "SECOND":
+                    replaceValue = "toSecond#[toDateTime#[" + expr + "]]";
+                    break;
+                case "DAYOFYEAR":
+                    replaceValue = "toDayOfYear#[toDateTime#[" + expr + "]]";
+                    break;
+                case "DAYOFMONTH":
+                    replaceValue = "toDayOfMonth#[toDateTime#[" + expr + "]]";
+                    break;
+                case "DAYOFWEEK":
+                    replaceValue = "toDayOfWeek#[addDays#[toDateTime#[" + expr + "],1]]";
+                    break;
+                default:
+                    replaceValue = unit + "#[" + expr + "]";
             }
-        }else if(DBTypeEnum.DRUID.getValue().equals(dbType)){
-            switch (unit){
-                case "YEAR": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'YEAR' ]"; break;
-                case "QUARTER": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'QUARTER' ]"; break;
-                case "MONTH": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'MONTH' ]"; break;
-                case "DAY": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'DAY' ]"; break;
-                case "HOUR": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'HOUR' ]"; break;
-                case "MINUTE": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'MINUTE' ]"; break;
-                case "SECOND": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'SECOND' ]"; break;
-                case "DAYOFYEAR": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'DOY' ]"; break;
-                case "DAYOFMONTH": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'DAY' ]"; break;
-                case "DAYOFWEEK": replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'P1D',1], 'DOW' ]"; break;
-                default: replaceValue = unit+"#[" + expr + "]";
+        } else if (DBTypeEnum.DRUID.getValue().equals(dbType)) {
+            switch (unit) {
+                case "YEAR":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'YEAR' ]";
+                    break;
+                case "QUARTER":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'QUARTER' ]";
+                    break;
+                case "MONTH":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'MONTH' ]";
+                    break;
+                case "DAY":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'DAY' ]";
+                    break;
+                case "HOUR":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'HOUR' ]";
+                    break;
+                case "MINUTE":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'MINUTE' ]";
+                    break;
+                case "SECOND":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'SECOND' ]";
+                    break;
+                case "DAYOFYEAR":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'DOY' ]";
+                    break;
+                case "DAYOFMONTH":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'PT1M',0], 'DAY' ]";
+                    break;
+                case "DAYOFWEEK":
+                    replaceValue = "TIME_EXTRACT#[TIME_SHIFT#[ TIMESTAMP " + expr + ",'P1D',1], 'DOW' ]";
+                    break;
+                default:
+                    replaceValue = unit + "#[" + expr + "]";
             }
         }
         return replaceValue;
@@ -489,8 +547,9 @@ public class SQLDateFunctionUtil {
 
     /**
      * 实现相对时间相关替换：
+     *
      * @param params
-     * @param sign ADD相关为true,SUB相关为false;
+     * @param sign   ADD相关为true,SUB相关为false;
      * @param dbType
      * @return
      */
@@ -502,32 +561,68 @@ public class SQLDateFunctionUtil {
             Matcher matcher = pIntervalNumUnit.matcher(param2);
             if (matcher.find()) {
                 param2 = matcher.group(1);
-                if(!sign){
+                if (!sign) {
                     param2 = "-  #[" + param2 + "]";
                 }
-                if(DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)){
-                    switch (matcher.group(2).toUpperCase()){
-                        case "SECOND": replaceValue = "toDateTime#[" + param1 + "]" + param2; break;
-                        case "MINUTE": replaceValue = "toDateTime#[" + param1 + "]" + param2 + "*60"; break;
-                        case "HOUR": replaceValue = "toDateTime#[" + param1 + "]" + param2 + "*3600"; break;
-                        case "DAY": replaceValue = "toDateTime#[" + param1 + "]" + param2+ "*86400"; break;
-                        case "WEEK": replaceValue = "toDateTime#[" + param1 + "]" + param2 + "*604800"; break;
-                        case "MONTH": replaceValue = "addMonths#[toDateTime#[" + param1 + "] ," + param2 + "]"; break;
-                        case "QUARTER": replaceValue = "addQuarter#[toDateTime#[" + param1 + "]," + param2 + "]"; break;
-                        case "YEAR": replaceValue = "addYears#[toDateTime#[" + param1 + "]," + param2 + "]"; break;
-                        default:replaceValue = param1 + param2; break;
-                    }
-                }else if(DBTypeEnum.DRUID.getValue().equals(dbType)){
+                if (DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)) {
                     switch (matcher.group(2).toUpperCase()) {
-                        case "SECOND": replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'PT1S',"+ param2 +"]"; break;
-                        case "MINUTE": replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'PT1M',"+ param2 +"]"; break;
-                        case "HOUR": replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'PT1H',"+ param2 +"]"; break;
-                        case "DAY": replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1D',"+ param2 +"]"; break;
-                        case "WEEK": replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1W',"+ param2 +"]"; break;
-                        case "MONTH": replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1M',"+ param2 +"]"; break;
-                        case "QUARTER": replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1M',"+ param2 +"]"; break;
-                        case "YEAR": replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1Y',"+ param2 +"]"; break;
-                        default:replaceValue = param1 + param2; break;
+                        case "SECOND":
+                            replaceValue = "toDateTime#[" + param1 + "]" + param2;
+                            break;
+                        case "MINUTE":
+                            replaceValue = "toDateTime#[" + param1 + "]" + param2 + "*60";
+                            break;
+                        case "HOUR":
+                            replaceValue = "toDateTime#[" + param1 + "]" + param2 + "*3600";
+                            break;
+                        case "DAY":
+                            replaceValue = "toDateTime#[" + param1 + "]" + param2 + "*86400";
+                            break;
+                        case "WEEK":
+                            replaceValue = "toDateTime#[" + param1 + "]" + param2 + "*604800";
+                            break;
+                        case "MONTH":
+                            replaceValue = "addMonths#[toDateTime#[" + param1 + "] ," + param2 + "]";
+                            break;
+                        case "QUARTER":
+                            replaceValue = "addQuarter#[toDateTime#[" + param1 + "]," + param2 + "]";
+                            break;
+                        case "YEAR":
+                            replaceValue = "addYears#[toDateTime#[" + param1 + "]," + param2 + "]";
+                            break;
+                        default:
+                            replaceValue = param1 + param2;
+                            break;
+                    }
+                } else if (DBTypeEnum.DRUID.getValue().equals(dbType)) {
+                    switch (matcher.group(2).toUpperCase()) {
+                        case "SECOND":
+                            replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'PT1S'," + param2 + "]";
+                            break;
+                        case "MINUTE":
+                            replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'PT1M'," + param2 + "]";
+                            break;
+                        case "HOUR":
+                            replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'PT1H'," + param2 + "]";
+                            break;
+                        case "DAY":
+                            replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1D'," + param2 + "]";
+                            break;
+                        case "WEEK":
+                            replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1W'," + param2 + "]";
+                            break;
+                        case "MONTH":
+                            replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1M'," + param2 + "]";
+                            break;
+                        case "QUARTER":
+                            replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1M'," + param2 + "]";
+                            break;
+                        case "YEAR":
+                            replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1Y'," + param2 + "]";
+                            break;
+                        default:
+                            replaceValue = param1 + param2;
+                            break;
                     }
                 }
                 return replaceValue;
@@ -535,12 +630,12 @@ public class SQLDateFunctionUtil {
         } else if (params.size() == 2) {
             String param1 = params.get(0);
             String param2 = params.get(1);
-            if(!sign){
+            if (!sign) {
                 param2 = "-  #[" + param2 + "]";
             }
-            if(DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)){
+            if (DBTypeEnum.CLICKHOUSE.getValue().equals(dbType)) {
                 replaceValue = "addDays#[toDateTime#[" + param1 + "]," + param2 + "]";
-            }else if(DBTypeEnum.DRUID.getValue().equals(dbType)){
+            } else if (DBTypeEnum.DRUID.getValue().equals(dbType)) {
                 replaceValue = "TIME_SHIFT#[ TIMESTAMP " + param1 + ",'P1D'," + param2 + "]";
             }
         }
@@ -549,6 +644,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 实现替换：FROM_UNIXTIME(unix_timestamp)、FROM_UNIXTIME(date,format)、DATE_FORMAT(date,format)、STR_TO_DATE(date,format)
+     *
      * @param func
      * @param param
      * @param dbType
@@ -563,7 +659,7 @@ public class SQLDateFunctionUtil {
                 replaceValue = "toDateTime#[" + param + "]";
             } else if (DBTypeEnum.DRUID.getValue().equals(dbType) && !bool) {
                 replaceValue = "MILLIS_TO_TIMESTAMP#[ 1000 * [" + param + "]]";
-            }else if (DBTypeEnum.DRUID.getValue().equals(dbType) && bool) {
+            } else if (DBTypeEnum.DRUID.getValue().equals(dbType) && bool) {
                 replaceValue = "TIME_FORMAT#[MILLIS_TO_TIMESTAMP#[ 1000 * [" + param + "]],'YYYY-MM-dd HH:mm:ss']";
             }
         } else if (func.contains("FROM_UNIXTIME") && DBTypeEnum.DRUID.getValue().equals(dbType) && "%Y-%m-%d %H:%i:%s".equals(params.get(1).replaceAll("\\'|\\\"", "").trim())) {
@@ -576,55 +672,132 @@ public class SQLDateFunctionUtil {
             String param2 = params.get(1).replaceAll("\\'|\\\"", "").trim();
             if (DBTypeEnum.CLICKHOUSE.getValue().equals(dbType) && bool) {
                 switch (param2) {
-                    case "%Y-%m-%d %H:%i:%s": replaceValue = "toDateTime#[" + param1 + "]"; break;
-                    case "%Y-%m-%d %H:%i:00": replaceValue = "toStartOfMinute#[toDateTime#[" + param1 + "]]"; break;
-                    case "%Y-%m-%d %H:00:00": replaceValue = "toStartOfHour#[toDateTime#[" + param1 + "]]"; break;
-                    case "%Y-%m-%d 00:00:00": replaceValue = "toStartOfDay#[toDateTime#[" + param1 + "]]"; break;
-                    case "%Y-%m-01 00:00:00": replaceValue = "toDateTime#[toStartOfMonth#[toDateTime#[" + param1 + "]]]"; break;
-                    case "%Y-01-01 00:00:00": replaceValue = "toDateTime#[toStartOfYear#[toDateTime#[" + param1 + "]]]"; break;
-                    case "%Y-%m-%d": replaceValue = "formatDateTime#[toDateTime#["+ param1 +"], '%Y-%m-%d]"; break;
-                    case "%Y-%m-01": replaceValue = "formatDateTime#[toDateTime#["+ param1 +"], '%Y-%m-01]"; break;
-                    case "%Y-01-01": replaceValue = "formatDateTime#[toDateTime#["+ param1 +"], '%Y-01-01]"; break;
-                    default: replaceValue = "toDateTime#[" + param1 + "]";
+                    case "%Y-%m-%d %H:%i:%s":
+                        replaceValue = "toDateTime#[" + param1 + "]";
+                        break;
+                    case "%Y-%m-%d %H:%i:00":
+                        replaceValue = "toStartOfMinute#[toDateTime#[" + param1 + "]]";
+                        break;
+                    case "%Y-%m-%d %H:00:00":
+                        replaceValue = "toStartOfHour#[toDateTime#[" + param1 + "]]";
+                        break;
+                    case "%Y-%m-%d 00:00:00":
+                        replaceValue = "toStartOfDay#[toDateTime#[" + param1 + "]]";
+                        break;
+                    case "%Y-%m-01 00:00:00":
+                        replaceValue = "toDateTime#[toStartOfMonth#[toDateTime#[" + param1 + "]]]";
+                        break;
+                    case "%Y-01-01 00:00:00":
+                        replaceValue = "toDateTime#[toStartOfYear#[toDateTime#[" + param1 + "]]]";
+                        break;
+                    case "%Y-%m-%d":
+                        replaceValue = "formatDateTime#[toDateTime#[" + param1 + "], '%Y-%m-%d]";
+                        break;
+                    case "%Y-%m-01":
+                        replaceValue = "formatDateTime#[toDateTime#[" + param1 + "], '%Y-%m-01]";
+                        break;
+                    case "%Y-01-01":
+                        replaceValue = "formatDateTime#[toDateTime#[" + param1 + "], '%Y-01-01]";
+                        break;
+                    default:
+                        replaceValue = "toDateTime#[" + param1 + "]";
                 }
-            }else if (DBTypeEnum.CLICKHOUSE.getValue().equals(dbType) && !bool) {
+            } else if (DBTypeEnum.CLICKHOUSE.getValue().equals(dbType) && !bool) {
                 switch (param2) {
-                    case "%Y-%m-%d %H:%i:%s": replaceValue = "toDateTime#[" + param1 + "]"; break;
-                    case "%Y-%m-%d %H:%i:00": replaceValue = "toStartOfMinute#[toDateTime#[" + param1 + "]]"; break;
-                    case "%Y-%m-%d %H:00:00": replaceValue = "toStartOfHour#[toDateTime#[" + param1 + "]]"; break;
-                    case "%Y-%m-%d 00:00:00": replaceValue = "toStartOfDay#[toDateTime#[" + param1 + "]]"; break;
-                    case "%Y-%m-01 00:00:00": replaceValue = "toDateTime#[toStartOfMonth#[toDateTime#[" + param1 + "]]]"; break;
-                    case "%Y-01-01 00:00:00": replaceValue = "toDateTime#[toStartOfYear#[toDateTime#[" + param1 + "]]]"; break;
-                    case "%Y-%m-%d": replaceValue = "toStartOfDay#[toDateTime#[" + param1 + "]]"; break;
-                    case "%Y-%m-01": replaceValue = "toStartOfMonth#[toDateTime#[" + param1 + "]]"; break;
-                    case "%Y-01-01": replaceValue = "toStartOfYear#[toDateTime#[" + param1 + "]]"; break;
-                    default: replaceValue = "toDateTime#[" + param1 + "]";
+                    case "%Y-%m-%d %H:%i:%s":
+                        replaceValue = "toDateTime#[" + param1 + "]";
+                        break;
+                    case "%Y-%m-%d %H:%i:00":
+                        replaceValue = "toStartOfMinute#[toDateTime#[" + param1 + "]]";
+                        break;
+                    case "%Y-%m-%d %H:00:00":
+                        replaceValue = "toStartOfHour#[toDateTime#[" + param1 + "]]";
+                        break;
+                    case "%Y-%m-%d 00:00:00":
+                        replaceValue = "toStartOfDay#[toDateTime#[" + param1 + "]]";
+                        break;
+                    case "%Y-%m-01 00:00:00":
+                        replaceValue = "toDateTime#[toStartOfMonth#[toDateTime#[" + param1 + "]]]";
+                        break;
+                    case "%Y-01-01 00:00:00":
+                        replaceValue = "toDateTime#[toStartOfYear#[toDateTime#[" + param1 + "]]]";
+                        break;
+                    case "%Y-%m-%d":
+                        replaceValue = "toStartOfDay#[toDateTime#[" + param1 + "]]";
+                        break;
+                    case "%Y-%m-01":
+                        replaceValue = "toStartOfMonth#[toDateTime#[" + param1 + "]]";
+                        break;
+                    case "%Y-01-01":
+                        replaceValue = "toStartOfYear#[toDateTime#[" + param1 + "]]";
+                        break;
+                    default:
+                        replaceValue = "toDateTime#[" + param1 + "]";
                 }
             } else if (DBTypeEnum.DRUID.getValue().equals(dbType) && bool) {
                 switch (param2) {
-                    case "%Y-%m-%d %H:%i:%s": replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-MM-dd HH:mm:ss']"; break;
-                    case "%Y-%m-%d %H:%i:00": replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-MM-dd HH:mm:00']"; break;
-                    case "%Y-%m-%d %H:00:00": replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-MM-dd HH:00:00']"; break;
-                    case "%Y-%m-%d 00:00:00": replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-MM-dd 00:00:00']"; break;
-                    case "%Y-%m-01 00:00:00": replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-MM-01 00:00:00']"; break;
-                    case "%Y-01-01 00:00:00": replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-01-01 00:00:00']"; break;
-                    case "%Y-%m-%d": replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-MM-dd']"; break;
-                    case "%Y-%m-01": replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-MM-01']"; break;
-                    case "%Y-01-01": replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-01-01']"; break;
-                    default: replaceValue = "TIME_FORMAT#[ TIMESTAMP "+ param1 +",'YYYY-MM-dd HH:mm:ss']";
+                    case "%Y-%m-%d %H:%i:%s":
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-MM-dd HH:mm:ss']";
+                        break;
+                    case "%Y-%m-%d %H:%i:00":
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-MM-dd HH:mm:00']";
+                        break;
+                    case "%Y-%m-%d %H:00:00":
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-MM-dd HH:00:00']";
+                        break;
+                    case "%Y-%m-%d 00:00:00":
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-MM-dd 00:00:00']";
+                        break;
+                    case "%Y-%m-01 00:00:00":
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-MM-01 00:00:00']";
+                        break;
+                    case "%Y-01-01 00:00:00":
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-01-01 00:00:00']";
+                        break;
+                    case "%Y-%m-%d":
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-MM-dd']";
+                        break;
+                    case "%Y-%m-01":
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-MM-01']";
+                        break;
+                    case "%Y-01-01":
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-01-01']";
+                        break;
+                    default:
+                        replaceValue = "TIME_FORMAT#[ TIMESTAMP " + param1 + ",'YYYY-MM-dd HH:mm:ss']";
                 }
             } else if (DBTypeEnum.DRUID.getValue().equals(dbType) && !bool) {
                 switch (param2) {
-                    case "%Y-%m-%d %H:%i:%s": replaceValue = " TIMESTAMP " + param1; break;
-                    case "%Y-%m-%d %H:%i:00": replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to minute]"; break;
-                    case "%Y-%m-%d %H:00:00": replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to hour]"; break;
-                    case "%Y-%m-%d 00:00:00": replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to day]"; break;
-                    case "%Y-%m-01 00:00:00": replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to month]"; break;
-                    case "%Y-01-01 00:00:00": replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to year]"; break;
-                    case "%Y-%m-%d": replaceValue = "TIME_FLOOR#[ TIMESTAMP " + param1 + ",'P1D']"; break;
-                    case "%Y-%m-01": replaceValue = "TIME_FLOOR#[ TIMESTAMP " + param1 + ",'P1M']"; break;
-                    case "%Y-01-01": replaceValue = "TIME_FLOOR#[ TIMESTAMP " + param1 + ",'P1Y']"; break;
-                    default : replaceValue = " TIMESTAMP " + param1; break;
+                    case "%Y-%m-%d %H:%i:%s":
+                        replaceValue = " TIMESTAMP " + param1;
+                        break;
+                    case "%Y-%m-%d %H:%i:00":
+                        replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to minute]";
+                        break;
+                    case "%Y-%m-%d %H:00:00":
+                        replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to hour]";
+                        break;
+                    case "%Y-%m-%d 00:00:00":
+                        replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to day]";
+                        break;
+                    case "%Y-%m-01 00:00:00":
+                        replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to month]";
+                        break;
+                    case "%Y-01-01 00:00:00":
+                        replaceValue = "FLOOR#[ TIMESTAMP " + param1 + " to year]";
+                        break;
+                    case "%Y-%m-%d":
+                        replaceValue = "TIME_FLOOR#[ TIMESTAMP " + param1 + ",'P1D']";
+                        break;
+                    case "%Y-%m-01":
+                        replaceValue = "TIME_FLOOR#[ TIMESTAMP " + param1 + ",'P1M']";
+                        break;
+                    case "%Y-01-01":
+                        replaceValue = "TIME_FLOOR#[ TIMESTAMP " + param1 + ",'P1Y']";
+                        break;
+                    default:
+                        replaceValue = " TIMESTAMP " + param1;
+                        break;
                 }
             }
         }
@@ -633,6 +806,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 解析之后的sql处理
+     *
      * @param sql
      * @param dbType
      * @return
@@ -682,8 +856,10 @@ public class SQLDateFunctionUtil {
         }
         return sql;
     }
+
     /**
      * 替换解析时候加入的[、]、#
+     *
      * @param sql
      * @return
      */
@@ -693,11 +869,13 @@ public class SQLDateFunctionUtil {
         sql = sql.replace("#", "");
         return sql;
     }
+
     /**
      * 替换：FROM_UNIXTIME(unix_timestamp)、FROM_UNIXTIME(date,format)、DATE_FORMAT(date,format)、STR_TO_DATE(date,format)
+     *
      * @param sqlParse
-     * @param num 包含括号的个数
-     * @param bool 应用的分组中为true 条件范围中则为false
+     * @param num      包含括号的个数
+     * @param bool     应用的分组中为true 条件范围中则为false
      * @param dbType
      * @return
      */
@@ -709,7 +887,7 @@ public class SQLDateFunctionUtil {
             String group2 = mDateFormatMark.group(2);
             String replaceValue = group2;
             if (StringUtil.getBracketsMatch(group2, "(", false)[0] >= 0) {
-                replaceValue = dateFormatRealize(mDateFormatMark.group(1),group2, bool , dbType);
+                replaceValue = dateFormatRealize(mDateFormatMark.group(1), group2, bool, dbType);
             }
             mDateFormatMark.appendReplacement(sb, replaceValue);
         }
@@ -719,24 +897,25 @@ public class SQLDateFunctionUtil {
 
     /**
      * 替换SUBDATE(expr,days)、SUBDATE(expr,days)、SUBDATE(date,INTERVAL expr dbType)、ADDDATE(date,INTERVAL expr dbType)、DATE_SUB(date,INTERVAL expr dbType)、DATE_ADD(date,INTERVAL expr dbType)
+     *
      * @param sqlParse
-     * @param num 包含的括号个数
+     * @param num      包含的括号个数
      * @param dbType
      * @return
      */
-    public static String dateRelativeHaveMark(String sqlParse,int num,String dbType){
+    public static String dateRelativeHaveMark(String sqlParse, int num, String dbType) {
         Pattern pDateRelativeParse = Pattern.compile("(ADDDATE|DATE_ADD|SUBDATE|DATE_SUB)\\s*\\((.*?(.*?\\).*?){" + num + "})\\)", Pattern.CASE_INSENSITIVE);
         Matcher matcherParse = pDateRelativeParse.matcher(sqlParse);
         String innerValue = "";
         StringBuffer sb = new StringBuffer();
         if (matcherParse.find()) {
             Boolean sign;
-            if(matcherParse.group(1).toUpperCase().contains("ADD")){
+            if (matcherParse.group(1).toUpperCase().contains("ADD")) {
                 sign = true;
-            }else {
+            } else {
                 sign = false;
             }
-            if (StringUtil.getBracketsMatch(matcherParse.group(2), null,false)[0] >= 0) {
+            if (StringUtil.getBracketsMatch(matcherParse.group(2), null, false)[0] >= 0) {
                 List<String> params = diviParam(matcherParse.group(2), ",");
                 innerValue = dateRelative(params, sign, dbType);
             }
@@ -748,8 +927,9 @@ public class SQLDateFunctionUtil {
 
     /**
      * 实现替换：UNIX_TIMESTAMP()、UNIX_TIMESTAMP(expr)
+     *
      * @param sqlParse
-     * @param num 包含的括号个数
+     * @param num      包含的括号个数
      * @param dbType
      * @return
      */
@@ -780,8 +960,9 @@ public class SQLDateFunctionUtil {
 
     /**
      * 实现替换：DATE(expr)
+     *
      * @param sqlParse
-     * @param num 包含的括号个数
+     * @param num      包含的括号个数
      * @param dbType
      * @return
      */
@@ -804,6 +985,7 @@ public class SQLDateFunctionUtil {
 
     /**
      * 获取函数参数
+     *
      * @param str
      * @param div 参数分隔符
      * @return
@@ -818,7 +1000,7 @@ public class SQLDateFunctionUtil {
         for (int i = 0; i < split.length; i++) {
             resultTemp += split[i];
             if (StringUtil.getBracketsMatch(resultTemp, "(", true)[0] >= 0
-                && StringUtil.getBracketsMatch(resultTemp, "[", true)[0] >= 0) {
+                    && StringUtil.getBracketsMatch(resultTemp, "[", true)[0] >= 0) {
                 result.add(resultTemp);
                 resultTemp = "";
                 continue;

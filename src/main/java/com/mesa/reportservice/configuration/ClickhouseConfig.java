@@ -1,5 +1,6 @@
-package com.mesa.reportservice.util;
+package com.mesa.reportservice.configuration;
 
+import com.mesa.reportservice.util.Logs;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,7 @@ public class ClickhouseConfig {
     public static String getJobUrl(String sql, String query_id) {
 
         String url = "http://" + task_ip.trim() + "/?user=" + task_user.trim() + "&password=" + task_user_password.trim()
-                + "&database=" + task_database.trim() + "&query_id=" + query_id + "&query=";
+                 + "&database=" + task_database.trim() + "&query_id=" + query_id + "&query=";
         String jobsql = "";
 
         try {
@@ -58,7 +59,7 @@ public class ClickhouseConfig {
     public static String getFinishUrl(String query_id) {
 
         String url = "http://" + log_ip.trim() + "/?user=" + log_user.trim() + "&password=" + log_user_password.trim()
-                + "&database=system" + "&query=";
+                 + "&database=system" + "&query=";
         String finishsql = "";
         // String logsql = "select elapsed,total_rows_approx,read_rows from `system`.processes where query_id='" + query_id + "' FORMAT JSONEachRow";
         try {
@@ -75,7 +76,7 @@ public class ClickhouseConfig {
     public static String getKillUrl(String query_id) {
 
         String url = "http://" + task_ip.trim() + "/?user=" + task_user.trim() + "&password=" + task_user_password.trim()
-                + "&query=";
+                + "&max_execution_time=60" + "&query=";
 
         String killsql = "";
 

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mesa.reportservice.mapper.ReportResultMapper" >
+  <resultMap type="com.mesa.reportservice.bean.JobEntity" id="BaseResultMap">
+    <id property="resultId" column="result_id"/>
+    <result property="resultName" column="result_name"/>
+    <result property="startTime" column="start_time"/>
+    <result property="endTime" column="end_time"/>
+    <result property="querySql" column="query_sql"/>
+    <result property="status" column="status"/>
+    <result property="excuteTime" column="excute_time"/>
+    <result property="excuteRow" column="excute_row"/>
+    <result property="excuteProcess" column="excute_process"/>
+    <result property="excuteDetail" column="excute_detail"/>
+    <result property="opTime" column="op_time"/>
+    <result property="chartType" column="chart_type"/>
+    <result property="issuedTime" column="issued_time"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    result_id, result_name, DATE_FORMAT(start_time,'%Y-%m-%d %H:%i:%s') as start_time,DATE_FORMAT(end_time,'%Y-%m-%d %H:%i:%s') as end_time, query_sql, status, excute_time,
+    excute_row, excute_process, excute_detail, is_send_notice,DATE_FORMAT(op_time,'%Y-%m-%d %H:%i:%s') as op_time, chart_type,DATE_FORMAT(issued_time,'%Y-%m-%d %H:%i:%s') as issued_time
+  </sql>
+  <select id="getJobForExcute" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from report_result
+    where status = 1  order by end_time  limit 10
+  </select>
+
+  <select id="getJobTask" resultMap="BaseResultMap" parameterType="hashmap">
+    select
+    <include refid="Base_Column_List" />
+    from report_result
+    where status = 0 and end_time &lt; #{endtime} order by end_time limit ${rows}
+  </select>
+
+  <update id="updateProcesses" parameterType="com.mesa.reportservice.bean.JobEntity" >
+    update report_result
+    <set >
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="excuteTime != null" >
+        excute_time = #{excuteTime,jdbcType=INTEGER},
+      </if>
+      <if test="excuteRow != null" >
+        excute_row = #{excuteRow,jdbcType=BIGINT},
+      </if>
+      <if test="excuteProcess != null" >
+        excute_process = #{excuteProcess,jdbcType=INTEGER},
+      </if>
+      <if test="excuteDetail != null" >
+        excute_detail = #{excuteDetail,jdbcType=VARCHAR},
+      </if>
+      <if test="opTime != null" >
+        op_time = #{opTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where result_id = #{resultId,jdbcType=INTEGER}
+  </update>
+
+
+
+
+  <update id="updateStatue" parameterType="com.mesa.reportservice.bean.JobEntity" >
+    update report_result
+    <set >
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="excuteDetail != null" >
+        excute_detail = #{excuteDetail,jdbcType=VARCHAR},
+      </if>
+      <if test="opTime != null" >
+        op_time = #{opTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where result_id = #{resultId,jdbcType=INTEGER}
+  </update>
+
+</mapper>

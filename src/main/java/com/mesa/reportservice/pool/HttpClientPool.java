@@ -1,4 +1,4 @@
-package com.mesa.reportservice.dao;
+package com.mesa.reportservice.pool;
 
 import com.mesa.reportservice.util.Logs;
 import org.apache.http.client.config.RequestConfig;

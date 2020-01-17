@@ -114,26 +114,18 @@ public final class StringUtil extends StringUtils {
     }
 
 
-
-
-    public static String bSubstring(String s, int length) throws Exception
-    {
+    public static String bSubstring(String s, int length) throws Exception {
 
         byte[] bytes = s.getBytes("Unicode");
         int n = 0; // 表示当前的字节数
         int i = 2; // 要截取的字节数，从第3个字节开始
-        for (; i < bytes.length && n < length; i++)
-        {
+        for (; i < bytes.length && n < length; i++) {
             // 奇数位置，如3、5、7等，为UCS2编码中两个字节的第二个字节
-            if (i % 2 == 1)
-            {
+            if (i % 2 == 1) {
                 n++; // 在UCS2第二个字节时n加1
-            }
-            else
-            {
+            } else {
                 // 当UCS2编码的第一个字节不等于0时，该UCS2字符为汉字，一个汉字算两个字节
-                if (bytes[i] != 0)
-                {
+                if (bytes[i] != 0) {
                     n++;
                 }
             }
@@ -152,9 +144,6 @@ public final class StringUtil extends StringUtils {
 
         return new String(bytes, 0, i, "Unicode");
     }
-
-
-
 
 
     /**
@@ -805,12 +794,12 @@ public final class StringUtil extends StringUtils {
     }
 
 
-
     /**
      * 获取第一个括号对应右括号的索引以及包含括号的个数,向后匹配
+     *
      * @param str
      * @param bracketL 支持：( OR [ OR {
-     * @param bool 是否将传入的字符串全部匹配完成,若不需要则在匹配到第一个括号匹配完成时结束
+     * @param bool     是否将传入的字符串全部匹配完成,若不需要则在匹配到第一个括号匹配完成时结束
      * @return int[0]:匹配括号的个数,int[1]:第一个括号对应右括号的索引;若无匹配括号返回{0,-1};若有其中一个不成对则返回{-1,index}
      */
     public static int[] getBracketsMatch(String str, String bracketL, boolean bool) {

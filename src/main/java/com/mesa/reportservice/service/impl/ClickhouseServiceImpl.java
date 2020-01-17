@@ -1,13 +1,14 @@
-package com.mesa.reportservice.service;
+package com.mesa.reportservice.service.impl;
 
 import com.mesa.reportservice.bean.HttpResult;
+import com.mesa.reportservice.service.ClickhouseService;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.Map;
  */
 
 @Service
-public class HttpAPIService {
+public class ClickhouseServiceImpl implements ClickhouseService {
 
     @Autowired
     private CloseableHttpClient httpClient;
@@ -35,6 +36,7 @@ public class HttpAPIService {
      * @return
      * @throws Exception
      */
+    @Override
     public String doGet(String url) throws Exception {
         // 声明 http get 请求
         HttpGet httpGet = new HttpGet(url);
@@ -63,6 +65,7 @@ public class HttpAPIService {
      * @return
      * @throws Exception
      */
+    @Override
     public String doGet(String url, Map<String, Object> map) throws Exception {
         URIBuilder uriBuilder = new URIBuilder(url);
 
@@ -86,21 +89,69 @@ public class HttpAPIService {
      * @return
      * @throws Exception
      */
-    public HttpResult doPost(String url, String json) throws Exception {
+    @Override
+    public HttpResult sendQueryForPost(String url) throws Exception {
         // 声明httpPost请求
         HttpPost httpPost = new HttpPost(url);
         // 加入配置信息
         httpPost.setConfig(config);
         //  httpPost.setHeader("Accept","application/json");
         // 判断map是否为空，不为空则进行遍历，封装from表单对象
-        if (!json.equals("") && !json.isEmpty()) {
+
+   /*     if (!json.equals("") && !json.isEmpty()) {
 
 
             StringEntity s = new StringEntity(json.toString());
             s.setContentEncoding("UTF-8");
             s.setContentType("application/json");//发送json数据需要设置contentType
             httpPost.setEntity(s);
-        }
+        }*/
+
+
+        /*if (map != null) {
+            List<NameValuePair> list = new ArrayList<NameValuePair>();
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                list.add(new BasicNameValuePair(entry.getKey(), entry.getValue().toString()));
+            }
+            // 构造from表单对象
+            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(list, "UTF-8");
+
+            // 把表单放到post里
+            httpPost.setEntity(urlEncodedFormEntity);
+        }*/
+
+        // 发起请求
+        CloseableHttpResponse response = this.httpClient.execute(httpPost);
+
+        HttpResult rs = new HttpResult(response.getStatusLine().getStatusCode(), EntityUtils.toString(
+                response.getEntity(), "UTF-8"));
+
+
+        //Thread.sleep(120);
+        return rs;
+    }
+
+    @Override
+    public HttpResult QuerySystemForPost(String url) throws Exception {
+        // 声明httpPost请求
+        HttpPost httpPost = new HttpPost(url);
+        // 加入配置信息
+        httpPost.setConfig(config);
+        //  httpPost.setHeader("Accept","application/json");
+        // 判断map是否为空，不为空则进行遍历，封装from表单对象
+//        httpPost.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 1000);
+
+
+   /*     if (!json.equals("") && !json.isEmpty()) {
+
+
+            StringEntity s = new StringEntity(json.toString());
+            s.setContentEncoding("UTF-8");
+            s.setContentType("application/json");//发送json数据需要设置contentType
+            httpPost.setEntity(s);
+        }*/
+
+
         /*if (map != null) {
             List<NameValuePair> list = new ArrayList<NameValuePair>();
             for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -131,7 +182,5 @@ public class HttpAPIService {
      * @return
      * @throws Exception
      */
-    public HttpResult doPost(String url) throws Exception {
-        return this.doPost(url, "");
-    }
+
 }

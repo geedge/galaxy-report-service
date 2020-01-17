@@ -1,4 +1,4 @@
-package com.mesa.reportservice.util;
+package com.mesa.reportservice.configuration;
 
 import com.mesa.reportservice.bean.JobEntity;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @ConfigurationProperties(prefix = "globle")
-public class ConfigUtil {
+public class GlobelConfig {
 
 
     // public static ExecutorService pool = Executors.newFixedThreadPool(30);
@@ -25,12 +25,12 @@ public class ConfigUtil {
 
 
     public void setCk_timeout(int ck_timeout) {
-        ConfigUtil.ck_timeout = ck_timeout;
+        GlobelConfig.ck_timeout = ck_timeout;
     }
 
 
     public void setJob_thread(int job_thread) {
-        ConfigUtil.job_thread = job_thread;
+        GlobelConfig.job_thread = job_thread;
     }
 
 
