@@ -17,7 +17,7 @@ public interface MysqlService {
 
     int updateProcesses(JobEntity job);
 
-    int updateStatue(JobEntity job);
+    int updateStatue(JobEntity job) ;
 
 
 }

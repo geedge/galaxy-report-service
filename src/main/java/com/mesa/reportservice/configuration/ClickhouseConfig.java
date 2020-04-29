@@ -19,6 +19,7 @@ public class ClickhouseConfig {
     private static String task_user;
     private static String task_user_password;
     private static String log_ip;
+    private static String gateway_ip;
     // private static String log_database;
     private static String log_user;
     private static String log_user_password;
@@ -90,6 +91,27 @@ public class ClickhouseConfig {
         }
 
         return killsql;
+    }
+
+    public static String getFormatUrl(String sql) {
+
+        String formaturl = "http://" + gateway_ip.trim() + "/?option=syntax-check"+ "&query=";
+
+        try {
+
+            sql = URLEncoder.encode(sql, "utf8");
+            sql= sql.replaceAll("\\+", "%20");
+            formaturl = formaturl + sql;
+        } catch (UnsupportedEncodingException e) {
+            Logs.error(e.toString());
+
+        }
+
+        return formaturl;
+    }
+
+    public  void setGateway_ip(String gateway_ip) {
+        ClickhouseConfig.gateway_ip = gateway_ip;
     }
 
     public void setTask_ip(String task_ip) {

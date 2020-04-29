@@ -197,54 +197,59 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
      */
     public JobEntity getQueryLogMessage(JobEntity job) {
 
-        String finishurl = ClickhouseConfig.getFinishUrl(job.getQuery_id());
-        HttpResult num = new HttpResult();
-        int j = 0;
-        do {
-            try {
-                //ck默认最慢同步时间7500ms，循环三次
-                Thread.sleep(3000);
-                num = cs.sendQueryForPost(finishurl);
-                if (num.getCode() == 200 && !num.getBody().isEmpty() && !num.getBody().equals("")) {
+        if (job.getStatus() != 4) {
+            String finishurl = ClickhouseConfig.getFinishUrl(job.getQuery_id());
+            HttpResult num = new HttpResult();
+            int j = 0;
+            do {
+                try {
+                    //ck默认最慢同步时间7500ms，循环三次
+                    Thread.sleep(3000);
+                    num = cs.sendQueryForPost(finishurl);
+                    if (num.getCode() == 200 && !num.getBody().isEmpty() && !num.getBody().equals("")) {
 
-                    Map mapresult = JSON.parseObject(num.getBody());
-                    int type = Integer.parseInt(mapresult.get("type").toString());
-                    Logs.debug("type" + type);
-                    switch (type) {
-                        case 2:
-                            job.setStatus(type);
-                            job.setExcuteDetail("SUCCESS");
-                            job.setQuery_duration_ms(mapresult.get("query_duration_ms").toString());
-                            job.setMemory_usage(mapresult.get("memory_usage").toString());
-                            job.setExcuteRow(Long.parseLong(mapresult.get("read_rows").toString()));
-                            break;
-                        case 3:
-                            job.setStatus(type);
-                            job.setExcuteDetail("SQL Syntax Error" + mapresult.get("exception").toString());
-                            // job.setQuerySql(mapresult.get("query").toString());
-                            break;
-                        case 4:
-                            job.setStatus(type);
-                            job.setExcuteDetail("SQL Execution Error " + mapresult.get("exception").toString());
-                            //  job.setQuerySql(mapresult.get("query").toString());
-                            break;
-                        default:
-                            break;
+                        Map mapresult = JSON.parseObject(num.getBody());
+                        int type = Integer.parseInt(mapresult.get("type").toString());
+                        Logs.debug("type" + type);
+                        switch (type) {
+                            case 2:
+                                job.setStatus(type);
+                                job.setExcuteDetail("SUCCESS");
+                                job.setQuery_duration_ms(mapresult.get("query_duration_ms").toString());
+                                job.setMemory_usage(mapresult.get("memory_usage").toString());
+                                job.setExcuteRow(Long.parseLong(mapresult.get("read_rows").toString()));
+                                break;
+                            case 3:
+                                job.setStatus(type);
+                                job.setExcuteDetail("SQL Syntax Error:" + mapresult.get("exception").toString());
+                                // job.setQuerySql(mapresult.get("query").toString());
+                                break;
+                            case 4:
+                                job.setStatus(type);
+                                job.setExcuteDetail("SQL Execution Error:" + mapresult.get("exception").toString());
+                                //  job.setQuerySql(mapresult.get("query").toString());
+                                break;
+                            default:
+                                break;
+                        }
+                    } else {
+                        job.setStatus(6);
+                        if(job.getExcuteDetail().equals("")){
+                            job.setExcuteDetail("Other ERROR ");
+                        }
+
                     }
-                } else {
+                } catch (Exception e) {
                     job.setStatus(6);
-                    job.setExcuteDetail("Other ERROR");
-
+                    job.setExcuteDetail("Other ERROR: "+e.toString());
+                    Logs.error("获取querylogmessage失败");
                 }
-            } catch (Exception e) {
-                job.setStatus(6);
-                job.setExcuteDetail("Other ERROR");
-                Logs.error("获取querylogmessage失败");
+                j--;
             }
-            j--;
+            while (job.getStatus() == 6 && j > 0);
+            return job;
         }
-        while (job.getStatus() == 6 && j > 0);
+
         return job;
     }
-
 }

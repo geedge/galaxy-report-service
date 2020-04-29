@@ -4,6 +4,8 @@ import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.mapper.ReportResultMapper;
 import com.mesa.reportservice.service.MysqlService;
 import com.mesa.reportservice.util.DateUtil;
+import com.mesa.reportservice.util.Logs;
+import com.mesa.reportservice.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +34,12 @@ public class MysqlServiceImpl implements MysqlService {
     public List<JobEntity> getJobTask(int rows) {
 
 
-            String current_time = DateUtil.getDate();
-            HashMap map = new HashMap();
-            map.put("endtime", current_time);
-            map.put("rows", rows);
+        String current_time = DateUtil.getDate();
+        HashMap map = new HashMap();
+        map.put("endtime", current_time);
+        map.put("rows", rows);
 
-            return rrm.getJobTask(map);
+        return rrm.getJobTask(map);
 
     }
 
@@ -60,6 +62,13 @@ public class MysqlServiceImpl implements MysqlService {
         String sDate = formatter.format(currentTime);
         java.sql.Timestamp nowTime = java.sql.Timestamp.valueOf(sDate);
         job.setOpTime(sDate);
+       /* if (job.getExcuteDetail().length() > 500) {
+            try {
+                job.setExcuteDetail(StringUtil.bSubstring(job.getExcuteDetail(), 500));
+            } catch (Exception e) {
+                Logs.error(e.toString());
+            }
+        }*/
         return rrm.updateStatue(job);
     }
 }

@@ -39,15 +39,14 @@ public class JobEntity implements Cloneable {
 
     private String query_duration_ms;
 
-    private long read_rows;
+    private Integer resultRows;
+
 
     private String memory_usage;
 
     private String result;
 
     private int excute_status;
-
-    private String issued_time;
 
 
     public Integer getResultId() {
@@ -186,12 +185,12 @@ public class JobEntity implements Cloneable {
         this.query_duration_ms = query_duration_ms;
     }
 
-    public long getRead_rows() {
-        return read_rows;
+    public Integer getResultRows() {
+        return resultRows;
     }
 
-    public void setRead_rows(long read_rows) {
-        this.read_rows = read_rows;
+    public void setResultRows(Integer resultRows) {
+        this.resultRows = resultRows;
     }
 
     public String getMemory_usage() {
@@ -218,13 +217,6 @@ public class JobEntity implements Cloneable {
         this.excute_status = excute_status;
     }
 
-    public String getIssued_time() {
-        return issued_time;
-    }
-
-    public void setIssued_time(String issued_time) {
-        this.issued_time = issued_time;
-    }
 
 
     @Override

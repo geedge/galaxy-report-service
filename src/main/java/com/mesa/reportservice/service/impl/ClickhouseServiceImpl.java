@@ -85,7 +85,6 @@ public class ClickhouseServiceImpl implements ClickhouseService {
      * 带参数的post请求
      *
      * @param url
-     * @param json
      * @return
      * @throws Exception
      */
