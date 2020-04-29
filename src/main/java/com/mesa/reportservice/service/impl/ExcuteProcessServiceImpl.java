@@ -85,11 +85,11 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                                     while (number != 1 && z >= 0);
                                     Logs.info("success save to hbase queryid=" + je.getQuery_id() + " sql=" + je.getQuerySql());
                                 } else {
-                                    updateErrorMessage(je.getResultId(), 5, "Write To HBase Error");
+                                    updateErrorMessage(je.getResultId(), 5, "Write Data Error");
                                     Logs.error("save hbase error" + hr.getBody());
                                 }
                             } catch (Exception e) {
-                                updateErrorMessage(je.getResultId(), 6, "Result Write To Mysql Error");
+                                updateErrorMessage(je.getResultId(), 6, "Result Write To Database Error");
                                 Logs.error("save hbase error queryid=" + je.getResultId() + e.toString());
 
                             } finally {

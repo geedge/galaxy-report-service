@@ -13,14 +13,13 @@
     <result property="excuteProcess" column="excute_process"/>
     <result property="excuteDetail" column="excute_detail"/>
     <result property="opTime" column="op_time"/>
-    <result property="chartType" column="chart_type"/>
     <result property="issuedTime" column="issued_time"/>
     <result property="resultRows" column="result_rows"/>
 
   </resultMap>
   <sql id="Base_Column_List" >
     result_id, result_name, DATE_FORMAT(start_time,'%Y-%m-%d %H:%i:%s') as start_time,DATE_FORMAT(end_time,'%Y-%m-%d %H:%i:%s') as end_time, query_sql, status, excute_time,
-    excute_row, excute_process, excute_detail, is_send_notice,DATE_FORMAT(op_time,'%Y-%m-%d %H:%i:%s') as op_time, chart_type,DATE_FORMAT(issued_time,'%Y-%m-%d %H:%i:%s') as issued_time,result_rows
+    excute_row, excute_process, excute_detail, is_send_notice,DATE_FORMAT(op_time,'%Y-%m-%d %H:%i:%s') as op_time,DATE_FORMAT(issued_time,'%Y-%m-%d %H:%i:%s') as issued_time,result_rows
   </sql>
   <select id="getJobForExcute" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 

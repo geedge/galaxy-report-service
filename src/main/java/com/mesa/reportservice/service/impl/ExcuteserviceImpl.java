@@ -9,7 +9,6 @@ import com.mesa.reportservice.service.ExcuteService;
 import com.mesa.reportservice.service.FormatService;
 import com.mesa.reportservice.service.MysqlService;
 import com.mesa.reportservice.configuration.GlobelConfig;
-import com.mesa.reportservice.util.FormatSqlUtil;
 import com.mesa.reportservice.util.Logs;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
