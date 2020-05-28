@@ -9,5 +9,5 @@ import java.util.List;
  */
 public interface ExcuteProcessService {
 
-    void getTaskProcess(List<JobEntity> joblist);
+    void getTaskProcess(JobEntity job);
 }

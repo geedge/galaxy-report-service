@@ -1,6 +1,7 @@
 package com.mesa.reportservice.controller;
 
 import com.mesa.reportservice.bean.JobEntity;
+import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.service.ExcuteProcessService;
 import com.mesa.reportservice.service.MysqlService;
 import com.mesa.reportservice.service.ZkService;
@@ -10,6 +11,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+
+import static com.mesa.reportservice.configuration.GlobelConfig.*;
 
 /**
  * @author wk1
@@ -21,6 +25,7 @@ public class ScheduledResultController {
 
     @Autowired
     private MysqlService ms;
+
     @Autowired
     private ExcuteProcessService eps;
     @Autowired
@@ -29,9 +34,11 @@ public class ScheduledResultController {
     @Scheduled(cron = "${scan.result.scheduled.plan}")
     public void getExcuteResult() {
         if (zs.isMaster()) {
-            List<JobEntity> joblist = ms.getJobForExcute();
-            eps.getTaskProcess(joblist);
 
+            List<JobEntity> joblist = ms.getJobForExcute();
+            for(JobEntity jobEntity:joblist) {
+                eps.getTaskProcess(jobEntity);
+            }
         }
     }
 

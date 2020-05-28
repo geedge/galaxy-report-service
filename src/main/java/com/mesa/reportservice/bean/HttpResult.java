@@ -7,6 +7,7 @@ public class HttpResult {
 
     private int code;
     private String body;
+    private byte[] bodybyte;
 
     public HttpResult(int code, String body) {
 
@@ -16,6 +17,14 @@ public class HttpResult {
 
     public HttpResult() {
 
+    }
+
+    public byte[] getBodybyte() {
+        return bodybyte;
+    }
+
+    public void setBodybyte(byte[] bodybyte) {
+        this.bodybyte = bodybyte;
     }
 
     public int getCode() {

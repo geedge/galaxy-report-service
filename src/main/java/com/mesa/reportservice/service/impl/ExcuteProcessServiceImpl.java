@@ -5,17 +5,16 @@ import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.configuration.ClickhouseConfig;
 import com.mesa.reportservice.configuration.GlobelConfig;
-import com.mesa.reportservice.configuration.HbaseConfig;
 import com.mesa.reportservice.service.ClickhouseService;
 import com.mesa.reportservice.service.ExcuteProcessService;
 import com.mesa.reportservice.service.HbaseService;
 import com.mesa.reportservice.service.MysqlService;
-import com.mesa.reportservice.util.*;
+import com.mesa.reportservice.util.Logs;
+import com.mesa.reportservice.util.StringUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,44 +33,46 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     private HbaseService hs;
 
     @Override
-    public void getTaskProcess(List<JobEntity> joblist) {
+    public void getTaskProcess(JobEntity jobEntity) {
 
         try {
-            for (JobEntity jk : joblist) {
-                String sql = jk.getQuerySql().trim();
-                String queryid = DigestUtils.md5Hex(jk.getResultId() + sql);
-                //程序异常停止重启后kill正在进行的查询，更新数据库状态重新执行
-                if (!GlobelConfig.mapresult.containsKey(queryid)) {
-                   String killurl = ClickhouseConfig.getKillUrl(queryid);
-                    try {
-                        Logs.info("startkill++++++"+queryid);
+            String sql = jobEntity.getQuerySql().trim();
+            String queryid = DigestUtils.md5Hex(jobEntity.getResultId() + sql);
+            jobEntity.setQuery_id(queryid);
+            //程序异常停止重启后kill正在进行的查询，更新数据库状态重新执行
+            if (!GlobelConfig.mapresult.containsKey(queryid)) {
+                String killurl = ClickhouseConfig.getKillUrl(queryid);
+                try {
+                    Logs.info("startkill++++++" + queryid);
 
-                        cs.QuerySystemForPost(killurl);
-                        Logs.info("endkill======="+queryid);
-                    } catch (Exception e) {
-                        Logs.error(e.toString());
-                    }
-                    updateErrorMessage(jk.getResultId(), 0, "Re Execution");
+                    cs.QuerySystemForPost(killurl);
+                    Logs.info("endkill=======" + queryid);
+
+                } catch (Exception e) {
+                    Logs.error(e.toString());
                 }
-                else {
-                    JobEntity je = (JobEntity) GlobelConfig.mapresult.get(queryid).clone();
-                    Logs.info("startget++++++" + queryid);
+                updateErrorMessage(jobEntity.getResultId(), 0, "Re Execution");
 
-                    switch (je.getStatus()) {
-                        case 1:
-                            je = getProcessMessage(je);
+            } else {
 
-                            if (je.getExcuteRow() != 0 || je.getExcuteTime() != 0) {
-                                ms.updateProcesses(je);
-                            }
-                            break;
-                        case 2:
-                            try {
+                JobEntity je =GlobelConfig.mapresult.get(queryid);
+                Logs.info("startget++++++" + je.getQuery_id());
+
+                if (je.getStatus() == 1) {
+                    je = getProcessMessage(je);
+                    if (je.getExcuteRow() != 0 || je.getExcuteTime() != 0) {
+                        ms.updateProcesses(je);
+                    }
+                } else {
+
+                    try {
+                        switch (je.getExcute_status()) {
+
+                            case 2:
+
                                 je = getQueryLogMessage(je);
-                                HttpResult hr = saveToHbase(je);
-
-                                if (hr.getCode() == 200) {
-
+                                Boolean isok = saveToHbase(je);
+                                if (isok) {
                                     je.setExcuteDetail("SUCCESS");
                                     je.setExcuteTime(0);
                                     je.setExcuteProcess(100);
@@ -86,28 +87,34 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                                     Logs.info("success save to hbase queryid=" + je.getQuery_id() + " sql=" + je.getQuerySql());
                                 } else {
                                     updateErrorMessage(je.getResultId(), 5, "Write Data Error");
-                                    Logs.error("save hbase error" + hr.getBody());
+                                    Logs.error("save hbase error");
                                 }
-                            } catch (Exception e) {
-                                updateErrorMessage(je.getResultId(), 6, "Result Write To Database Error");
-                                Logs.error("save hbase error queryid=" + je.getResultId() + e.toString());
 
-                            } finally {
-                                GlobelConfig.mapresult.remove(queryid);
-                            }
-                            break;
 
-                        default:
-                            try {
+                                break;
+
+                            case 6:
+                                updateErrorMessage(je.getResultId(), 6, "unknow error");
+                                Logs.error("unknow error  resultid ="+je.getResultId()+" excutesql=" + je.getQuerySql() +" formatsql="+je.getFormatSql());
+                                break;
+                            default:
                                 je = getQueryLogMessage(je);
                                 updateErrorMessage(je.getResultId(), je.getStatus(), je.getExcuteDetail());
-                            } catch (Exception e) {
-                                Logs.error(e.toString());
-                            } finally {
-                                GlobelConfig.mapresult.remove(queryid);
-                            }
+                                Logs.error("excute error  resultid ="+je.getResultId()+" excutesql=" + je.getQuerySql() +" formatsql="+je.getFormatSql());
+
+
+                        }
+                    } catch (Exception e) {
+                        // updateErrorMessage(je.getResultId(), 6, "Result Write To Database Error");
+                        Logs.error("save database error queryid=" + je.getResultId() + e.toString());
+
+                    } finally {
+                        GlobelConfig.mapresult.remove(je.getQuery_id());
                     }
+
                 }
+
+
             }
         } catch (Exception e) {
             Logs.error(e.toString());
@@ -141,7 +148,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
         String queryProccess = ClickhouseConfig.getProcessUrl(job.getQuery_id());
         HttpResult hr = null;
         try {
-            hr = cs.sendQueryForPost(queryProccess);
+            hr = cs.QuerySystemForPost(queryProccess);
             String rs = hr.getBody().trim();
             if (!rs.isEmpty() && !rs.equals("")) {
                 //JobEntity job = new JobEntity();
@@ -171,17 +178,14 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     /**
      * 结果存入hbase
      */
-    public HttpResult saveToHbase(JobEntity entity) {
+    public Boolean saveToHbase(JobEntity entity) {
 
         int k = 3;
-        HttpResult hr = new HttpResult();
-
+        Boolean isok = false;
         do {
             try {
-                String hbasejson = HbaseConfig.getHbaseJson(entity.getQuery_id(), entity.getResult(), entity);
-                String hbaseurl = HbaseConfig.getHbasePostUrl();
                 k--;
-                hr = hs.doPost(hbaseurl, hbasejson);
+                isok = hs.put(entity);
                 break;
             } catch (Exception e) {
                 Logs.error("写入hbase报错重试次数" + (3 - k) + e.toString());
@@ -189,7 +193,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
             }
         }
         while (k >= 0);
-        return hr;
+        return isok;
     }
 
     /**
@@ -205,7 +209,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                 try {
                     //ck默认最慢同步时间7500ms，循环三次
                     Thread.sleep(3000);
-                    num = cs.sendQueryForPost(finishurl);
+                    num = cs.QuerySystemForPost(finishurl);
                     if (num.getCode() == 200 && !num.getBody().isEmpty() && !num.getBody().equals("")) {
 
                         Map mapresult = JSON.parseObject(num.getBody());
@@ -218,10 +222,12 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                                 job.setQuery_duration_ms(mapresult.get("query_duration_ms").toString());
                                 job.setMemory_usage(mapresult.get("memory_usage").toString());
                                 job.setExcuteRow(Long.parseLong(mapresult.get("read_rows").toString()));
+                                job.setResultRows(Integer.valueOf(mapresult.get("result_rows").toString()));
                                 break;
                             case 3:
                                 job.setStatus(type);
                                 job.setExcuteDetail("SQL Syntax Error:" + mapresult.get("exception").toString());
+
                                 // job.setQuerySql(mapresult.get("query").toString());
                                 break;
                             case 4:
@@ -234,14 +240,12 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                         }
                     } else {
                         job.setStatus(6);
-                        if(job.getExcuteDetail().equals("")){
-                            job.setExcuteDetail("Other ERROR ");
-                        }
+                        job.setExcuteDetail("Other ERROR ");
 
                     }
                 } catch (Exception e) {
                     job.setStatus(6);
-                    job.setExcuteDetail("Other ERROR: "+e.toString());
+                    job.setExcuteDetail("Other ERROR: " + e.toString());
                     Logs.error("获取querylogmessage失败");
                 }
                 j--;

@@ -1,7 +1,14 @@
 package com.mesa.reportservice.service.impl;
 
 import com.mesa.reportservice.bean.HttpResult;
+import com.mesa.reportservice.bean.JobEntity;
+import com.mesa.reportservice.configuration.HbaseProperties;
 import com.mesa.reportservice.service.HbaseService;
+import com.mesa.reportservice.util.Logs;
+import com.mesa.reportservice.util.ziputil;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,6 +20,7 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -23,119 +31,39 @@ import java.util.Map;
 public class HbaseServiceImpl implements HbaseService {
 
     @Autowired
-    private CloseableHttpClient httpClient;
+    private Connection hbaseConnection;
 
     @Autowired
-    private RequestConfig config;
+    private HbaseProperties hbproperties;
 
-
-    /**
-     * 不带参数的get请求，如果状态码为200，则返回body，如果不为200，则返回null
-     *
-     * @param url
-     * @return
-     * @throws Exception
-     */
     @Override
-    public String doGet(String url) throws Exception {
-        // 声明 http get 请求
-        HttpGet httpGet = new HttpGet(url);
-        httpGet.setHeader("Accept", "application/json");
-        // 装载配置信息
-        httpGet.setConfig(config);
-
-        // 发起请求
-        CloseableHttpResponse response = this.httpClient.execute(httpGet);
-
-        // 判断状态码是否为200
-        if (response.getStatusLine().getStatusCode() == 200) {
-            // 返回响应体的内容
-
-            return EntityUtils.toString(response.getEntity(), "UTF-8");
-        }
+    public Boolean put(JobEntity jobEntity) throws Exception {
 
 
-        return null;
-    }
+        Boolean status = true;
+        try(Table table =hbaseConnection.getTable(TableName.valueOf(hbproperties.getTable()))) {
+            Put put = new Put(Bytes.toBytes(jobEntity.getQuery_id()));
+            put.addColumn(Bytes.toBytes("response"), Bytes.toBytes("result"), jobEntity.getResult());
+            put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("result_id"), Bytes.toBytes(jobEntity.getResultId()));
 
-    /**
-     * 带参数的get请求，如果状态码为200，则返回body，如果不为200，则返回null
-     *
-     * @param url
-     * @return
-     * @throws Exception
-     */
-    @Override
-    public String doGet(String url, Map<String, Object> map) throws Exception {
-        URIBuilder uriBuilder = new URIBuilder(url);
+            put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("excute_sql"), Bytes.toBytes(jobEntity.getQuerySql()));
+            put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("format_sql"), Bytes.toBytes(jobEntity.getFormatSql()));
 
-        if (map != null) {
-            // 遍历map,拼接请求参数
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                uriBuilder.setParameter(entry.getKey(), entry.getValue().toString());
+            if(jobEntity.getExcuteRow()!=null){
+                put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("read_rows"), Bytes.toBytes(jobEntity.getExcuteRow()));
             }
-        }
-
-        // 调用不带参数的get请求
-        return this.doGet(uriBuilder.build().toString());
-
-    }
-
-    /**
-     * 带参数的post请求
-     *
-     * @param url
-     * @param json
-     * @return
-     * @throws Exception
-     */
-    @Override
-    public HttpResult doPost(String url, String json) throws Exception {
-        // 声明httpPost请求
-        HttpPost httpPost = new HttpPost(url);
-        // 加入配置信息
-        httpPost.setConfig(config);
-        //  httpPost.setHeader("Accept","application/json");
-        // 判断map是否为空，不为空则进行遍历，封装from表单对象
-        if (!json.equals("") && !json.isEmpty()) {
-
-
-            StringEntity s = new StringEntity(json.toString());
-            s.setContentEncoding("UTF-8");
-            s.setContentType("application/json");//发送json数据需要设置contentType
-            httpPost.setEntity(s);
-        }
-        /*if (map != null) {
-            List<NameValuePair> list = new ArrayList<NameValuePair>();
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                list.add(new BasicNameValuePair(entry.getKey(), entry.getValue().toString()));
+            if(jobEntity.getQuery_duration_ms()!=null){
+            put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("query_duration_ms"), Bytes.toBytes(jobEntity.getQuery_duration_ms()));
             }
-            // 构造from表单对象
-            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(list, "UTF-8");
-
-            // 把表单放到post里
-            httpPost.setEntity(urlEncodedFormEntity);
-        }*/
-
-        // 发起请求
-        CloseableHttpResponse response = this.httpClient.execute(httpPost);
-
-        HttpResult rs = new HttpResult(response.getStatusLine().getStatusCode(), EntityUtils.toString(
-                response.getEntity(), "UTF-8"));
-
-
-        //Thread.sleep(120);
-        return rs;
+            if(jobEntity.getMemory_usage()!=null){
+                put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("memory_usage"), Bytes.toBytes(jobEntity.getMemory_usage()));
+            }
+            table.put(put);
+        }catch(Exception e) {
+            status =false;
+            Logs.error(e.toString());
+        }
+        return status;
     }
 
-    /**
-     * 不带参数post请求
-     *
-     * @param url
-     * @return
-     * @throws Exception
-     */
-    public HttpResult doPost(String url) throws Exception {
-        return this.doPost(url, "");
-    }
 }

@@ -7,7 +7,7 @@ COPY config config
 ARG JAR_FILE
 COPY ${JAR_FILE} galaxy-report-service.jar
 #dockercompose set JAVA_OPTS
-ENV JAVA_OPTS=" -Xms1024m -Xmx2048m "
+ENV JAVA_OPTS=" -Xms20480m -Xmx20480m "
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 #ENV TZ=Asia/Almaty
 #RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

@@ -39,14 +39,16 @@ public class JobEntity implements Cloneable {
 
     private String query_duration_ms;
 
-    private Integer resultRows;
+    private int resultRows;
 
 
     private String memory_usage;
 
-    private String result;
+    private byte[] result;
 
     private int excute_status;
+
+    private String formatSql;
 
 
     public Integer getResultId() {
@@ -185,13 +187,6 @@ public class JobEntity implements Cloneable {
         this.query_duration_ms = query_duration_ms;
     }
 
-    public Integer getResultRows() {
-        return resultRows;
-    }
-
-    public void setResultRows(Integer resultRows) {
-        this.resultRows = resultRows;
-    }
 
     public String getMemory_usage() {
         return memory_usage;
@@ -201,11 +196,11 @@ public class JobEntity implements Cloneable {
         this.memory_usage = memory_usage;
     }
 
-    public String getResult() {
+    public byte[] getResult() {
         return result;
     }
 
-    public void setResult(String result) {
+    public void setResult(byte[] result) {
         this.result = result;
     }
 
@@ -218,6 +213,21 @@ public class JobEntity implements Cloneable {
     }
 
 
+    public int getResultRows() {
+        return resultRows;
+    }
+
+    public void setResultRows(int resultRows) {
+        this.resultRows = resultRows;
+    }
+
+    public String getFormatSql() {
+        return formatSql;
+    }
+
+    public void setFormatSql(String formatSql) {
+        this.formatSql = formatSql;
+    }
 
     @Override
     public Object clone() {

@@ -1,6 +1,8 @@
 package com.mesa.reportservice.service;
 
 import com.mesa.reportservice.bean.HttpResult;
+import com.mesa.reportservice.bean.JobEntity;
+import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 
 import java.util.Map;
 
@@ -9,14 +11,7 @@ import java.util.Map;
  */
 public interface HbaseService {
 
-    String doGet(String url) throws Exception;
 
-
-    String doGet(String url, Map<String, Object> map) throws Exception;
-
-
-    HttpResult doPost(String url, String json) throws Exception;
-
-    HttpResult doPost(String url) throws Exception;
+    Boolean put(JobEntity jobEntity) throws Exception;
 
 }
