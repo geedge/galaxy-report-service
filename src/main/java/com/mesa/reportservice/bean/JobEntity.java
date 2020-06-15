@@ -44,12 +44,14 @@ public class JobEntity implements Cloneable {
 
     private String memory_usage;
 
-    private byte[] result;
+    private String result;
 
     private int excute_status;
 
     private String formatSql;
 
+
+    private int isValid;
 
     public Integer getResultId() {
         return resultId;
@@ -196,11 +198,11 @@ public class JobEntity implements Cloneable {
         this.memory_usage = memory_usage;
     }
 
-    public byte[] getResult() {
+    public String getResult() {
         return result;
     }
 
-    public void setResult(byte[] result) {
+    public void setResult(String result) {
         this.result = result;
     }
 
@@ -227,6 +229,15 @@ public class JobEntity implements Cloneable {
 
     public void setFormatSql(String formatSql) {
         this.formatSql = formatSql;
+    }
+
+
+    public int getIsValid() {
+        return isValid;
+    }
+
+    public void setIsValid(int isValid) {
+        this.isValid = isValid;
     }
 
     @Override

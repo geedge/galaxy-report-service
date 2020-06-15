@@ -10,6 +10,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -24,6 +25,7 @@ public class FormatServiceImpl implements FormatService {
     private CloseableHttpClient httpClient;
 
     @Autowired
+    @Qualifier("RequestShortConfig")
     private RequestConfig config;
 
     @Override

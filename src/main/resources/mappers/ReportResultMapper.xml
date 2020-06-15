@@ -15,11 +15,12 @@
     <result property="opTime" column="op_time"/>
     <result property="issuedTime" column="issued_time"/>
     <result property="resultRows" column="result_rows"/>
+    <result property="isValid" column="is_valid"/>
 
   </resultMap>
   <sql id="Base_Column_List" >
     result_id, result_name, DATE_FORMAT(start_time,'%Y-%m-%d %H:%i:%s') as start_time,DATE_FORMAT(end_time,'%Y-%m-%d %H:%i:%s') as end_time, query_sql, status, excute_time,
-    excute_row, excute_process, excute_detail, is_send_notice,DATE_FORMAT(op_time,'%Y-%m-%d %H:%i:%s') as op_time,DATE_FORMAT(issued_time,'%Y-%m-%d %H:%i:%s') as issued_time,result_rows
+    excute_row, excute_process, excute_detail, is_send_notice,DATE_FORMAT(op_time,'%Y-%m-%d %H:%i:%s') as op_time,DATE_FORMAT(issued_time,'%Y-%m-%d %H:%i:%s') as issued_time,result_rows,is_valid
   </sql>
   <select id="getJobForExcute" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
@@ -32,7 +33,7 @@
     select
     <include refid="Base_Column_List" />
     from report_result
-    where status = 0 and end_time &lt; #{endtime} order by end_time limit ${rows}
+    where status = 0 and is_valid = 1 and end_time &lt; #{endtime} order by end_time limit ${rows}
   </select>
 
   <update id="updateProcesses" parameterType="com.mesa.reportservice.bean.JobEntity" >

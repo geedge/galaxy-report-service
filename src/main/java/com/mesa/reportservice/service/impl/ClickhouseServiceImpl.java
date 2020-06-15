@@ -1,9 +1,12 @@
 package com.mesa.reportservice.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.service.ClickhouseService;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -11,8 +14,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Map;
 
 import static com.mesa.reportservice.util.GZIPUtils.compress;
@@ -29,8 +34,12 @@ public class ClickhouseServiceImpl implements ClickhouseService {
     private CloseableHttpClient httpClient;
 
     @Autowired
-    private RequestConfig config;
+    @Qualifier("RequestShortConfig")
+    private RequestConfig RequestshortConfig;
 
+    @Autowired
+    @Qualifier("RequestLongConfig")
+    private RequestConfig RequestLongConfig;
 
     /**
      * 不带参数的get请求，如果状态码为200，则返回body，如果不为200，则返回null
@@ -45,7 +54,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         HttpGet httpGet = new HttpGet(url);
         httpGet.setHeader("Accept", "application/json");
         // 装载配置信息
-        httpGet.setConfig(config);
+        httpGet.setConfig(RequestLongConfig);
 
         // 发起请求
         CloseableHttpResponse response = this.httpClient.execute(httpGet);
@@ -92,22 +101,19 @@ public class ClickhouseServiceImpl implements ClickhouseService {
      * @throws Exception
      */
     @Override
-    public HttpResult sendQueryForPost(String url) throws Exception,OutOfMemoryError{
+    public HttpResult sendQueryForGet(String url) throws Exception,OutOfMemoryError{
         // 声明httpPost请求
-        HttpPost httpPost = new HttpPost(url);
+        HttpGet httpGet = new HttpGet(url);
+
 
         // 加入配置信息
-        httpPost.setConfig(config);
+        httpGet.setConfig(RequestLongConfig);
 
-        CloseableHttpResponse response = this.httpClient.execute(httpPost);
+        CloseableHttpResponse response = this.httpClient.execute(httpGet);
 
         HttpResult rs = new HttpResult();
         rs.setCode(response.getStatusLine().getStatusCode());
-        rs.setBodybyte(EntityUtils.toByteArray(response.getEntity()));
-
-         /*byte[] bodybyte =snappyCompress(EntityUtils.toByteArray(response.getEntity()));
-        rs.setCode(response.getStatusLine().getStatusCode());
-        rs.setBodybyte(bodybyte);*/
+        rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
         return rs;
     }
 
@@ -115,21 +121,64 @@ public class ClickhouseServiceImpl implements ClickhouseService {
 
 
     @Override
-    public HttpResult QuerySystemForPost(String url) throws Exception {
+    public HttpResult QuerySystemForGet(String url) throws Exception {
         // 声明httpPost请求
-        HttpPost httpPost = new HttpPost(url);
+        HttpGet httpGet = new HttpGet(url);
         // 加入配置信息
-        httpPost.setConfig(config);
+        httpGet.setConfig(RequestshortConfig);
 
         // 发起请求
-        CloseableHttpResponse response = this.httpClient.execute(httpPost);
+        CloseableHttpResponse response = this.httpClient.execute(httpGet);
 
-        HttpResult rs = new HttpResult(response.getStatusLine().getStatusCode(), EntityUtils.toString(
-                response.getEntity(), "UTF-8"));
-
+        HttpResult rs = new HttpResult();
+        rs.setCode(response.getStatusLine().getStatusCode());
+        rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
 
         //Thread.sleep(120);
         return rs;
+    }
+
+
+    @Override
+    public HttpResult QuerySystemForDelete(String url) throws Exception {
+        // 声明httpPost请求
+        HttpDelete HttpDelete = new HttpDelete(url);
+        // 加入配置信息
+        HttpDelete.setConfig(RequestshortConfig);
+
+        // 发起请求
+        CloseableHttpResponse response = this.httpClient.execute(HttpDelete);
+
+        HttpResult rs = new HttpResult();
+        rs.setCode(response.getStatusLine().getStatusCode());
+        rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
+
+        //Thread.sleep(120);
+        return rs;
+    }
+
+    public CloseableHttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    public void setHttpClient(CloseableHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
+    public RequestConfig getRequestshortConfig() {
+        return RequestshortConfig;
+    }
+
+    public void setRequestshortConfig(RequestConfig requestshortConfig) {
+        RequestshortConfig = requestshortConfig;
+    }
+
+    public RequestConfig getRequestLongConfig() {
+        return RequestLongConfig;
+    }
+
+    public void setRequestLongConfig(RequestConfig requestLongConfig) {
+        RequestLongConfig = requestLongConfig;
     }
 
     /**

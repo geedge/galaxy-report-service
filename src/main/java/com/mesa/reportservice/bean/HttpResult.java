@@ -7,25 +7,15 @@ public class HttpResult {
 
     private int code;
     private String body;
-    private byte[] bodybyte;
+   // private byte[] bodybyte;
 
-    public HttpResult(int code, String body) {
 
-        this.code = code;
-        this.body = body;
-    }
 
     public HttpResult() {
 
     }
 
-    public byte[] getBodybyte() {
-        return bodybyte;
-    }
 
-    public void setBodybyte(byte[] bodybyte) {
-        this.bodybyte = bodybyte;
-    }
 
     public int getCode() {
         return code;

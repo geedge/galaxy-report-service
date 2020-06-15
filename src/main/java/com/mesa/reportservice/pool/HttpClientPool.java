@@ -29,6 +29,8 @@ public class HttpClientPool {
 
     private boolean staleConnectionCheckEnabled;
 
+    private Integer socketTimeoutShort;
+
 
     public void setMaxTotal(Integer maxTotal) {
         this.maxTotal = maxTotal;
@@ -52,6 +54,10 @@ public class HttpClientPool {
 
     public void setStaleConnectionCheckEnabled(boolean staleConnectionCheckEnabled) {
         this.staleConnectionCheckEnabled = staleConnectionCheckEnabled;
+    }
+
+    public void setSocketTimeoutShort(Integer socketTimeoutShort) {
+        this.socketTimeoutShort = socketTimeoutShort;
     }
 
     /**
@@ -115,13 +121,23 @@ public class HttpClientPool {
                 .setStaleConnectionCheckEnabled(staleConnectionCheckEnabled);
     }
 
+
+
+    @Bean(name = "builderShort")
+    public RequestConfig.Builder getBuilderShort() {
+        RequestConfig.Builder builder = RequestConfig.custom();
+        return builder.setConnectTimeout(connectTimeout)
+                .setConnectionRequestTimeout(connectionRequestTimeout)
+                .setSocketTimeout(socketTimeoutShort)
+                .setStaleConnectionCheckEnabled(staleConnectionCheckEnabled);
+    }
     /**
      * 使用builder构建一个RequestConfig对象
      *
      * @param builder
      * @return
      */
-    @Bean
+    @Bean(name = "RequestLongConfig")
     public RequestConfig getRequestConfig(@Qualifier("builder") RequestConfig.Builder builder) {
         Logs.debug("httpclient  success");
         return builder.build();
@@ -134,7 +150,11 @@ public class HttpClientPool {
      * @Description Hbase连接池
      * @Date 2018年5月31日 下午10:22:06
      */
-
+    @Bean(name = "RequestShortConfig")
+    public RequestConfig getRequestShortConfig(@Qualifier("builderShort") RequestConfig.Builder builder) {
+        Logs.debug("httpclientshort  success");
+        return builder.build();
+    }
 
 }
 

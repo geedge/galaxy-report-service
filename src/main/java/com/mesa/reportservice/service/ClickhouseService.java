@@ -15,9 +15,14 @@ public interface ClickhouseService {
     String doGet(String url, Map<String, Object> map) throws Exception;
 
 
-    HttpResult sendQueryForPost(String url) throws Exception;
+    HttpResult sendQueryForGet(String url) throws Exception;
 
 
-    HttpResult QuerySystemForPost(String url) throws Exception;
+    HttpResult QuerySystemForGet(String url) throws Exception;
+
+
+    HttpResult QuerySystemForDelete(String url) throws Exception;
+
+
 
 }
