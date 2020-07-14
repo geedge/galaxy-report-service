@@ -39,8 +39,8 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
         try {
             String sql = jobEntity.getQuerySql().trim();
             sql = sql.replace("$exe_time", "toDateTime('" + jobEntity.getIssuedTime().trim() + "')");
-            sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
-            sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
+          //  sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
+          //  sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
             //job.setFormatSql(sql);
             String queryid = DigestUtils.md5Hex(jobEntity.getResultId() + sql);
             jobEntity.setQuery_id(queryid);
@@ -96,7 +96,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                                     Boolean isok = saveToHbase(je);
                                     if (isok) {
                                         je.setExcuteDetail("SUCCESS");
-                                        je.setExcuteTime(0);
+                                      //  je.setExcuteTime(0);
                                         je.setExcuteProcess(100);
                                         je.setStatus(2);
                                         int number = 0;
@@ -113,6 +113,10 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                                     }
                                     break;
 
+                                case 400001:
+                                    updateErrorMessage(je.getResultId(), 3, "Param Syntax Error");
+                                    Logs.error("Param Syntax Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql() );
+                                    break;
                                 case 400010:
                                     updateErrorMessage(je.getResultId(), 3, "SQL Syntax Error");
                                     Logs.error("SQL Syntax Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql() );
@@ -131,8 +135,8 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                                     break;
                                 default:
                                    // je = getQueryLogMessage(je);
-                                    updateErrorMessage(je.getResultId(), 8, je.getExcuteDetail());
-                                    Logs.error("unknow error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql() );
+                                    updateErrorMessage(je.getResultId(), 8, "system error");
+                                    Logs.error("system error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql() );
                             }
                         }
                     } catch (Exception e) {
@@ -178,29 +182,32 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
         try {
             hr = cs.QuerySystemForGet(queryProccess);
             String rs = hr.getBody().trim();
+            Map data = JSON.parseObject(rs);
+
             if (!rs.isEmpty() && !rs.equals("")) {
                 //JobEntity job = new JobEntity();
-                Map data = JSON.parseObject(rs);
                 List listdata = (List) data.get("data");
-                Map map = JSON.parseObject(JSON.toJSONString(listdata.get(0)));
-                float elapsed = Float.parseFloat(map.get("elapsed").toString());
-                long total_rows_approx = Long.parseLong(map.get("total_rows_approx").toString());
-                long read_rows = Long.parseLong(map.get("read_rows").toString());
-                int ftime = (int) (elapsed * total_rows_approx / read_rows);
+                if(listdata.size()>0) {
+                    Map map = JSON.parseObject(JSON.toJSONString(listdata.get(0)));
+                    //float elapsed = Float.parseFloat(map.get("elapsed").toString());
+                    long total_rows_approx = Long.parseLong(map.get("total_rows_approx").toString());
+                    long read_rows = Long.parseLong(map.get("read_rows").toString());
+
+               /* int ftime = (int) (elapsed * total_rows_approx / read_rows);
                 ftime = Math.round((ftime - elapsed) * 10 * 1000) / 10;
                 if (ftime <= 0) {
                     ftime = 1;
+                }*/
+                    //Logs.info("total_rows_approx" + total_rows_approx + "read_rows" + read_rows + "elapsed" + elapsed + "ftime" + ftime);
+                    double persent = (read_rows * 1.00 / total_rows_approx);
+                    int result = (int) (persent * 100);
+                    if (result > 98) {
+                        result = 98;
+                    }
+                    job.setExcuteRow(total_rows_approx);
+                    job.setExcuteProcess(result);
+                    // job.setExcuteTime(ftime);
                 }
-                //Logs.info("total_rows_approx" + total_rows_approx + "read_rows" + read_rows + "elapsed" + elapsed + "ftime" + ftime);
-                double persent = (read_rows * 1.00 / total_rows_approx);
-                int result = (int) (persent * 100);
-                if(result>98){
-                    result =98;
-                }
-                job.setExcuteRow(total_rows_approx);
-                job.setExcuteProcess(result);
-                job.setExcuteTime(ftime);
-
             }
         } catch (Exception e) {
             Logs.error(e.toString());
