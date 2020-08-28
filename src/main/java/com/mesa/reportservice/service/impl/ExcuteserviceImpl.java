@@ -10,7 +10,6 @@ import com.mesa.reportservice.service.ExcuteService;
 import com.mesa.reportservice.service.FormatService;
 import com.mesa.reportservice.service.MysqlService;
 import com.mesa.reportservice.configuration.GlobelConfig;
-import com.mesa.reportservice.util.Logs;
 import io.netty.channel.ConnectTimeoutException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.util.EntityUtils;
@@ -30,6 +29,7 @@ import static com.mesa.reportservice.configuration.ClickhouseConfig.getJobUrl;
  */
 @Service
 public class ExcuteserviceImpl implements ExcuteService {
+    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
 
     @Autowired
@@ -58,7 +58,7 @@ public class ExcuteserviceImpl implements ExcuteService {
             sql = fs.doFormat(formateUrl);
         } catch (Exception e) {
             sql="";
-            Logs.error(e.toString());
+            logger.error(e.toString());
         }
 
         if (sql.equals("ok") ||  sql.equals("")) {
@@ -77,7 +77,7 @@ public class ExcuteserviceImpl implements ExcuteService {
             //JobEntity jt = (JobEntity) job.clone();
             GlobelConfig.mapresult.put(queryid, job);
             ms.updateStatue(job);
-            Logs.info("execute queryid=" + queryid + " sql=" + sql + "mapresult size=" + GlobelConfig.mapresult.size());
+            logger.info("execute queryid=" + queryid + " sql=" + sql + "mapresult size=" + GlobelConfig.mapresult.size());
             String joburl = getJobUrl(job.getQuerySql(), job.getResultId());
             String killurl = ClickhouseConfig.getKillUrl(job.getQuery_id());
             HttpResult hr = new HttpResult();
@@ -86,14 +86,14 @@ public class ExcuteserviceImpl implements ExcuteService {
                 try {
                     hr = cs.sendQueryForGet(joburl);
 
-                    Logs.info("httpcode" + hr.getCode());
+                    logger.info("httpcode" + hr.getCode());
 
                     if (hr.getCode() != 200 ) {
 
                         k=0;
                         Map mapresult = JSON.parseObject(hr.getBody());
                         job.setExcute_status(Integer.parseInt(mapresult.get("code").toString()));
-                        Logs.error("excute sql Error ");
+                        logger.error("excute sql Error ");
 
                     } else {
 
@@ -108,7 +108,7 @@ public class ExcuteserviceImpl implements ExcuteService {
                         job.setExcuteTime(Math.round( Float.parseFloat(rows.get("elapsed").toString())));
 
                         job.setExcute_status(Integer.parseInt(mapresult.get("code").toString()));
-                        Logs.info("success queryid=" + queryid + " sql=" + sql);
+                        logger.info("success queryid=" + queryid + " sql=" + sql);
 
                     }
                 } catch (SocketTimeoutException e) {
@@ -117,10 +117,10 @@ public class ExcuteserviceImpl implements ExcuteService {
                     if(k==0) {
                         job.setExcute_status(500001);
                         job.setExcuteDetail("SQL Execution Error excute query time out");
-                        Logs.info("timeout queryid=" + queryid + " sql=" + sql);
+                        logger.info("timeout queryid=" + queryid + " sql=" + sql);
                     }
                     else{
-                        Logs.info("Socket warn " + e.toString() + "retry time " + (3 - k));
+                        logger.info("Socket warn " + e.toString() + "retry time " + (3 - k));
                     }
 
 
@@ -128,7 +128,7 @@ public class ExcuteserviceImpl implements ExcuteService {
 
                     job.setExcute_status(555999);
                     job.setExcuteDetail(e.toString());
-                    Logs.error("Unknow Error" + e.toString());
+                    logger.error("Unknow Error" + e.toString());
                     k=0;
 
                 }
@@ -136,20 +136,20 @@ public class ExcuteserviceImpl implements ExcuteService {
 
                     job.setExcute_status(555999);
                     job.setExcuteDetail("result too large");
-                    Logs.error("outofmemery Error" + e.toString());
+                    logger.error("outofmemery Error" + e.toString());
                     k=0;
                 }
                 catch (Exception e) {
                     job.setExcute_status(555999);
                     job.setExcuteDetail(e.toString());
-                    Logs.error("Unknow Error" + e.toString());
+                    logger.error("Unknow Error" + e.toString());
                     k=0;
                 }
 
                 try {
                     cs.QuerySystemForDelete(killurl);
                 } catch (Exception e) {
-                    Logs.error("Kill Query Error" + e.toString());
+                    logger.error("Kill Query Error" + e.toString());
                 }
             }
             while (k > 0);

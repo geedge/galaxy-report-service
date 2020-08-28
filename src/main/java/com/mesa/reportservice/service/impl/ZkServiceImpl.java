@@ -58,8 +58,8 @@ public class ZkServiceImpl implements ZkService {
                         return true;
 
                     } else {
+                        Logs.debug("不是主节点");
                         return false;
-
                     }
                 }
             } else {

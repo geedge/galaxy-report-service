@@ -6,6 +6,7 @@ import com.mesa.reportservice.service.ExcuteProcessService;
 import com.mesa.reportservice.service.MysqlService;
 import com.mesa.reportservice.service.ZkService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,9 @@ public class ScheduledResultController {
     @Autowired
     private ZkService zs;
 
+
+
+    @Async
     @Scheduled(cron = "${scan.result.scheduled.plan}")
     public void getExcuteResult() {
         if (zs.isMaster()) {

@@ -7,6 +7,7 @@ import com.mesa.reportservice.service.ZkService;
 import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.util.Logs;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,8 +22,8 @@ import java.util.concurrent.Executors;
 @Component
 @EnableScheduling
 public class ScheduledTaskController {
+    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
-    protected static ExecutorService pool = Executors.newFixedThreadPool(20);
     @Autowired
     private MysqlService ms;
     @Autowired
@@ -30,33 +31,29 @@ public class ScheduledTaskController {
     @Autowired
     private ZkService zs;
 
+    @Async
     @Scheduled(cron = "${scan.task.scheduled.plan}")
-    public void excuteSqlToCk() {
+    public void excuteSqlToCk() throws InterruptedException {
 
         if (zs.isMaster()) {
 
             int rows = GlobelConfig.job_thread- GlobelConfig.mapresult.size();
+            logger.info("row="+rows);
             if (rows>0) {
+                List<JobEntity> jobs = ms.getJobTask(1);
+                for (JobEntity job : jobs) {
+                    logger.debug("开始执行任务");
+                    es.excuteCkTask(job);
 
-                List<JobEntity> jobs = ms.getJobTask(rows);
-
-
-                for(JobEntity job :jobs) {
-
-                    Logs.debug("开始执行任务");
-
-                    pool.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            es.excuteCkTask(job);
-                        }
-                    });
                 }
-
-                } else {
-                    Logs.debug("无待执行任务");
+            }else {
+                logger.debug("无待执行任务");
                 }
             }
+            else{
+            logger.debug("zk 不是主节点");
+
+        }
         }
 
 
