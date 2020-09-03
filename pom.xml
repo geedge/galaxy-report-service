@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.mesa</groupId>
 	<artifactId>galaxy-report-service</artifactId>
-	<version>20.08.28</version>
+	<version>20.08.31</version>
 	<name>galaxy-report-service</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -52,7 +52,32 @@
 			<artifactId>hbase-client</artifactId>
 			<version>1.4.9</version>
 		</dependency>-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
@@ -186,7 +211,7 @@
 					<forceTags>true</forceTags>
 
 					<imageTags>
-						<imageTag>20.08.28</imageTag>
+						<imageTag>20.08.31</imageTag>
 					</imageTags>
 					<!--远程docker构建，供dockerfile使用-->
 					<dockerHost>http://192.168.40.153:2375</dockerHost>

@@ -239,7 +239,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     /**
      * 获取查询log中的信息
      */
-    public JobEntity getQueryLogMessage(JobEntity job) {
+  /*  public JobEntity getQueryLogMessage(JobEntity job) {
 
         if (job.getStatus() != 4) {
             String finishurl = ClickhouseConfig.getFinishUrl(job.getQuery_id());
@@ -248,7 +248,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
             do {
                 try {
                     //ck默认最慢同步时间7500ms，循环三次
-                    Thread.sleep(3000);
+                  //  Thread.sleep(3000);
                     num = cs.QuerySystemForGet(finishurl);
                     if (num.getCode() == 200 && !num.getBody().isEmpty() && !num.getBody().equals("")) {
 
@@ -295,5 +295,5 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
         }
 
         return job;
-    }
+    }*/
 }

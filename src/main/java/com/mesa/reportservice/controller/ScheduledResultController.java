@@ -24,6 +24,8 @@ import static com.mesa.reportservice.configuration.GlobelConfig.*;
 @EnableScheduling
 public class ScheduledResultController {
 
+    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+
     @Autowired
     private MysqlService ms;
 
@@ -34,15 +36,20 @@ public class ScheduledResultController {
 
 
 
-    @Async
+    @Async("resultExecutor")
     @Scheduled(cron = "${scan.result.scheduled.plan}")
     public void getExcuteResult() {
-        if (zs.isMaster()) {
-
-            List<JobEntity> joblist = ms.getJobForExcute();
-            for(JobEntity jobEntity:joblist) {
-                eps.getTaskProcess(jobEntity);
+        try {
+            if (zs.isMaster()) {
+                logger.info("开始查看结果");
+                List<JobEntity> joblist = ms.getJobForExcute();
+                for (JobEntity jobEntity : joblist) {
+                    eps.getTaskProcess(jobEntity);
+                }
             }
+        }
+        catch (Exception e){
+            logger.error(e.toString());
         }
     }
 

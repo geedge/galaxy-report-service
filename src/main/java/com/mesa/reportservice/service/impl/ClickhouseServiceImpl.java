@@ -40,6 +40,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
     @Autowired
     @Qualifier("RequestLongConfig")
     private RequestConfig RequestLongConfig;
+    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
     /**
      * 不带参数的get请求，如果状态码为200，则返回body，如果不为200，则返回null
@@ -51,23 +52,34 @@ public class ClickhouseServiceImpl implements ClickhouseService {
     @Override
     public String doGet(String url) throws Exception {
         // 声明 http get 请求
+
         HttpGet httpGet = new HttpGet(url);
         httpGet.setHeader("Accept", "application/json");
         // 装载配置信息
         httpGet.setConfig(RequestLongConfig);
 
+        try(CloseableHttpResponse response = this.httpClient.execute(httpGet)){
+            if (response.getStatusLine().getStatusCode() == 200) {
+                // 返回响应体的内容
+
+                return EntityUtils.toString(response.getEntity(), "UTF-8");
+            } else {
+                throw new Exception();
+
+            }
+        }
+        catch (Exception e){
+
+            logger.error(e.toString());
+            throw new Exception();
+
+        }
         // 发起请求
-        CloseableHttpResponse response = this.httpClient.execute(httpGet);
+
 
         // 判断状态码是否为200
-        if (response.getStatusLine().getStatusCode() == 200) {
-            // 返回响应体的内容
-
-            return EntityUtils.toString(response.getEntity(), "UTF-8");
-        }
 
 
-        return null;
     }
 
     /**
@@ -109,12 +121,17 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         // 加入配置信息
         httpGet.setConfig(RequestLongConfig);
 
-        CloseableHttpResponse response = this.httpClient.execute(httpGet);
+        try(CloseableHttpResponse response = this.httpClient.execute(httpGet) ){
+            HttpResult rs = new HttpResult();
+            rs.setCode(response.getStatusLine().getStatusCode());
+            rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
+            return rs;
 
-        HttpResult rs = new HttpResult();
-        rs.setCode(response.getStatusLine().getStatusCode());
-        rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
-        return rs;
+        }catch (Exception e){
+            logger.error(e.toString());
+            throw new Exception();
+        }
+
     }
 
 
@@ -128,14 +145,19 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         httpGet.setConfig(RequestshortConfig);
 
         // 发起请求
-        CloseableHttpResponse response = this.httpClient.execute(httpGet);
+        try(CloseableHttpResponse response = this.httpClient.execute(httpGet) ){
 
-        HttpResult rs = new HttpResult();
-        rs.setCode(response.getStatusLine().getStatusCode());
-        rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
+            HttpResult rs = new HttpResult();
+            rs.setCode(response.getStatusLine().getStatusCode());
+            rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
 
-        //Thread.sleep(120);
-        return rs;
+            //Thread.sleep(120);
+            return rs;
+
+    }catch (Exception e){
+        logger.error(e.toString());
+        throw new Exception();
+    }
     }
 
 
@@ -147,14 +169,20 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         HttpDelete.setConfig(RequestshortConfig);
 
         // 发起请求
-        CloseableHttpResponse response = this.httpClient.execute(HttpDelete);
+        try(CloseableHttpResponse response = this.httpClient.execute(HttpDelete)) {
 
-        HttpResult rs = new HttpResult();
-        rs.setCode(response.getStatusLine().getStatusCode());
-        rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
+            HttpResult rs = new HttpResult();
+            rs.setCode(response.getStatusLine().getStatusCode());
+            rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
 
-        //Thread.sleep(120);
-        return rs;
+            //Thread.sleep(120);
+            return rs;
+        }
+        catch (Exception e){
+        logger.error(e.toString());
+            throw new Exception();
+    }
+
     }
 
     public CloseableHttpClient getHttpClient() {

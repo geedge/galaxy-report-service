@@ -85,10 +85,9 @@ public class ExcuteserviceImpl implements ExcuteService {
             do {
                 try {
                     hr = cs.sendQueryForGet(joburl);
-
                     logger.info("httpcode" + hr.getCode());
 
-                    if (hr.getCode() != 200 ) {
+                    if (hr!=null &&hr.getCode() != 200 ) {
 
                         k=0;
                         Map mapresult = JSON.parseObject(hr.getBody());

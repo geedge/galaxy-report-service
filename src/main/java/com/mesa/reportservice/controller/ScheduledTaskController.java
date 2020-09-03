@@ -31,28 +31,32 @@ public class ScheduledTaskController {
     @Autowired
     private ZkService zs;
 
-    @Async
+    @Async("taskExecutor")
     @Scheduled(cron = "${scan.task.scheduled.plan}")
-    public void excuteSqlToCk() throws InterruptedException {
+    public void excuteSqlToCk()  {
 
-        if (zs.isMaster()) {
+        try {
+            if (zs.isMaster()) {
 
-            int rows = GlobelConfig.job_thread- GlobelConfig.mapresult.size();
-            logger.info("row="+rows);
-            if (rows>0) {
-                List<JobEntity> jobs = ms.getJobTask(1);
-                for (JobEntity job : jobs) {
-                    logger.debug("开始执行任务");
-                    es.excuteCkTask(job);
+                int rows = GlobelConfig.job_thread - GlobelConfig.mapresult.size();
+                logger.info("row=" + rows);
+                if (rows > 0) {
+                    List<JobEntity> jobs = ms.getJobTask(1);
+                    for (JobEntity job : jobs) {
+                        logger.info("开始执行任务");
+                        es.excuteCkTask(job);
 
+                    }
+                } else {
+                    logger.debug("无待执行任务");
                 }
-            }else {
-                logger.debug("无待执行任务");
-                }
+            } else {
+                logger.debug("zk 不是主节点");
+
             }
-            else{
-            logger.debug("zk 不是主节点");
-
+        }
+        catch (Exception e){
+            logger.error(e.toString());
         }
         }
 

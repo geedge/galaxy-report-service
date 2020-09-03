@@ -22,15 +22,15 @@ public class ExecutorConfig  {
     @Bean
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
+        executor.setCorePoolSize(2);
         executor.setMaxPoolSize(20);
         executor.initialize();
         return executor;
     }
     @Bean
     public Executor resultExecutor() {
-            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
         executor.setMaxPoolSize(20);
         executor.initialize();
         return executor;
