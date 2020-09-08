@@ -15,23 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @ConfigurationProperties(prefix = "globle")
 public class GlobelConfig {
 
-
-    // public static ExecutorService pool = Executors.newFixedThreadPool(30);
-    // public static int query_log_sleep;
-    //public static int loop_number;
     public static int job_thread;
-    public static int ck_timeout;
     public static Map<String, JobEntity> mapresult = new ConcurrentHashMap<>();
-
-
-    public void setCk_timeout(int ck_timeout) {
-        GlobelConfig.ck_timeout = ck_timeout;
-    }
-
-
     public void setJob_thread(int job_thread) {
         GlobelConfig.job_thread = job_thread;
     }
-
-
 }

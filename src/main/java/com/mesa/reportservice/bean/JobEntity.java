@@ -53,6 +53,8 @@ public class JobEntity implements Cloneable {
 
     private int isValid;
 
+    private long beginTime;
+
     public Integer getResultId() {
         return resultId;
     }
@@ -238,6 +240,14 @@ public class JobEntity implements Cloneable {
 
     public void setIsValid(int isValid) {
         this.isValid = isValid;
+    }
+
+    public long getBeginTime() {
+        return beginTime;
+    }
+
+    public void setBeginTime(long beginTime) {
+        this.beginTime = beginTime;
     }
 
     @Override

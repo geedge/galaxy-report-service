@@ -1,4 +1,4 @@
-package com.mesa.reportservice.pool;
+package com.mesa.reportservice.configuration;
 
 import com.mesa.reportservice.util.Logs;
 import org.apache.http.client.config.RequestConfig;
@@ -25,7 +25,7 @@ public class HttpClientPool {
 
     private Integer connectionRequestTimeout;
 
-    private Integer socketTimeout;
+    public static Integer socketTimeout;
 
     private boolean staleConnectionCheckEnabled;
 

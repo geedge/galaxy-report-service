@@ -62,13 +62,6 @@ public class MysqlServiceImpl implements MysqlService {
         String sDate = formatter.format(currentTime);
         java.sql.Timestamp nowTime = java.sql.Timestamp.valueOf(sDate);
         job.setOpTime(sDate);
-       /* if (job.getExcuteDetail().length() > 500) {
-            try {
-                job.setExcuteDetail(StringUtil.bSubstring(job.getExcuteDetail(), 500));
-            } catch (Exception e) {
-                Logs.error(e.toString());
-            }
-        }*/
         return rrm.updateStatue(job);
     }
 }

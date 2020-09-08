@@ -34,15 +34,9 @@ public class HbaseFactory {
             conf.set("hbase.zookeeper.quorum", hbproperties.getZookeeper_quorum());
             conf.set("hbase.zookeeper.property.clientPort", hbproperties.getZookeeper_property_clientPort());
             conf.set("hbase.zookeeper.znode.parent", hbproperties.getZookeeper_znode_parent());
-            // conf.set("hase.client.pause", client_pause);
             conf.set("hbase.client.retries.number", hbproperties.getClient_retries_number());
             conf.set("hbase.rpc.timeout", hbproperties.getRpc_timeout());
-            // conf.set("hbase.client.operation.timeout", client_operation_timeout);
-            // conf.set("hbase.client.scanner.timeout.period", client_scanner_timeout_period);
             conf.set("hbase.client.keyvalue.maxsize", "1024000000");
-            //conf.set("hbase.client.write.buffer", "20971520");
-
-
         }
 
         return conf;
@@ -63,44 +57,4 @@ public class HbaseFactory {
 
 
     }
-    /*@Bean(name = "hbaseTable")
-    public Table getTable(@Qualifier("hbaseConnection") Connection con)  {
-
-        Table table=null;
-        try {
-
-            ExecutorService pool = Executors.newFixedThreadPool(10);
-            BufferedMutatorParams bmp = new BufferedMutatorParams();
-            ss.writeBufferSize();
-            ss.setWriteBufferPeriodicFlushTimerTickMs()
-            BufferedMutatorParams aaa = con.getBufferedMutator()
-            aaa.writeBufferSize(1000000);
-
-            BufferedMutator aaa=null;
-            aaa
-            table = con.getTable(TableName.valueOf("tsg:t1"),pool);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return table;
-
-
-    }*/
-
-  /*  @Bean(name = "hbaseExceptionListener")
-    public BufferedMutator.ExceptionListener getLishtener(@Qualifier("hbaseConnection") Connection con) {
-
-        BufferedMutator.ExceptionListener listener = new BufferedMutator.ExceptionListener() {
-
-            public void onException(RetriesExhaustedWithDetailsException e, BufferedMutator mutator) {
-                for (int i = 0; i < e.getNumExceptions(); i++) {
-                    System.out.print("Failed to sent put " + e.getRow(i) + ".");
-                }
-            }
-        };
-        return listener;
-
-
-    }*/
-
 }

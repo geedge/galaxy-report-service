@@ -9,5 +9,7 @@ import java.util.List;
  */
 public interface ExcuteProcessService {
 
-    void getTaskProcess(JobEntity job);
+    void updateResultMessage(JobEntity job);
+    void killQuery(JobEntity jobEntity);
+    void updateProcessMessage(JobEntity job);
 }
