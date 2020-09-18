@@ -9,15 +9,15 @@ import java.util.List;
 public interface MysqlService {
 
 
-    List<JobEntity> getJobForExcute();
+    List<JobEntity> getJobForExcute() throws Exception;
 
 
-    List<JobEntity> getJobTask(int Rows);
+    List<JobEntity> getJobTask(int Rows) throws Exception;
 
 
     int updateProcesses(JobEntity job);
 
-    int updateStatue(JobEntity job) ;
+    int updateStatue(JobEntity job);
 
 
 }

@@ -19,19 +19,20 @@ import java.util.List;
  */
 @Service
 public class MysqlServiceImpl implements MysqlService {
+    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
     @Autowired
     public ReportResultMapper rrm;
 
     @Override
-    public List<JobEntity> getJobForExcute() {
+    public List<JobEntity> getJobForExcute() throws Exception{
 
         return rrm.getJobForExcute();
 
     }
 
     @Override
-    public List<JobEntity> getJobTask(int rows) {
+    public List<JobEntity> getJobTask(int rows) throws Exception{
 
 
         String current_time = DateUtil.getDate();
@@ -44,24 +45,35 @@ public class MysqlServiceImpl implements MysqlService {
     }
 
     @Override
-    public int updateProcesses(JobEntity job) {
+    public int updateProcesses(JobEntity job){
 
-        Date currentTime = new Date();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String sDate = formatter.format(currentTime);
-        java.sql.Timestamp nowTime = java.sql.Timestamp.valueOf(sDate);
-        job.setOpTime(sDate);
-        return rrm.updateProcesses(job);
+        try {
+            Date currentTime = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String sDate = formatter.format(currentTime);
+            java.sql.Timestamp nowTime = java.sql.Timestamp.valueOf(sDate);
+            job.setOpTime(sDate);
+            return rrm.updateProcesses(job);
+        }
+        catch(Exception e){
+            logger.error(e.toString());
+            return 0;
+        }
     }
 
     @Override
     public int updateStatue(JobEntity job) {
-
-        Date currentTime = new Date();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String sDate = formatter.format(currentTime);
-        java.sql.Timestamp nowTime = java.sql.Timestamp.valueOf(sDate);
-        job.setOpTime(sDate);
-        return rrm.updateStatue(job);
+        try {
+            Date currentTime = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String sDate = formatter.format(currentTime);
+            java.sql.Timestamp nowTime = java.sql.Timestamp.valueOf(sDate);
+            job.setOpTime(sDate);
+            return rrm.updateStatue(job);
+        }
+        catch(Exception e){
+            logger.error(e.toString());
+            return 0;
+        }
     }
 }

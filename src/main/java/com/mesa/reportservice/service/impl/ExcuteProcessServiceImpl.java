@@ -5,10 +5,7 @@ import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.configuration.ClickhouseConfig;
 import com.mesa.reportservice.configuration.GlobelConfig;
-import com.mesa.reportservice.service.ClickhouseService;
-import com.mesa.reportservice.service.ExcuteProcessService;
-import com.mesa.reportservice.service.HbaseService;
-import com.mesa.reportservice.service.MysqlService;
+import com.mesa.reportservice.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +27,8 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     private MysqlService ms;
     @Autowired
     private HbaseService hs;
-
+    @Autowired
+    private MonitorService mons;
     @Override
     public void updateResultMessage(JobEntity je) {
 
@@ -50,10 +48,12 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                             je.setExcuteDetail("SUCCESS");
                             je.setExcuteProcess(100);
                             je.setStatus(2);
+                            mons.addSuccess();
                             logger.info("success save to hbase resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         } else {
                             je.setStatus(5);
                             je.setExcuteDetail("Write Data Error");
+                            mons.addFail();
                             logger.error("save hbase error resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         }
                         break;
@@ -81,12 +81,12 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                     case 555999:
                         je.setStatus(7);
                         je.setExcuteDetail("Unknow Error");
-                        logger.error("unknow error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        logger.error("Unknow Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         break;
                     default:
                         je.setStatus(8);
                         je.setExcuteDetail("System Error");
-                        logger.error("system error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        logger.error("System Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                 }
 
             }
@@ -98,7 +98,9 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
             }
             while (number != 1 && z >= 0);
         } catch (Exception e) {
-            // updateErrorMessage(je.getResultId(), 6, "Result Write To Database Error");
+            je.setStatus(10);
+            je.setExcuteDetail("Database Error");
+            ms.updateProcesses(je);
             logger.error("save database error queryid=" + je.getResultId() + e.toString());
 
         } finally {
