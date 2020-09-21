@@ -29,6 +29,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     private HbaseService hs;
     @Autowired
     private MonitorService mons;
+
     @Override
     public void updateResultMessage(JobEntity je) {
 
@@ -48,7 +49,6 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                             je.setExcuteDetail("SUCCESS");
                             je.setExcuteProcess(100);
                             je.setStatus(2);
-                            mons.addSuccess();
                             logger.info("success save to hbase resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         } else {
                             je.setStatus(5);
@@ -104,6 +104,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
             logger.error("save database error queryid=" + je.getResultId() + e.toString());
 
         } finally {
+            saveToMonitor(je);
             GlobelConfig.mapresult.remove(je.getQuery_id());
         }
 
@@ -146,7 +147,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                     Map map = JSON.parseObject(JSON.toJSONString(listdata.get(0)));
                     long total_rows_approx = Long.parseLong(map.get("total_rows_approx").toString());
                     long read_rows = Long.parseLong(map.get("read_rows").toString());
-                    float elapsed = Float.parseFloat(map.get("elapsed").toString())*1000;
+                    float elapsed = Float.parseFloat(map.get("elapsed").toString()) * 1000;
                     double persent = (read_rows * 1.00 / total_rows_approx);
                     int result = (int) (persent * 100);
                     if (result > 98) {
@@ -189,4 +190,20 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
         return isok;
     }
 
+    /**
+     * promethus记录结果
+     */
+    public void saveToMonitor(JobEntity entity) {
+
+        try {
+            if (entity.getStatus() == 2) {
+
+                mons.addSuccess();
+            } else {
+                mons.addFail();
+            }
+        } catch (Exception e) {
+            logger.error("监控结果失败" + e.toString());
+        }
+    }
 }
