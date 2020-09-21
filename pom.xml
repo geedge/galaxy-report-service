@@ -238,10 +238,10 @@
 							<include>${project.build.finalName}.jar</include>
 						</resource>
 
-						<!--<resource>
+						<resource>
 							<targetPath>/config</targetPath>
 							<directory>config</directory>
-						</resource>-->
+						</resource>
 					</resources>
 
 				</configuration>
