@@ -86,7 +86,7 @@ public class ExcuteserviceImpl implements ExcuteService {
                     job.setResult(hr.getBody());
                     job.setExcuteTime((int) Float.parseFloat(rows.get("elapsed").toString()));
                     job.setExcute_status(Integer.parseInt(mapresult.get("code").toString()));
-                    logger.info("success queryid=" + queryid + " sql=" + sql);
+                    logger.info("success resultid = "+job.getResultId()+" queryid=" + queryid + " sql=" + sql);
 
                 }
             } catch (SocketTimeoutException e) {
@@ -95,7 +95,7 @@ public class ExcuteserviceImpl implements ExcuteService {
                 if (k == 0) {
                     job.setExcute_status(500001);
                     job.setExcuteDetail("SQL Execution Error excute query time out");
-                    logger.info("timeout queryid=" + queryid + " sql=" + sql);
+                    logger.info("timeout resultid = "+job.getResultId()+" queryid=" + queryid + " sql=" + sql);
                 } else {
                     logger.info("Socket warn " + e.toString() + "retry time " + (3 - k));
                 }

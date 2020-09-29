@@ -34,8 +34,6 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     public void updateResultMessage(JobEntity je) {
 
 
-        logger.info("startget++++++" + je.getQuery_id());
-
         try {
             if (je.getIsValid() == 0) {
                 je.setStatus(9);
@@ -49,44 +47,44 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                             je.setExcuteDetail("SUCCESS");
                             je.setExcuteProcess(100);
                             je.setStatus(2);
-                            logger.info("success save to hbase resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                            logger.info("success save to hbase query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         } else {
                             je.setStatus(5);
                             je.setExcuteDetail("Write Data Error");
                             mons.addFail();
-                            logger.error("save hbase error resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                            logger.error("save hbase error query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         }
                         break;
 
                     case 400001:
                         je.setStatus(3);
                         je.setExcuteDetail("Param Syntax Error");
-                        logger.error("Param Syntax Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        logger.error("Param Syntax Error query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         break;
                     case 400010:
                         je.setStatus(3);
                         je.setExcuteDetail("SQL Syntax Error");
-                        logger.error("SQL Syntax Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        logger.error("SQL Syntax Error query_id="+je.getQuery_id()+"  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         break;
                     case 500001:
                         je.setStatus(4);
                         je.setExcuteDetail("SQL Execution Error");
-                        logger.error("SQL Execution Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        logger.error("SQL Execution Error query_id="+je.getQuery_id()+"  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         break;
                     case 500010:
                         je.setStatus(6);
                         je.setExcuteDetail("Engine Statistics Error");
-                        logger.error("Engine Statistics Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        logger.error("Engine Statistics Error query_id="+je.getQuery_id()+"  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         break;
                     case 555999:
                         je.setStatus(7);
                         je.setExcuteDetail("Unknow Error");
-                        logger.error("Unknow Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        logger.error("Unknow Error query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                         break;
                     default:
                         je.setStatus(8);
                         je.setExcuteDetail("System Error");
-                        logger.error("System Error  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        logger.error("System Error query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                 }
 
             }
@@ -101,7 +99,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
             je.setStatus(10);
             je.setExcuteDetail("Database Error");
             ms.updateProcesses(je);
-            logger.error("save database error queryid=" + je.getResultId() + e.toString());
+            logger.error("save database error resultid =" + je.getResultId()+" queryid=" + je.getResultId() + e.toString());
 
         } finally {
             saveToMonitor(je);
@@ -115,9 +113,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     public void killQuery(JobEntity jobEntity) {
         String killurl = ClickhouseConfig.getKillUrl(jobEntity.getQuery_id());
         try {
-            logger.info("startkill++++++" + jobEntity.getQuery_id());
             cs.QuerySystemForDelete(killurl);
-            logger.info("endkill=======" + jobEntity.getQuery_id());
 
         } catch (Exception e) {
             logger.error(e.toString());

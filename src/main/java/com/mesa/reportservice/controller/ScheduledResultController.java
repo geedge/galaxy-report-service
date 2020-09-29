@@ -48,8 +48,8 @@ public class ScheduledResultController {
                 for (JobEntity jobEntity : joblist) {
                     String sql = jobEntity.getQuerySql().trim();
                     sql = sql.replace("$exe_time", "toDateTime('" + jobEntity.getIssuedTime().trim() + "')");
-                    //sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
-                    //sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
+                  //sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
+                  //sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
                     String queryid = DigestUtils.md5Hex(jobEntity.getResultId() + sql);
                     jobEntity.setQuery_id(queryid);
 
@@ -85,7 +85,6 @@ public class ScheduledResultController {
                     int rows = GlobelConfig.job_thread - GlobelConfig.mapresult.size();
                     for (Map.Entry<String, JobEntity> entry : GlobelConfig.mapresult.entrySet()) {
                         logger.info("----key = " + entry.getKey() + ", value = " + entry.getValue().getStatus());
-                        System.out.print("----key = " + entry.getKey() + ", value = " + entry.getValue().getStatus());
                     }
                     if (rows > 0) {
                         List<JobEntity> jobs = ms.getJobTask(rows);
