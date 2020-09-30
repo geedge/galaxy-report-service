@@ -4,6 +4,7 @@ package com.mesa.reportservice.service;
 import com.mesa.reportservice.bean.JobEntity;
 
 import java.util.List;
+import java.util.Map;
 
 
 public interface MysqlService {
@@ -19,5 +20,6 @@ public interface MysqlService {
 
     int updateStatue(JobEntity job);
 
+    Map<String,Long> getJobCount()  throws Exception;
 
-}
+    }

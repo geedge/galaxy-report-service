@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by wk1 on 2020/1/2.
@@ -76,4 +77,15 @@ public class MysqlServiceImpl implements MysqlService {
             return 0;
         }
     }
+
+    @Override
+    public Map<String,Long> getJobCount() throws Exception {
+        String current_time = DateUtil.getDate();
+        String today_time = DateUtil.getCurrentDate();
+        HashMap map = new HashMap();
+        map.put("endtime", current_time);
+        map.put("optime", today_time);
+        return rrm.getJobCount(map);
+    }
+
 }

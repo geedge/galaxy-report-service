@@ -17,4 +17,7 @@ public interface ReportResultMapper {
     int updateProcesses(JobEntity job);
 
     int updateStatue(JobEntity job);
+
+    Map<String,Long>  getJobCount(Map<String, Object> map);
+
 }
