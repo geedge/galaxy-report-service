@@ -83,9 +83,6 @@ public class ScheduledResultController {
                     }
                 }
                     int rows = GlobelConfig.job_thread - GlobelConfig.mapresult.size();
-                    for (Map.Entry<String, JobEntity> entry : GlobelConfig.mapresult.entrySet()) {
-                        logger.info("----key = " + entry.getKey() + ", value = " + entry.getValue().getStatus());
-                    }
                     if (rows > 0) {
                         List<JobEntity> jobs = ms.getJobTask(rows);
                         for (JobEntity job : jobs) {

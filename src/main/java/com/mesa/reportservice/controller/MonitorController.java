@@ -41,6 +41,7 @@ public class MonitorController {
             json = obj.toString();
         } catch (Exception e) {
             logger.error(e.toString());
+            json=e.toString();
         }
 
             return json;

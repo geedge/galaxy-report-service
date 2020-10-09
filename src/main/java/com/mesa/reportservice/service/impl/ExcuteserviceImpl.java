@@ -54,7 +54,6 @@ public class ExcuteserviceImpl implements ExcuteService {
         job.setExcuteTime(0);
         job.setExcuteProcess(0);
         job.setResultRows(0);
-        //JobEntity jt = (JobEntity) job.clone();
         GlobelConfig.mapresult.put(queryid, job);
         ms.updateProcesses(job);
         logger.info("execute queryid=" + queryid + " sql=" + sql + "mapresult size=" + GlobelConfig.mapresult.size());
@@ -80,7 +79,6 @@ public class ExcuteserviceImpl implements ExcuteService {
                     Map mapresult = JSON.parseObject(hr.getBody());
 
                     Map rows = (Map) mapresult.get("statistics");
-                    // Integer resultrows = (Integer) rows.get("result_rows");
                     job.setResultRows(Integer.parseInt(rows.get("result_rows").toString()));
                     job.setExcuteRow(Long.parseLong(rows.get("rows_read").toString()));
                     job.setResult(hr.getBody());
