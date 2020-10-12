@@ -40,7 +40,7 @@ public class HbaseServiceImpl implements HbaseService {
     public Boolean put(JobEntity jobEntity) throws Exception {
 
 
-        Boolean status = true;
+        Boolean status = false;
         try(Table table =hbaseConnection.getTable(TableName.valueOf(hbproperties.getTable()))) {
             Put put = new Put(Bytes.toBytes(jobEntity.getQuery_id()));
             put.addColumn(Bytes.toBytes("response"), Bytes.toBytes("result"), Bytes.toBytes(jobEntity.getResult()));
@@ -59,8 +59,8 @@ public class HbaseServiceImpl implements HbaseService {
                 put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("memory_usage"), Bytes.toBytes(jobEntity.getMemory_usage()));
             }
             table.put(put);
+            status =true;
         }catch(Exception e) {
-            status =false;
             Logs.error(e.toString());
         }
         return status;

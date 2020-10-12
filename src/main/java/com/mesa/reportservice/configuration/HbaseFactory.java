@@ -40,6 +40,7 @@ public class HbaseFactory {
             conf.set("hbase.rpc.timeout", hbproperties.getRpc_timeout());
             conf.set("hbase.client.keyvalue.maxsize", "1024000000");
             conf.set("zookeeper.recovery.retry", "3");
+            conf.set("hbase.client.ipc.pool.size", hbproperties.getConnect_pool().toString());
 
 
         }
@@ -49,11 +50,9 @@ public class HbaseFactory {
 
     @Bean(name = "hbaseConnection")
     public Connection getConnection(@Qualifier("hbaseConfiguration") org.apache.hadoop.conf.Configuration Conf) {
-        ExecutorService executor = null;
         Connection con = null;
         try {
-            executor = Executors.newFixedThreadPool(hbproperties.getConnect_pool());
-            con = ConnectionFactory.createConnection(Conf,executor);
+            con = ConnectionFactory.createConnection(Conf);
 
         } catch (IOException e) {
             logger.error(e.toString());
