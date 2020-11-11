@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.mesa</groupId>
 	<artifactId>galaxy-report-service</artifactId>
-	<version>20.10.11</version>
+	<version>20.10.20</version>
 	<name>galaxy-report-service</name>
 	<description>Demo project for Spring Boot</description>
 
@@ -219,7 +219,7 @@
 					<forceTags>true</forceTags>
 
 					<imageTags>
-						<imageTag>20.10.11</imageTag>
+						<imageTag>20.10.20</imageTag>
 					</imageTags>
 					<!--远程docker构建，供dockerfile使用-->
 					<dockerHost>http://192.168.40.153:2375</dockerHost>

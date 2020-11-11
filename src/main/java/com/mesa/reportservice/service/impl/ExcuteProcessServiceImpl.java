@@ -156,7 +156,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                         ms.updateProcesses(job);
                     }
                 } else {
-                    logger.error("responsedata is null");
+                    logger.info("responsedata is null");
                 }
             } else {
                 logger.error("responsebody is null");
