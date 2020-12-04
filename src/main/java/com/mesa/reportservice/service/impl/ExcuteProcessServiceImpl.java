@@ -110,7 +110,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     }
 
     @Override
-    public void killQuery(JobEntity jobEntity) {
+    public void reSet(JobEntity jobEntity) {
         String killurl = ClickhouseConfig.getKillUrl(jobEntity.getQuery_id());
         try {
             cs.QuerySystemForDelete(killurl);
@@ -124,7 +124,16 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
         }
     }
 
+    @Override
+    public void killQuery(JobEntity jobEntity) {
+        String killurl = ClickhouseConfig.getKillUrl(jobEntity.getQuery_id());
+        try {
+            cs.QuerySystemForDelete(killurl);
 
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+    }
     /**
      * 获取进度条信息
      */

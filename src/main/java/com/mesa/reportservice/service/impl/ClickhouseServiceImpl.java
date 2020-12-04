@@ -20,9 +20,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Map;
 
-import static com.mesa.reportservice.util.GZIPUtils.compress;
-import static com.mesa.reportservice.util.GZIPUtils.uncompress;
-
 /**
  * Created by wk1 on 2019/5/15.
  */

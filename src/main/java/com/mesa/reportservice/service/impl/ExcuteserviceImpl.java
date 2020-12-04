@@ -41,8 +41,8 @@ public class ExcuteserviceImpl implements ExcuteService {
 
         String sql = job.getQuerySql().trim();
         sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
-        //sql = sql.replace("$start_time", "toDateTime('" + job.getStartTime().trim() + "')");
-        //sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");
+        sql = sql.replace("$start_time", "toDateTime('" + job.getStartTime().trim() + "')");
+        sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");
         job.setQuerySql(sql);
         String queryid = DigestUtils.md5Hex(job.getResultId() + sql);
         job.setQuery_id(queryid);

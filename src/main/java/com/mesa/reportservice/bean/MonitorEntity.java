@@ -14,6 +14,7 @@ public class MonitorEntity {
 
     private Map<String,JobEntity> joblist ;
 
+    private String status;
 
 
     public MonitorEntity() {
@@ -58,5 +59,14 @@ public class MonitorEntity {
 
     public void setJoblist(Map<String, JobEntity> joblist) {
         this.joblist = joblist;
+    }
+
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

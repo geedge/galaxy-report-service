@@ -10,6 +10,8 @@ import java.util.List;
 public interface ExcuteProcessService {
 
     void updateResultMessage(JobEntity job);
-    void killQuery(JobEntity jobEntity);
+    void reSet(JobEntity jobEntity);
     void updateProcessMessage(JobEntity job);
+    void killQuery(JobEntity jobEntity);
+
 }

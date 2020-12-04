@@ -1,5 +1,6 @@
 package com.mesa.reportservice.service.impl;
 
+import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.configuration.ZkProperties;
 import com.mesa.reportservice.service.ZkService;
 import com.mesa.reportservice.util.Logs;
@@ -31,18 +32,14 @@ public class ZkServiceImpl implements ZkService {
                 boolean isZkCuratorStarted = curatorConnect.isStarted();
                 String nodePath = "/masterip";
                 System.out.println("当前客户端的状态：" + (isZkCuratorStarted ? "连接中..." : "已关闭..."));
-                ExistsBuilder sss = curatorConnect.checkExists();
+                ExistsBuilder eb = curatorConnect.checkExists();
                 Stat statExist = curatorConnect.checkExists().forPath(nodePath);
-                InetAddress address = InetAddress.getLocalHost();
-                String localip = address.getHostAddress().trim();
                 if (statExist == null) {
-                    System.out.println(address.getHostAddress());
-                    byte[] data = address.getHostAddress().getBytes();  // 节点数据
+                    byte[] data = GlobelConfig.zkuuid.getBytes();  // 节点数据
 
                     String result = curatorConnect.create().creatingParentsIfNeeded()  // 创建父节点，也就是会递归创建
                             .withMode(CreateMode.EPHEMERAL)  // 节点类型
                             .forPath(nodePath, data);
-                    System.out.println(result + "节点，创建成功...");
                     return true;
 
                 } else {
@@ -50,10 +47,10 @@ public class ZkServiceImpl implements ZkService {
                     Stat stat = new Stat();
 
                     byte[] nodeData = curatorConnect.getData().storingStatIn(stat).forPath(nodePath);
-                    String masterip = new String(nodeData).trim();
-                    System.out.println("节点 " + nodePath + " 的数据为：" + new String(nodeData));
+                    String masterid = new String(nodeData).trim();
+                    System.out.println("uuid="+ GlobelConfig.zkuuid+" 节点 " + nodePath + " 的数据为：" + new String(nodeData));
 
-                    if (masterip.equals(localip)) {
+                    if (masterid.equals(GlobelConfig.zkuuid)) {
 
                         return true;
 

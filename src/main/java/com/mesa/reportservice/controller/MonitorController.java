@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.mesa.reportservice.bean.MonitorEntity;
 import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.service.MysqlService;
+import com.mesa.reportservice.service.ZkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,8 @@ public class MonitorController {
     private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
     @Autowired
     private MysqlService mysqlService;
+    @Autowired
+    private ZkService zs;
 
 
     @GetMapping(value = "/monitor")
@@ -36,6 +39,12 @@ public class MonitorController {
             me.setTodaySuccessJobNum(numMap.get("todaySuccessNum"));
             me.setTodayErrorJobNum(numMap.get("todayErrorNum"));
             me.setJoblist(GlobelConfig.mapresult);
+            if(zs.isMaster()){
+                me.setStatus("active");
+            }
+            else{
+                me.setStatus("standby");
+            }
             GlobelConfig.mapresult.size();
             Object obj = JSONArray.toJSON(me);
             json = obj.toString();

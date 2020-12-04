@@ -48,8 +48,8 @@ public class ScheduledResultController {
                 for (JobEntity jobEntity : joblist) {
                     String sql = jobEntity.getQuerySql().trim();
                     sql = sql.replace("$exe_time", "toDateTime('" + jobEntity.getIssuedTime().trim() + "')");
-                  //sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
-                  //sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
+                    sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
+                    sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
                     String queryid = DigestUtils.md5Hex(jobEntity.getResultId() + sql);
                     jobEntity.setQuery_id(queryid);
 
@@ -57,7 +57,15 @@ public class ScheduledResultController {
                         eps.killQuery(jobEntity);
                         GlobelConfig.mapresult.get(jobEntity.getQuery_id()).setIsValid(0);
                     } else if (!GlobelConfig.mapresult.containsKey(jobEntity.getQuery_id())) {
-                        eps.killQuery(jobEntity);
+                        eps.reSet(jobEntity);
+                    }
+                    if (GlobelConfig.mapresult.containsKey(jobEntity.getQuery_id())) {
+                        if (jobEntity.getIsValid() == 0) {
+                            eps.killQuery(jobEntity);
+                            GlobelConfig.mapresult.get(jobEntity.getQuery_id()).setIsValid(0);
+                        }
+                    } else {
+                        eps.reSet(jobEntity);
                     }
 
                 }
@@ -99,6 +107,15 @@ public class ScheduledResultController {
                     } else {
                         logger.info("无待执行任务");
                     }
+            }
+            else {
+                if (GlobelConfig.mapresult.size() > 0) {
+                    for (Map.Entry<String, JobEntity> entry : GlobelConfig.mapresult.entrySet()) {
+                        logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getStatus());
+                        eps.killQuery(entry.getValue());
+                    }
+                    GlobelConfig.mapresult.clear();
+                }
             }
         } catch (Exception e) {
             logger.error(e.toString());

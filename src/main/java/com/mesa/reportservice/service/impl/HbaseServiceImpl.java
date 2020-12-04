@@ -5,23 +5,12 @@ import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.configuration.HbaseProperties;
 import com.mesa.reportservice.service.HbaseService;
 import com.mesa.reportservice.util.Logs;
-import com.mesa.reportservice.util.ziputil;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * Created by wk1 on 2019/5/15.
