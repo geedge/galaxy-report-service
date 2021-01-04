@@ -39,24 +39,8 @@ public class ExcuteserviceImpl implements ExcuteService {
     public void excuteCkTask(JobEntity job) {
 
 
-        String sql = job.getQuerySql().trim();
-        sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
-        sql = sql.replace("$start_time", "toDateTime('" + job.getStartTime().trim() + "')");
-        sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");
-        job.setQuerySql(sql);
-        String queryid = DigestUtils.md5Hex(job.getResultId() + sql);
-        job.setQuery_id(queryid);
-        job.setQuerySql(sql);
-        job.setStatus(1);
-        job.setExcute_status(1);
-        job.setExcuteDetail("EXECUTING");
-        job.setExcuteRow(0L);
-        job.setExcuteTime(0);
-        job.setExcuteProcess(0);
-        job.setResultRows(0);
-        GlobelConfig.mapresult.put(queryid, job);
-        ms.updateProcesses(job);
-        logger.info("execute queryid=" + queryid + " sql=" + sql + "mapresult size=" + GlobelConfig.mapresult.size());
+
+        logger.info("execute queryid=" + job.getQuery_id() + " sql=" + job.getQuerySql() + "mapresult size=" + GlobelConfig.mapresult.size());
         String joburl = getJobUrl(job.getQuerySql(), job.getResultId());
         String killurl = ClickhouseConfig.getKillUrl(job.getQuery_id());
         HttpResult hr = new HttpResult();
@@ -84,7 +68,7 @@ public class ExcuteserviceImpl implements ExcuteService {
                     job.setResult(hr.getBody());
                     job.setExcuteTime((int) Float.parseFloat(rows.get("elapsed").toString()));
                     job.setExcute_status(Integer.parseInt(mapresult.get("code").toString()));
-                    logger.info("success resultid = "+job.getResultId()+" queryid=" + queryid + " sql=" + sql);
+                    logger.info("success resultid = "+job.getResultId()+" queryid=" + job.getQuery_id() + " sql=" + job.getQuerySql());
 
                 }
             } catch (SocketTimeoutException e) {
@@ -93,7 +77,7 @@ public class ExcuteserviceImpl implements ExcuteService {
                 if (k == 0) {
                     job.setExcute_status(500001);
                     job.setExcuteDetail("SQL Execution Error excute query time out");
-                    logger.info("timeout resultid = "+job.getResultId()+" queryid=" + queryid + " sql=" + sql);
+                    logger.info("timeout resultid = "+job.getResultId()+" queryid=" + job.getQuery_id() + " sql=" + job.getQuerySql());
                 } else {
                     logger.info("Socket warn " + e.toString() + "retry time " + (3 - k));
                 }
@@ -119,10 +103,12 @@ public class ExcuteserviceImpl implements ExcuteService {
                 k = 0;
             }
 
-            try {
-                cs.QuerySystemForDelete(killurl);
-            } catch (Exception e) {
-                logger.error("Kill Query Error" + e.toString());
+            if(hr.getCode() != 200) {
+                try {
+                    cs.QuerySystemForDelete(killurl);
+                } catch (Exception e) {
+                    logger.error("Kill Query Error" + e.toString());
+                }
             }
         }
         while (k > 0);

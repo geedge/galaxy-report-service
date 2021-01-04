@@ -48,8 +48,6 @@ public class ScheduledResultController {
                 for (JobEntity jobEntity : joblist) {
                     String sql = jobEntity.getQuerySql().trim();
                     sql = sql.replace("$exe_time", "toDateTime('" + jobEntity.getIssuedTime().trim() + "')");
-                    sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
-                    sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
                     String queryid = DigestUtils.md5Hex(jobEntity.getResultId() + sql);
                     jobEntity.setQuery_id(queryid);
 
@@ -97,12 +95,33 @@ public class ScheduledResultController {
                             logger.info("开始执行任务");
                             long begintime = System.currentTimeMillis();
                             job.setBeginTime(begintime);
-                            pool.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    es.excuteCkTask(job);
-                                }
-                            });
+                            String sql = job.getQuerySql().trim();
+                            sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
+                            job.setQuerySql(sql);
+                            String queryid = DigestUtils.md5Hex(job.getResultId() + sql);
+                            job.setQuery_id(queryid);
+                            job.setQuerySql(sql);
+                            job.setStatus(1);
+                            job.setExcute_status(1);
+                            job.setExcuteDetail("EXECUTING");
+                            job.setExcuteRow(0L);
+                            job.setExcuteTime(0);
+                            job.setExcuteProcess(0);
+                            job.setResultRows(0);
+                            if(ms.updateProcesses(job)!=0){
+                                GlobelConfig.mapresult.put(queryid, job);
+                                pool.execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        es.excuteCkTask(job);
+                                    }
+                                });
+                            }else{
+                                logger.error("更新数据库状态失败");
+
+                            }
+
+
                         }
                     } else {
                         logger.info("无待执行任务");
