@@ -26,8 +26,6 @@ public class ScheduledResultController {
     private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
     protected static ExecutorService pool = Executors.newFixedThreadPool(30);
-
-
     @Autowired
     private MysqlService ms;
     @Autowired
@@ -36,7 +34,8 @@ public class ScheduledResultController {
     private ExcuteProcessService eps;
     @Autowired
     private ZkService zs;
-
+    @Autowired
+    private ClickhouseService cs;
 
     @Scheduled(cron = "${scan.result.scheduled.plan}")
     public void getExcuteResult() {
@@ -48,7 +47,10 @@ public class ScheduledResultController {
                 for (JobEntity jobEntity : joblist) {
                     String sql = jobEntity.getQuerySql().trim();
                     sql = sql.replace("$exe_time", "toDateTime('" + jobEntity.getIssuedTime().trim() + "')");
-                    String queryid = DigestUtils.md5Hex(jobEntity.getResultId() + sql);
+                    sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
+                    sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
+
+                    String queryid = cs.getQueryId(jobEntity.getResultId().toString(),sql);
                     jobEntity.setQuery_id(queryid);
 
                     if (jobEntity.getIsValid() == 0) {
@@ -97,8 +99,10 @@ public class ScheduledResultController {
                             job.setBeginTime(begintime);
                             String sql = job.getQuerySql().trim();
                             sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
+                            sql = sql.replace("$start_time", "toDateTime('" + job.getStartTime().trim() + "')");
+                            sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");
                             job.setQuerySql(sql);
-                            String queryid = DigestUtils.md5Hex(job.getResultId() + sql);
+                            String queryid = cs.getQueryId(job.getResultId().toString(),sql);
                             job.setQuery_id(queryid);
                             job.setQuerySql(sql);
                             job.setStatus(1);

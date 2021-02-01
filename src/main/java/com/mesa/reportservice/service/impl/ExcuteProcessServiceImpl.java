@@ -111,38 +111,28 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
 
     @Override
     public void reSet(JobEntity jobEntity) {
-        String killurl = ClickhouseConfig.getKillUrl(jobEntity.getQuery_id());
-        try {
-            cs.QuerySystemForDelete(killurl);
 
-        } catch (Exception e) {
-            logger.error(e.toString());
-        } finally {
             jobEntity.setStatus(0);
             jobEntity.setExcuteDetail("Re Execution");
             ms.updateProcesses(jobEntity);
-        }
+
     }
 
     @Override
     public void killQuery(JobEntity jobEntity) {
-        String killurl = ClickhouseConfig.getKillUrl(jobEntity.getQuery_id());
         try {
-            cs.QuerySystemForDelete(killurl);
+            cs.queryForCancel(jobEntity.getQuery_id());
 
         } catch (Exception e) {
             logger.error(e.toString());
         }
     }
-    /**
-     * 获取进度条信息
-     */
+
     @Override
     public void updateProcessMessage(JobEntity job) {
-        String queryProccess = ClickhouseConfig.getProcessUrl(job.getQuery_id());
         HttpResult hr = null;
         try {
-            hr = cs.QuerySystemForGet(queryProccess);
+            hr = cs.queryForProcess(job.getQuery_id());
             String rs = hr.getBody().trim();
             Map data = JSON.parseObject(rs);
 
@@ -150,16 +140,12 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                 List listdata = (List) data.get("data");
                 if (null != listdata && listdata.size() > 0) {
                     Map map = JSON.parseObject(JSON.toJSONString(listdata.get(0)));
-                    long total_rows_approx = Long.parseLong(map.get("total_rows_approx").toString());
-                    long read_rows = Long.parseLong(map.get("read_rows").toString());
-                    float elapsed = Float.parseFloat(map.get("elapsed").toString()) * 1000;
-                    double persent = (read_rows * 1.00 / total_rows_approx);
+                    long read_rows = Long.parseLong(map.get("rows_read").toString());
+                    float elapsed = Float.parseFloat(map.get("elapsed").toString());
+                    double persent = Double.parseDouble(map.get("percent").toString());
                     int result = (int) (persent * 100);
-                    if (result > 98) {
-                        result = 98;
-                    }
                     job.setExcuteTime((int) elapsed);
-                    job.setExcuteRow(total_rows_approx);
+                    job.setExcuteRow(read_rows);
                     job.setExcuteProcess(result);
                     if (job.getExcuteRow() != 0 || job.getExcuteTime() != 0) {
                         ms.updateProcesses(job);
@@ -174,7 +160,6 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
             logger.error(e.toString());
         }
     }
-
     /**
      * 结果存入hbase
      */

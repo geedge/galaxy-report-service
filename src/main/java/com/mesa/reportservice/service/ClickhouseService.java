@@ -9,19 +9,16 @@ import java.util.Map;
  */
 public interface ClickhouseService {
 
-    String doGet(String url) throws Exception;
+    String  getQueryId(String resultId,String query) throws Exception;
 
 
-    String doGet(String url, Map<String, Object> map) throws Exception;
+    HttpResult queryForExcute(String resultId,String query) throws Exception;
 
 
-    HttpResult sendQueryForGet(String url) throws Exception;
+    HttpResult queryForProcess(String queryId) throws Exception;
 
 
-    HttpResult QuerySystemForGet(String url) throws Exception;
-
-
-    HttpResult QuerySystemForDelete(String url) throws Exception;
+    HttpResult queryForCancel(String queryId) throws Exception;
 
 
 

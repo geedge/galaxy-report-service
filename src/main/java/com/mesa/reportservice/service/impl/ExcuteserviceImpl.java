@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.net.SocketTimeoutException;
 import java.util.Map;
 
-import static com.mesa.reportservice.configuration.ClickhouseConfig.getJobUrl;
 
 /**
  * Created by wk1 on 2020/1/8.
@@ -41,13 +40,11 @@ public class ExcuteserviceImpl implements ExcuteService {
 
 
         logger.info("execute queryid=" + job.getQuery_id() + " sql=" + job.getQuerySql() + "mapresult size=" + GlobelConfig.mapresult.size());
-        String joburl = getJobUrl(job.getQuerySql(), job.getResultId());
-        String killurl = ClickhouseConfig.getKillUrl(job.getQuery_id());
         HttpResult hr = new HttpResult();
         int k = 3;
         do {
             try {
-                hr = cs.sendQueryForGet(joburl);
+                hr = cs.queryForExcute(job.getResultId().toString(),job.getQuerySql());
                 logger.info("httpcode" + hr.getCode());
 
                 if (hr != null && hr.getCode() != 200) {
@@ -105,7 +102,7 @@ public class ExcuteserviceImpl implements ExcuteService {
 
             if(hr.getCode() != 200) {
                 try {
-                    cs.QuerySystemForDelete(killurl);
+                    cs.queryForCancel(job.getQuery_id());
                 } catch (Exception e) {
                     logger.error("Kill Query Error" + e.toString());
                 }
