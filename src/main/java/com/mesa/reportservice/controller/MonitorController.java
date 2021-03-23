@@ -1,5 +1,6 @@
 package com.mesa.reportservice.controller;
 
+import cn.hutool.log.Log;
 import com.alibaba.fastjson.JSONArray;
 import com.mesa.reportservice.bean.MonitorEntity;
 import com.mesa.reportservice.configuration.GlobelConfig;
@@ -19,11 +20,11 @@ import java.util.Map;
 @Component
 public class MonitorController {
 
-    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
     @Autowired
     private MysqlService mysqlService;
     @Autowired
     private ZkService zs;
+    Log logger = Log.get();
 
 
     @GetMapping(value = "/monitor")

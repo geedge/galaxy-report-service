@@ -1,5 +1,6 @@
 package com.mesa.reportservice.controller;
 
+import cn.hutool.log.Log;
 import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.configuration.HttpClientPool;
@@ -23,7 +24,7 @@ import java.util.concurrent.Executors;
 @EnableScheduling
 public class ScheduledResultController {
 
-    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    Log logger = Log.get();
 
     protected static ExecutorService pool = Executors.newFixedThreadPool(30);
     @Autowired
@@ -102,9 +103,6 @@ public class ScheduledResultController {
                             sql = sql.replace("$start_time", "toDateTime('" + job.getStartTime().trim() + "')");
                             sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");
                             job.setQuerySql(sql);
-                            String queryid = cs.getQueryId(job.getResultId().toString(),sql);
-                            job.setQuery_id(queryid);
-                            job.setQuerySql(sql);
                             job.setStatus(1);
                             job.setExcute_status(1);
                             job.setExcuteDetail("EXECUTING");
@@ -112,20 +110,39 @@ public class ScheduledResultController {
                             job.setExcuteTime(0);
                             job.setExcuteProcess(0);
                             job.setResultRows(0);
-                            if(ms.updateProcesses(job)!=0){
-                                GlobelConfig.mapresult.put(queryid, job);
-                                pool.execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        es.excuteCkTask(job);
-                                    }
-                                });
-                            }else{
-                                logger.error("更新数据库状态失败");
-
+                            String queryid="";
+                            try {
+                                queryid = cs.getQueryId(job.getResultId().toString(), sql);
                             }
+                            catch (Exception e){
+                                job.setExcute_status(0);
+                                job.setStatus(7);
+                                job.setExcuteDetail("Unknow Error");
+                            }
+                            job.setQuery_id(queryid);
 
+                            if(job.getStatus()==1){
+                                if(ms.updateProcesses(job)!=0){
+                                    GlobelConfig.mapresult.put(queryid, job);
+                                    pool.execute(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            es.excuteCkTask(job);
+                                        }
+                                    });
+                                }else{
+                                    logger.error("更新数据库状态失败");
 
+                                }
+                            }
+                            else{
+                                if(ms.updateProcesses(job)!=0){
+                                    logger.error("任务不能执行");
+                                }else{
+                                    logger.error("更新数据库状态失败");
+
+                                }
+                            }
                         }
                     } else {
                         logger.info("无待执行任务");

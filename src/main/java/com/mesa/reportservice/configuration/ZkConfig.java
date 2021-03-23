@@ -1,6 +1,6 @@
 package com.mesa.reportservice.configuration;
 
-import com.mesa.reportservice.util.Logs;
+import cn.hutool.log.Log;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 public class ZkConfig {
 
     private final ZkProperties zkproperties;
+    Log logger = Log.get();
 
     @Autowired
     public ZkConfig(ZkProperties zkproperties) {
@@ -41,7 +42,7 @@ public class ZkConfig {
         if (zkproperties.getOpen() == 0) {
             client.start();
         } else {
-            Logs.info("repoertservice start local");
+            logger.info("repoertservice start local");
         }
 
         return client;

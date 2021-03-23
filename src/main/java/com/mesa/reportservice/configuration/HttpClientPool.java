@@ -1,6 +1,5 @@
 package com.mesa.reportservice.configuration;
 
-import com.mesa.reportservice.util.Logs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -139,7 +138,6 @@ public class HttpClientPool {
      */
     @Bean(name = "RequestLongConfig")
     public RequestConfig getRequestConfig(@Qualifier("builder") RequestConfig.Builder builder) {
-        Logs.debug("httpclient  success");
         return builder.build();
     }
 
@@ -152,7 +150,6 @@ public class HttpClientPool {
      */
     @Bean(name = "RequestShortConfig")
     public RequestConfig getRequestShortConfig(@Qualifier("builderShort") RequestConfig.Builder builder) {
-        Logs.debug("httpclientshort  success");
         return builder.build();
     }
 

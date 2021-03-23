@@ -1,10 +1,10 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.log.Log;
 import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.configuration.HbaseProperties;
 import com.mesa.reportservice.service.HbaseService;
-import com.mesa.reportservice.util.Logs;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -24,6 +24,22 @@ public class HbaseServiceImpl implements HbaseService {
 
     @Autowired
     private HbaseProperties hbproperties;
+    Log logger = Log.get();
+
+
+    private String getRowKey(String query_id){
+
+        String rowKey = query_id;
+        try {
+            String[] queryIdArray = query_id.split(":");
+            rowKey=queryIdArray[1];
+        }
+        catch (Exception e){
+            logger.error(e.toString());
+        }
+        return rowKey;
+
+    }
 
     @Override
     public Boolean put(JobEntity jobEntity) throws Exception {
@@ -31,7 +47,7 @@ public class HbaseServiceImpl implements HbaseService {
 
         Boolean status = false;
         try(Table table =hbaseConnection.getTable(TableName.valueOf(hbproperties.getTable()))) {
-            Put put = new Put(Bytes.toBytes(jobEntity.getQuery_id()));
+            Put put = new Put(Bytes.toBytes(getRowKey(jobEntity.getQuery_id())));
             put.addColumn(Bytes.toBytes("response"), Bytes.toBytes("result"), Bytes.toBytes(jobEntity.getResult()));
             put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("result_id"), Bytes.toBytes(jobEntity.getResultId()));
 
@@ -50,9 +66,11 @@ public class HbaseServiceImpl implements HbaseService {
             table.put(put);
             status =true;
         }catch(Exception e) {
-            Logs.error(e.toString());
+            logger.error(e.toString());
         }
         return status;
-    }
+}
+
+
 
 }

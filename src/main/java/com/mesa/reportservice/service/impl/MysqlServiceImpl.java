@@ -1,10 +1,10 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.log.Log;
 import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.mapper.ReportResultMapper;
 import com.mesa.reportservice.service.MysqlService;
 import com.mesa.reportservice.util.DateUtil;
-import com.mesa.reportservice.util.Logs;
 import com.mesa.reportservice.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @Service
 public class MysqlServiceImpl implements MysqlService {
-    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    Log logger = Log.get();
 
     @Autowired
     public ReportResultMapper rrm;

@@ -1,5 +1,6 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.log.Log;
 import com.alibaba.fastjson.JSON;
 import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.bean.JobEntity;
@@ -18,7 +19,7 @@ import java.util.Map;
 @Service
 
 public class ExcuteProcessServiceImpl implements ExcuteProcessService {
-    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    Log logger = Log.get();
 
 
     @Autowired

@@ -1,5 +1,6 @@
 package com.mesa.reportservice.configuration;
 
+import cn.hutool.log.Log;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.concurrent.Executors;
 public class HbaseFactory {
     private final HbaseProperties hbproperties;
 
-    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    Log logger = Log.get();
 
     @Autowired
     public HbaseFactory(HbaseProperties hbproperties) {

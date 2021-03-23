@@ -1,6 +1,5 @@
 package com.mesa.reportservice.configuration;
 
-import com.mesa.reportservice.util.Logs;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 

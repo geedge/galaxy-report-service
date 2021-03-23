@@ -1,10 +1,10 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.log.Log;
 import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.configuration.ZkProperties;
 import com.mesa.reportservice.service.MonitorService;
 import com.mesa.reportservice.service.ZkService;
-import com.mesa.reportservice.util.Logs;
 import io.micrometer.core.instrument.*;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.curator.framework.CuratorFramework;
@@ -26,7 +26,7 @@ import java.util.Map;
 @Service
 public class MonitorServiceImpl implements MonitorService {
 
-    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    Log logger = Log.get();
 
     @Autowired
     MeterRegistry registry;

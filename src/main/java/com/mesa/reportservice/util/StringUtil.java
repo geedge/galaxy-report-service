@@ -332,17 +332,7 @@ public final class StringUtil extends StringUtils {
      * @param msg 要加密的字符串
      * @return 返回加密后的24位字符, 如果解析出现异常将返回<code>null</code>.
      */
-    public static String md5(String msg) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] b = md.digest(msg.getBytes());
-            BASE64Encoder encoder = new BASE64Encoder();
-            return encoder.encode(b);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return EMPTY;
-        }
-    }
+
 
     public static String getBase64(String msg) {
         try {
@@ -397,35 +387,7 @@ public final class StringUtil extends StringUtils {
      * @param webSiteUrl url 地址
      * @return 返回截取后的域名地址
      */
-    public static String getDomain(String webSiteUrl) {
-        String url;
 
-        if (isEmpty(webSiteUrl)) {
-            return EMPTY;
-        }
-
-        if (webSiteUrl.indexOf("http://") >= 0) {
-            url = webSiteUrl.substring("http://".length(), webSiteUrl.length());
-        } else if (webSiteUrl.indexOf("https://", 0) >= 0) {
-            url = webSiteUrl.substring("https://".length(), webSiteUrl.length());
-        } else if (webSiteUrl.indexOf("ftp://", 0) >= 0) {
-            url = webSiteUrl.substring("ftp://".length(), webSiteUrl.length());
-        } else {
-            url = webSiteUrl;
-        }
-
-        if (url.indexOf("/", 0) >= 0) {
-            url = url.substring(0, url.indexOf("/", 1));
-        }
-        if (url.indexOf("www.") == 0) {
-            url = url.substring(url.indexOf(".") + 1, url.length());
-        }
-        if (url.indexOf("?") >= 0) {
-            url = url.substring(0, url.indexOf("?"));
-        }
-
-        return url;
-    }
 
     /**
      * <p>按照规则解析字符串得到一个数组.</p>

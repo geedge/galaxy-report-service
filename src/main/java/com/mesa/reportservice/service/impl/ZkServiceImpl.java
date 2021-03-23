@@ -1,9 +1,9 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.log.Log;
 import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.configuration.ZkProperties;
 import com.mesa.reportservice.service.ZkService;
-import com.mesa.reportservice.util.Logs;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.ExistsBuilder;
 import org.apache.zookeeper.CreateMode;
@@ -22,6 +22,7 @@ public class ZkServiceImpl implements ZkService {
     private CuratorFramework curatorConnect;
     @Autowired
     private ZkProperties zp;
+    Log logger = Log.get();
 
 
     @Override
@@ -55,7 +56,7 @@ public class ZkServiceImpl implements ZkService {
                         return true;
 
                     } else {
-                        Logs.debug("不是主节点");
+                        logger.debug("不是主节点");
                         return false;
                     }
                 }
@@ -63,7 +64,7 @@ public class ZkServiceImpl implements ZkService {
                 return true;
             }
         } catch (Exception e) {
-            Logs.error(e.toString());
+            logger.error(e.toString());
             return true;
         }
     }

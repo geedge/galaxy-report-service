@@ -1,11 +1,12 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.core.util.URLUtil;
+import cn.hutool.log.Log;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.configuration.ClickhouseConfig;
 import com.mesa.reportservice.service.ClickhouseService;
-import com.mesa.reportservice.util.Logs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -44,14 +45,14 @@ public class ClickhouseServiceImpl implements ClickhouseService {
     @Autowired
     @Qualifier("RequestLongConfig")
     private RequestConfig RequestLongConfig;
-    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    Log logger = Log.get();
 
 
     @Override
     public String getQueryId(String resultId, String query) throws Exception {
 
 
-        String url = "http://" + clickhouseConfig.getGateway_ip().trim() + "/sys/engine/queryIds?resultId=" + resultId + "&query=";
+        String url =  URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/queryIds?resultId=" + resultId + "&query=");
         String sql = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
         url = url+sql;
         HttpGet httpGet = new HttpGet(url);
@@ -70,7 +71,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
 
             }
         }catch (Exception e){
-            logger.error(e.toString());
+            logger.error("获取queryid失败"+e.toString());
             throw new Exception();
         }
     }
@@ -85,7 +86,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
     public HttpResult queryForExcute(String resultId, String query) throws Exception,OutOfMemoryError{
         // 声明httpPost请求
 
-        String url = "http://" + clickhouseConfig.getGateway_ip().trim() + "/?option=long-term&resultId=" + resultId + "&query=";
+        String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/?option=long-term&resultId=" + resultId + "&query=");
         query = URLEncoder.encode(query , "utf8").replaceAll("\\+", "%20");
         String jobsql = url + query;
         HttpGet httpGet = new HttpGet(jobsql);
@@ -111,7 +112,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
     @Override
     public HttpResult queryForProcess(String queryId) throws Exception {
         // 声明httpPost请求
-        String url = "http://" + clickhouseConfig.getGateway_ip().trim() + "/sys/engine/processes/"+queryId;
+        String url = URLUtil.normalize( clickhouseConfig.getGateway_ip().trim() + "/sys/engine/processes/"+queryId);
 
         HttpGet httpGet = new HttpGet(url);
         // 加入配置信息
@@ -137,7 +138,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
     @Override
     public HttpResult queryForCancel(String queryId) throws Exception {
 
-        String url = "http://" + clickhouseConfig.getGateway_ip().trim() + "/sys/engine/tasks/"+queryId;
+        String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/tasks/"+queryId);
         // 声明httpPost请求
         HttpDelete HttpDelete = new HttpDelete(url);
         // 加入配置信息

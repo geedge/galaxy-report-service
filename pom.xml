@@ -10,8 +10,9 @@
 	</parent>
 	<groupId>com.mesa</groupId>
 	<artifactId>galaxy-report-service</artifactId>
-	<version>20.12.20</version>
+	<version>21.03.12</version>
 	<name>galaxy-report-service</name>
+	<packaging>jar</packaging>
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
@@ -24,10 +25,29 @@
 		<docker.registry.port>9080</docker.registry.port>
 		<docker.image.prefix>tsg/galaxy</docker.image.prefix>
 	</properties>
+	<!-- 设置 jitpack.io 仓库 -->
+	<repositories>
+		<repository>
+			<id>nexus</id>
+			<name>Team Nexus Repository</name>
+			<url>http://192.168.40.125:8099/content/groups/public</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>nexus</id>
+			<name>Team Nexus Repository</name>
+			<url>http://192.168.40.125:8099/content/groups/public</url>
+		</pluginRepository>
+	</pluginRepositories>
 
 
 	<dependencies>
+
+
 		<dependency>
+
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 			<exclusions>
@@ -192,9 +212,18 @@
 					<artifactId>log4j-over-slf4j</artifactId>
 					<groupId>org.slf4j</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>servlet-api</artifactId>
+					<groupId>javax.servlet</groupId>
+				</exclusion>
+
 			</exclusions>
 		</dependency>
-
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-all</artifactId>
+			<version>5.5.2</version>
+		</dependency>
 	</dependencies>
 
 
@@ -204,6 +233,44 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.2.6.RELEASE</version>
+			</plugin>
+			<plugin>
+				<groupId>io.github.zlika</groupId>
+				<artifactId>reproducible-build-maven-plugin</artifactId>
+				<version>0.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>strip-jar</goal>
+						</goals>
+						<phase>install</phase>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>com.mesalab.xjar-maven-plugin</groupId>
+				<artifactId>mesalab-xjar-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build</goal>
+						</goals>
+						<phase>install</phase>
+						<configuration>
+							<!-- 配置加密密码 ，推荐使用命令指定 -->
+							<password>io.xjar</password>
+							<!-- 配置不加密项 -->
+							<excludes>
+								<exclude>
+									static/**
+								</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>com.spotify</groupId>
@@ -219,14 +286,14 @@
 					<forceTags>true</forceTags>
 
 					<imageTags>
-						<imageTag>20.12.20</imageTag>
+						<imageTag>21.03.12</imageTag>
 					</imageTags>
 					<!--远程docker构建，供dockerfile使用-->
 					<dockerHost>http://192.168.40.153:2375</dockerHost>
 					<dockerDirectory>docker</dockerDirectory>
 					<buildArgs>
-						<JDK_IMAGE>192.168.40.153:9080/common/jdk:1.8.0_73</JDK_IMAGE>
-						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+						<JDK_IMAGE>192.168.40.153:9080/common/jdk:1.8.0_73-go</JDK_IMAGE>
+						<JAR_FILE>${project.build.finalName}.xjar</JAR_FILE>
 					</buildArgs>
 
 
@@ -235,7 +302,8 @@
 						<resource>
 							<targetPath>/</targetPath>
 							<directory>${project.build.directory}</directory>
-							<include>${project.build.finalName}.jar</include>
+							<include>${project.build.finalName}.xjar</include>
+							<include>xjar.go</include>
 						</resource>
 
 						<resource>
@@ -246,6 +314,7 @@
 
 				</configuration>
 			</plugin>
+
 		</plugins>
 	</build>
 
