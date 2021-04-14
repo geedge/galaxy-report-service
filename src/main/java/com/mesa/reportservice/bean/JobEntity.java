@@ -256,7 +256,6 @@ public class JobEntity implements Cloneable {
         try {
             o = (JobEntity) super.clone();
         } catch (CloneNotSupportedException e) {
-            System.out.println(e.toString());
         }
         return o;
     }

@@ -1,11 +1,16 @@
 package com.mesa.reportservice.configuration;
 
+import com.alibaba.nacos.api.config.ConfigType;
+import com.alibaba.nacos.api.config.annotation.NacosConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by wk1 on 2020/1/6.
  */
-@ConfigurationProperties(prefix = "zookeeper")
+//@ConfigurationProperties(prefix = "zookeeper")
+@Component
+@NacosConfigurationProperties(prefix = "zookeeper", dataId = "${nacos.config.data-id}", groupId = "${nacos.config.group}", type = ConfigType.YAML, autoRefreshed = true)
 public class ZkProperties {
 
     private int open;

@@ -1,12 +1,18 @@
 package com.mesa.reportservice.configuration;
 
+import com.alibaba.nacos.api.config.ConfigType;
+import com.alibaba.nacos.api.config.annotation.NacosConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by Administrator on 2020/3/10.
  */
 
-@ConfigurationProperties(prefix = "hbase")
+//@ConfigurationProperties(prefix = "hbase")
+@Component
+@NacosConfigurationProperties(prefix = "hbase", dataId = "${nacos.config.data-id}", groupId = "${nacos.config.group}", type = ConfigType.YAML, autoRefreshed = true)
+
 public class HbaseProperties {
 
     private String zookeeper_quorum;

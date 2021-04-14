@@ -28,12 +28,12 @@ public class ZkServiceImpl implements ZkService {
     @Override
     public boolean isMaster() {
 
+
         try {
             if (zp.getOpen() == 0) {
                 boolean isZkCuratorStarted = curatorConnect.isStarted();
                 String nodePath = "/masterip";
-                System.out.println("当前客户端的状态：" + (isZkCuratorStarted ? "连接中..." : "已关闭..."));
-                ExistsBuilder eb = curatorConnect.checkExists();
+                logger.debug("当前客户端的状态：" + (isZkCuratorStarted ? "连接中..." : "已关闭..."));
                 Stat statExist = curatorConnect.checkExists().forPath(nodePath);
                 if (statExist == null) {
                     byte[] data = GlobelConfig.zkuuid.getBytes();  // 节点数据
@@ -41,15 +41,17 @@ public class ZkServiceImpl implements ZkService {
                     String result = curatorConnect.create().creatingParentsIfNeeded()  // 创建父节点，也就是会递归创建
                             .withMode(CreateMode.EPHEMERAL)  // 节点类型
                             .forPath(nodePath, data);
+                    logger.debug(result);
+
                     return true;
 
                 } else {
-                    System.out.println(nodePath + " 节点存在");
+                    logger.debug(nodePath + " 节点存在");
                     Stat stat = new Stat();
 
                     byte[] nodeData = curatorConnect.getData().storingStatIn(stat).forPath(nodePath);
-                    String masterid = new String(nodeData).trim();
-                    System.out.println("uuid="+ GlobelConfig.zkuuid+" 节点 " + nodePath + " 的数据为：" + new String(nodeData));
+                    String masterid = new String(nodeData, "UTF-8").trim();
+                    logger.debug("uuid=" + GlobelConfig.zkuuid + " 节点 " + nodePath + " 的数据为：" + masterid);
 
                     if (masterid.equals(GlobelConfig.zkuuid)) {
 
@@ -63,10 +65,13 @@ public class ZkServiceImpl implements ZkService {
             } else {
                 return true;
             }
+
         } catch (Exception e) {
             logger.error(e.toString());
-            return true;
+            return false;
         }
     }
 
 }
+
+

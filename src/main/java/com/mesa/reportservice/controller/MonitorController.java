@@ -8,7 +8,9 @@ import com.mesa.reportservice.service.MysqlService;
 import com.mesa.reportservice.service.ZkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.mesa.reportservice.configuration.ZkProperties;
 
 import java.util.Map;
 
@@ -24,6 +26,11 @@ public class MonitorController {
     private MysqlService mysqlService;
     @Autowired
     private ZkService zs;
+    @Autowired
+    private GlobelConfig gc;
+    @Autowired
+            private ZkProperties zkProperties;
+
     Log logger = Log.get();
 
 
@@ -39,14 +46,14 @@ public class MonitorController {
             me.setExcuteingJobNum(numMap.get("excuteingNum"));
             me.setTodaySuccessJobNum(numMap.get("todaySuccessNum"));
             me.setTodayErrorJobNum(numMap.get("todayErrorNum"));
-            me.setJoblist(GlobelConfig.mapresult);
+            me.setJoblist(gc.getMapresult());
             if(zs.isMaster()){
                 me.setStatus("active");
             }
             else{
                 me.setStatus("standby");
             }
-            GlobelConfig.mapresult.size();
+            gc.getMapresult().size();
             Object obj = JSONArray.toJSON(me);
             json = obj.toString();
         } catch (Exception e) {
@@ -56,6 +63,5 @@ public class MonitorController {
 
             return json;
     }
-
 
 }

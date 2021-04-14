@@ -12,5 +12,5 @@ import java.net.InetAddress;
 public interface ZkService {
 
 
-     boolean isMaster();
+     boolean isMaster() throws Exception;
 }

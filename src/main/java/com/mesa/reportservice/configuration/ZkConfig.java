@@ -14,17 +14,13 @@ import org.springframework.context.annotation.Configuration;
  * Created by wk1 on 2020/1/6.
  */
 @Configuration
-@EnableConfigurationProperties(ZkProperties.class)
-
 public class ZkConfig {
 
-    private final ZkProperties zkproperties;
+    @Autowired
+    private  ZkProperties zkproperties;
     Log logger = Log.get();
 
-    @Autowired
-    public ZkConfig(ZkProperties zkproperties) {
-        this.zkproperties = zkproperties;
-    }
+
 
     @Bean(name = "curatorConnect")
     public CuratorFramework CuratorConnect() {

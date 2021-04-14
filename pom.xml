@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.4.RELEASE</version>
+		<version>2.2.6.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.mesa</groupId>
 	<artifactId>galaxy-report-service</artifactId>
-	<version>21.03.12</version>
+	<version>21.04.07</version>
 	<name>galaxy-report-service</name>
 	<packaging>jar</packaging>
 	<description>Demo project for Spring Boot</description>
@@ -224,6 +224,12 @@
 			<artifactId>hutool-all</artifactId>
 			<version>5.5.2</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.alibaba.boot</groupId>
+			<artifactId>nacos-config-spring-boot-starter</artifactId>
+			<version>0.2.7</version>
+		</dependency>
 	</dependencies>
 
 
@@ -286,13 +292,14 @@
 					<forceTags>true</forceTags>
 
 					<imageTags>
-						<imageTag>21.03.12</imageTag>
+						<imageTag>21.04.07</imageTag>
 					</imageTags>
 					<!--远程docker构建，供dockerfile使用-->
 					<dockerHost>http://192.168.40.153:2375</dockerHost>
 					<dockerDirectory>docker</dockerDirectory>
 					<buildArgs>
-						<JDK_IMAGE>192.168.40.153:9080/common/jdk:1.8.0_73-go</JDK_IMAGE>
+						<JDK_IMAGE>192.168.40.153:9080/common/jdk:1.8.0_73-jre</JDK_IMAGE>
+						<GO_IMAGE>192.168.40.153:9080/common/golang:1.15.6</GO_IMAGE>
 						<JAR_FILE>${project.build.finalName}.xjar</JAR_FILE>
 					</buildArgs>
 

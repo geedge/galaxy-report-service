@@ -43,21 +43,11 @@ public class MonitorServiceImpl implements MonitorService {
     }
     @Override
     public void addSuccess() {
-
-        try{
             counter_report_success.increment();
-        } catch (Exception e) {
-            logger.error(e.toString());
-        }
     }
     @Override
     public void addFail() {
-
-        try{
             counter_report_fail.increment();
-        } catch (Exception e) {
-            logger.error(e.toString());
-        }
     }
 
 

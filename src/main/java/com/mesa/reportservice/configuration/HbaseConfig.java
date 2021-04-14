@@ -1,5 +1,7 @@
 package com.mesa.reportservice.configuration;
 
+import com.alibaba.nacos.api.config.ConfigType;
+import com.alibaba.nacos.api.config.annotation.NacosConfigurationProperties;
 import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.util.StringUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -11,7 +13,8 @@ import java.net.URL;
  * Created by wk1 on 2019/5/27.
  */
 @Component
-@ConfigurationProperties(prefix = "hbase")
+@NacosConfigurationProperties(prefix = "hbase", dataId = "${nacos.config.data-id}", groupId = "${nacos.config.group}", type = ConfigType.YAML, autoRefreshed = true)
+
 public class HbaseConfig {
 
     private static String columefamily;

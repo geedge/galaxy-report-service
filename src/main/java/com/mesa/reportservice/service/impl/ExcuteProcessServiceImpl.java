@@ -4,12 +4,12 @@ import cn.hutool.log.Log;
 import com.alibaba.fastjson.JSON;
 import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.bean.JobEntity;
-import com.mesa.reportservice.configuration.ClickhouseConfig;
 import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +30,8 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     private HbaseService hs;
     @Autowired
     private MonitorService mons;
-
+    @Autowired
+    private GlobelConfig gc;
     @Override
     public void updateResultMessage(JobEntity je) {
 
@@ -104,7 +105,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
 
         } finally {
             saveToMonitor(je);
-            GlobelConfig.mapresult.remove(je.getQuery_id());
+            gc.getMapresult().remove(je.getQuery_id());
         }
 
 
@@ -120,46 +121,45 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     }
 
     @Override
-    public void killQuery(JobEntity jobEntity) {
-        try {
+    public void killQuery(JobEntity jobEntity) throws IOException {
+
             cs.queryForCancel(jobEntity.getQuery_id());
 
-        } catch (Exception e) {
-            logger.error(e.toString());
-        }
     }
 
     @Override
-    public void updateProcessMessage(JobEntity job) {
-        HttpResult hr = null;
-        try {
-            hr = cs.queryForProcess(job.getQuery_id());
-            String rs = hr.getBody().trim();
-            Map data = JSON.parseObject(rs);
+    public void updateProcessMessage(JobEntity job) throws IOException {
 
-            if (!rs.isEmpty() && !rs.equals("")) {
-                List listdata = (List) data.get("data");
-                if (null != listdata && listdata.size() > 0) {
-                    Map map = JSON.parseObject(JSON.toJSONString(listdata.get(0)));
-                    long read_rows = Long.parseLong(map.get("rows_read").toString());
-                    float elapsed = Float.parseFloat(map.get("elapsed").toString());
-                    double persent = Double.parseDouble(map.get("percent").toString());
-                    int result = (int) (persent * 100);
-                    job.setExcuteTime((int) elapsed);
-                    job.setExcuteRow(read_rows);
-                    job.setExcuteProcess(result);
-                    if (job.getExcuteRow() != 0 || job.getExcuteTime() != 0) {
-                        ms.updateProcesses(job);
+            HttpResult hr = cs.queryForProcess(job.getQuery_id());
+            if (hr!=null) {
+                String rs = hr.getBody().trim();
+                Map data = JSON.parseObject(rs);
+
+                if (!rs.isEmpty() && !rs.equals("")) {
+                    List listdata = (List) data.get("data");
+                    if (null != listdata && listdata.size() > 0) {
+                        Map map = JSON.parseObject(JSON.toJSONString(listdata.get(0)));
+                        long read_rows = Long.parseLong(map.get("rows_read").toString());
+                        float elapsed = Float.parseFloat(map.get("elapsed").toString());
+                        double persent = Double.parseDouble(map.get("percent").toString());
+                        int result = (int) (persent * 100);
+                        job.setExcuteTime((int) elapsed);
+                        job.setExcuteRow(read_rows);
+                        job.setExcuteProcess(result);
+                        if (job.getExcuteRow() != 0 || job.getExcuteTime() != 0) {
+                            ms.updateProcesses(job);
+                        }
+                    } else {
+                        logger.info("responsedata is null");
                     }
                 } else {
-                    logger.info("responsedata is null");
+                    logger.error("responsebody is null");
                 }
-            } else {
+            }
+            else{
                 logger.error("responsebody is null");
             }
-        } catch (Exception e) {
-            logger.error(e.toString());
-        }
+
     }
     /**
      * 结果存入hbase
@@ -185,16 +185,11 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
      * promethus记录结果
      */
     public void saveToMonitor(JobEntity entity) {
-
-        try {
             if (entity.getStatus() == 2) {
 
                 mons.addSuccess();
             } else {
                 mons.addFail();
             }
-        } catch (Exception e) {
-            logger.error("监控结果失败" + e.toString());
-        }
     }
 }

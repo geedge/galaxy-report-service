@@ -1,9 +1,9 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.log.Log;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.configuration.ClickhouseConfig;
 import com.mesa.reportservice.service.ClickhouseService;
@@ -11,16 +11,13 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
@@ -49,31 +46,37 @@ public class ClickhouseServiceImpl implements ClickhouseService {
 
 
     @Override
-    public String getQueryId(String resultId, String query) throws Exception {
+    public String getQueryId(String resultId, String query) {
+
+        CloseableHttpResponse response = null;
+        String query_id = "";
+        try {
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/queryIds?resultId=" + resultId + "&query=");
+            String sql = null;
+            sql = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
+            url = url + sql;
+            HttpGet httpGet = new HttpGet(url);
+            // 加入配置信息
+            httpGet.setConfig(RequestshortConfig);
 
 
-        String url =  URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/queryIds?resultId=" + resultId + "&query=");
-        String sql = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
-        url = url+sql;
-        HttpGet httpGet = new HttpGet(url);
-        // 加入配置信息
-        httpGet.setConfig(RequestshortConfig);
-        try(CloseableHttpResponse response = this.httpClient.execute(httpGet) ){
-            if(response.getStatusLine().getStatusCode()!=200){
-                throw new Exception();
-            }
-            else {
+            response = this.httpClient.execute(httpGet);
+            if (response.getStatusLine().getStatusCode() != 200) {
+                throw new IOException();
+            } else {
                 Map data = JSON.parseObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
                 List listdata = (List) data.get("data");
                 Map map = JSON.parseObject(JSON.toJSONString(listdata.get(0)));
-                String  query_id = map.get("queryId").toString();
-                return query_id;
+                query_id = map.get("queryId").toString();
 
             }
-        }catch (Exception e){
-            logger.error("获取queryid失败"+e.toString());
-            throw new Exception();
+        } catch (IOException e) {
+            logger.error(e.toString());
+
+        } finally {
+            IoUtil.close(response);
         }
+        return query_id;
     }
 
     /**
@@ -83,80 +86,86 @@ public class ClickhouseServiceImpl implements ClickhouseService {
      * @throws Exception
      */
     @Override
-    public HttpResult queryForExcute(String resultId, String query) throws Exception,OutOfMemoryError{
+    public HttpResult queryForExcute(String resultId, String query) throws UnsupportedEncodingException {
         // 声明httpPost请求
+        CloseableHttpResponse response = null;
+        // 发起请求
+        HttpResult rs = null;
+        try {
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/?option=long-term&resultId=" + resultId + "&query=");
+            query = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
+            String jobsql = url + query;
+            HttpGet httpGet = new HttpGet(jobsql);
+            // 加入配置信息
+            httpGet.setConfig(RequestLongConfig);
 
-        String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/?option=long-term&resultId=" + resultId + "&query=");
-        query = URLEncoder.encode(query , "utf8").replaceAll("\\+", "%20");
-        String jobsql = url + query;
-        HttpGet httpGet = new HttpGet(jobsql);
-        // 加入配置信息
-        httpGet.setConfig(RequestLongConfig);
 
-        try(CloseableHttpResponse response = this.httpClient.execute(httpGet) ){
-            HttpResult rs = new HttpResult();
+            response = this.httpClient.execute(httpGet);
+            rs = new HttpResult();
             rs.setCode(response.getStatusLine().getStatusCode());
             rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
-            return rs;
 
-        }catch (Exception e){
+        } catch (IOException e) {
             logger.error(e.toString());
-            throw new Exception();
+
+        } finally {
+            IoUtil.close(response);
         }
-
-    }
-
-
-
-
-    @Override
-    public HttpResult queryForProcess(String queryId) throws Exception {
-        // 声明httpPost请求
-        String url = URLUtil.normalize( clickhouseConfig.getGateway_ip().trim() + "/sys/engine/processes/"+queryId);
-
-        HttpGet httpGet = new HttpGet(url);
-        // 加入配置信息
-        httpGet.setConfig(RequestshortConfig);
-
-        // 发起请求
-        try(CloseableHttpResponse response = this.httpClient.execute(httpGet) ){
-
-            HttpResult rs = new HttpResult();
-            rs.setCode(response.getStatusLine().getStatusCode());
-            rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
-
-            //Thread.sleep(120);
-            return rs;
-
-    }catch (Exception e){
-        logger.error(e.toString());
-        throw new Exception();
-    }
+        return rs;
     }
 
 
     @Override
-    public HttpResult queryForCancel(String queryId) throws Exception {
-
-        String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/tasks/"+queryId);
+    public HttpResult queryForProcess(String queryId) {
         // 声明httpPost请求
-        HttpDelete HttpDelete = new HttpDelete(url);
-        // 加入配置信息
-        HttpDelete.setConfig(RequestshortConfig);
-
+        CloseableHttpResponse response = null;
         // 发起请求
-        try(CloseableHttpResponse response = this.httpClient.execute(HttpDelete)) {
+        HttpResult rs = null;
+        try {
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/processes/" + queryId);
 
-            HttpResult rs = new HttpResult();
+            HttpGet httpGet = new HttpGet(url);
+            // 加入配置信息
+            httpGet.setConfig(RequestshortConfig);
+
+
+            response = this.httpClient.execute(httpGet);
+            rs = new HttpResult();
             rs.setCode(response.getStatusLine().getStatusCode());
             rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
-            return rs;
+        } catch (IOException e) {
+            logger.error(e.toString());
+        } finally {
+            IoUtil.close(response);
         }
-        catch (Exception e){
-        logger.error(e.toString());
-            throw new Exception();
+        return rs;
     }
 
+
+    @Override
+    public HttpResult queryForCancel(String queryId) {
+
+        CloseableHttpResponse response = null;
+        HttpResult rs = null;
+        try {
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/tasks/" + queryId);
+            // 声明httpPost请求
+            HttpDelete HttpDelete = new HttpDelete(url);
+            // 加入配置信息
+            HttpDelete.setConfig(RequestshortConfig);
+
+            // 发起请求
+
+            response = this.httpClient.execute(HttpDelete);
+            rs = new HttpResult();
+            rs.setCode(response.getStatusLine().getStatusCode());
+            rs.setBody(EntityUtils.toString(response.getEntity(), "UTF-8"));
+        } catch (IOException e) {
+            logger.error(e.toString());
+        } finally {
+            IoUtil.close(response);
+        }
+        return rs;
     }
 
     public CloseableHttpClient getHttpClient() {

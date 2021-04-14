@@ -1,5 +1,7 @@
 package com.mesa.reportservice.configuration;
 
+import com.alibaba.nacos.api.config.ConfigType;
+import com.alibaba.nacos.api.config.annotation.NacosConfigurationProperties;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -13,7 +15,9 @@ import org.springframework.stereotype.Component;
  * Created by wk1 on 2019/5/15.
  */
 @Component
-@ConfigurationProperties(prefix = "http")
+//@ConfigurationProperties(prefix = "http")
+@NacosConfigurationProperties(prefix = "http", dataId = "${nacos.config.data-id}", groupId = "${nacos.config.group}", type = ConfigType.YAML, autoRefreshed = true)
+
 public class HttpClientPool {
 
     private Integer maxTotal;
@@ -24,7 +28,7 @@ public class HttpClientPool {
 
     private Integer connectionRequestTimeout;
 
-    public static Integer socketTimeout;
+    private Integer socketTimeout;
 
     private boolean staleConnectionCheckEnabled;
 
@@ -57,6 +61,10 @@ public class HttpClientPool {
 
     public void setSocketTimeoutShort(Integer socketTimeoutShort) {
         this.socketTimeoutShort = socketTimeoutShort;
+    }
+
+    public Integer getSocketTimeout() {
+        return socketTimeout;
     }
 
     /**

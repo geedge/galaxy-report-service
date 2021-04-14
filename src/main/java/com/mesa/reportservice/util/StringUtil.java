@@ -319,43 +319,8 @@ public final class StringUtil extends StringUtils {
         return isEmpty(object) ? defaultValue : object;
     }
 
-    /**
-     * <p>对字符串进行MD5加密.</p>
-     * <p>
-     * 一般作为密码的处理方式,首先通过MD5进行加密，然后将字符串进行Base64编码获得所需字符.
-     * </p>
-     * <pre>
-     * String str = "ceshi";
-     * StringUtil.md5(str) = "zBfDDNERxyFfyPUfh5Dg4Q=="
-     * </pre>
-     *
-     * @param msg 要加密的字符串
-     * @return 返回加密后的24位字符, 如果解析出现异常将返回<code>null</code>.
-     */
 
 
-    public static String getBase64(String msg) {
-        try {
-
-            BASE64Encoder encoder = new BASE64Encoder();
-            return encoder.encode(msg.getBytes());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return EMPTY;
-        }
-    }
-
-    /**
-     * <p>截取处理字符串,当字符串超过指定的截取长度时,用“......”补充</p>
-     * <pre>
-     * String str = "中华人民共和国";
-     * StringUtil.getMoreString(str, 6) = "中华人民共和......"
-     * </pre>
-     *
-     * @param text   字符串数据
-     * @param length 截取的长度值
-     * @return 返回处理后字符
-     */
     public static String getMoreString(String text, int length) {
         StringBuilder textBuilder = new StringBuilder();
 

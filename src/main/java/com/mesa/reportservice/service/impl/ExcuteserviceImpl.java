@@ -4,14 +4,11 @@ import cn.hutool.log.Log;
 import com.alibaba.fastjson.JSON;
 import com.mesa.reportservice.bean.HttpResult;
 import com.mesa.reportservice.bean.JobEntity;
-import com.mesa.reportservice.configuration.ClickhouseConfig;
 import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.service.ClickhouseService;
 import com.mesa.reportservice.service.ExcuteService;
-import com.mesa.reportservice.service.FormatService;
 import com.mesa.reportservice.service.MysqlService;
 import io.netty.channel.ConnectTimeoutException;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,16 +28,15 @@ public class ExcuteserviceImpl implements ExcuteService {
     private ClickhouseService cs;
     @Autowired
     private MysqlService ms;
-
     @Autowired
-    private FormatService fs;
+    private GlobelConfig gc;
 
     @Override
     public void excuteCkTask(JobEntity job) {
 
 
 
-        logger.info("execute queryid=" + job.getQuery_id() + " sql=" + job.getQuerySql() + "mapresult size=" + GlobelConfig.mapresult.size());
+        logger.info("execute queryid=" + job.getQuery_id() + " sql=" + job.getQuerySql() + "mapresult size=" + gc.getMapresult().size());
         HttpResult hr = new HttpResult();
         int k = 3;
         do {

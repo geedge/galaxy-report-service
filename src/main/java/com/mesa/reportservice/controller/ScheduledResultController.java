@@ -5,7 +5,6 @@ import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.configuration.GlobelConfig;
 import com.mesa.reportservice.configuration.HttpClientPool;
 import com.mesa.reportservice.service.*;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,6 +36,11 @@ public class ScheduledResultController {
     private ZkService zs;
     @Autowired
     private ClickhouseService cs;
+    @Autowired
+    private HttpClientPool hc;
+    @Autowired
+    private GlobelConfig gc;
+
 
     @Scheduled(cron = "${scan.result.scheduled.plan}")
     public void getExcuteResult() {
@@ -51,19 +55,19 @@ public class ScheduledResultController {
                     sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
                     sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
 
-                    String queryid = cs.getQueryId(jobEntity.getResultId().toString(),sql);
+                    String queryid = cs.getQueryId(jobEntity.getResultId().toString(), sql);
                     jobEntity.setQuery_id(queryid);
 
                     if (jobEntity.getIsValid() == 0) {
                         eps.killQuery(jobEntity);
-                        GlobelConfig.mapresult.get(jobEntity.getQuery_id()).setIsValid(0);
-                    } else if (!GlobelConfig.mapresult.containsKey(jobEntity.getQuery_id())) {
+                        gc.getMapresult().get(jobEntity.getQuery_id()).setIsValid(0);
+                    } else if (!gc.getMapresult().containsKey(jobEntity.getQuery_id())) {
                         eps.reSet(jobEntity);
                     }
-                    if (GlobelConfig.mapresult.containsKey(jobEntity.getQuery_id())) {
+                    if (gc.getMapresult().containsKey(jobEntity.getQuery_id())) {
                         if (jobEntity.getIsValid() == 0) {
                             eps.killQuery(jobEntity);
-                            GlobelConfig.mapresult.get(jobEntity.getQuery_id()).setIsValid(0);
+                            gc.getMapresult().get(jobEntity.getQuery_id()).setIsValid(0);
                         }
                     } else {
                         eps.reSet(jobEntity);
@@ -71,90 +75,83 @@ public class ScheduledResultController {
 
                 }
                 //遍历内存中的任务对状态1的更新进度，其他更新数据库的状态
-                for (Map.Entry<String, JobEntity> entry : GlobelConfig.mapresult.entrySet()) {
+                for (Map.Entry<String, JobEntity> entry : gc.getMapresult().entrySet()) {
                     logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getStatus());
                     long currentTime = System.currentTimeMillis();
-                    long excutetime =currentTime-entry.getValue().getBeginTime();
-                    logger.info("excute time="+excutetime+"ttl_time="+HttpClientPool.socketTimeout);
-                    if (entry.getValue().getStatus()==1 && excutetime> HttpClientPool.socketTimeout+1){
+                    long excutetime = currentTime - entry.getValue().getBeginTime();
+                    logger.info("excute time=" + excutetime + "ttl_time=" + hc.getSocketTimeout());
+                    if (entry.getValue().getStatus() == 1 && excutetime > hc.getSocketTimeout()) {
                         entry.getValue().setStatus(2);
                         entry.getValue().setExcute_status(500001);
                         eps.killQuery(entry.getValue());
                         eps.updateResultMessage(entry.getValue());
-                    }
-                    else{
+                    } else {
                         if (entry.getValue().getStatus() == 1) {
                             eps.updateProcessMessage(entry.getValue());
-                        }
-                        else {
+                        } else {
                             eps.updateResultMessage(entry.getValue());
                         }
                     }
                 }
-                    int rows = GlobelConfig.job_thread - GlobelConfig.mapresult.size();
-                    if (rows > 0) {
-                        List<JobEntity> jobs = ms.getJobTask(rows);
-                        for (JobEntity job : jobs) {
-                            logger.info("开始执行任务");
-                            long begintime = System.currentTimeMillis();
-                            job.setBeginTime(begintime);
-                            String sql = job.getQuerySql().trim();
-                            sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
-                            sql = sql.replace("$start_time", "toDateTime('" + job.getStartTime().trim() + "')");
-                            sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");
-                            job.setQuerySql(sql);
-                            job.setStatus(1);
-                            job.setExcute_status(1);
-                            job.setExcuteDetail("EXECUTING");
-                            job.setExcuteRow(0L);
-                            job.setExcuteTime(0);
-                            job.setExcuteProcess(0);
-                            job.setResultRows(0);
-                            String queryid="";
-                            try {
-                                queryid = cs.getQueryId(job.getResultId().toString(), sql);
-                            }
-                            catch (Exception e){
-                                job.setExcute_status(0);
-                                job.setStatus(7);
-                                job.setExcuteDetail("Unknow Error");
-                            }
-                            job.setQuery_id(queryid);
+                int rows = gc.getJob_thread() - gc.getMapresult().size();
+                if (rows > 0) {
+                    List<JobEntity> jobs = ms.getJobTask(rows);
+                    for (JobEntity job : jobs) {
+                        logger.info("开始执行任务");
+                        long begintime = System.currentTimeMillis();
+                        job.setBeginTime(begintime);
+                        String sql = job.getQuerySql().trim();
+                        sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
+                        sql = sql.replace("$start_time", "toDateTime('" + job.getStartTime().trim() + "')");
+                        sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");
+                        job.setQuerySql(sql);
+                        job.setStatus(1);
+                        job.setExcute_status(1);
+                        job.setExcuteDetail("EXECUTING");
+                        job.setExcuteRow(0L);
+                        job.setExcuteTime(0);
+                        job.setExcuteProcess(0);
+                        job.setResultRows(0);
+                        String queryid = "";
+                        queryid = cs.getQueryId(job.getResultId().toString(), sql);
+                        job.setQuery_id(queryid);
+                        if (queryid.equals("") ) {
+                            job.setExcute_status(0);
+                            job.setStatus(7);
+                            job.setExcuteDetail("Unknow Error");
+                        }
+                        if (job.getStatus() == 1) {
+                            if (ms.updateProcesses(job) != 0) {
+                                gc.getMapresult().put(queryid, job);
+                                pool.execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        es.excuteCkTask(job);
+                                    }
+                                });
+                            } else {
+                                logger.error("更新数据库状态失败");
 
-                            if(job.getStatus()==1){
-                                if(ms.updateProcesses(job)!=0){
-                                    GlobelConfig.mapresult.put(queryid, job);
-                                    pool.execute(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            es.excuteCkTask(job);
-                                        }
-                                    });
-                                }else{
-                                    logger.error("更新数据库状态失败");
-
-                                }
                             }
-                            else{
-                                if(ms.updateProcesses(job)!=0){
-                                    logger.error("任务不能执行");
-                                }else{
-                                    logger.error("更新数据库状态失败");
+                        } else {
+                            if (ms.updateProcesses(job) != 0) {
+                                logger.error("任务不能执行");
+                            } else {
+                                logger.error("更新数据库状态失败");
 
-                                }
                             }
                         }
-                    } else {
-                        logger.info("无待执行任务");
                     }
-            }
-            else {
-                if (GlobelConfig.mapresult.size() > 0) {
-                    for (Map.Entry<String, JobEntity> entry : GlobelConfig.mapresult.entrySet()) {
+                } else {
+                    logger.info("无待执行任务");
+                }
+            } else {
+                if (gc.getMapresult().size() > 0) {
+                    for (Map.Entry<String, JobEntity> entry : gc.getMapresult().entrySet()) {
                         logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getStatus());
                         eps.killQuery(entry.getValue());
                     }
-                    GlobelConfig.mapresult.clear();
+                    gc.getMapresult().clear();
                 }
             }
         } catch (Exception e) {

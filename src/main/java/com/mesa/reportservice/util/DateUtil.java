@@ -452,38 +452,8 @@ public final class DateUtil {
     }
 
 
-    /**
-     * <p>将日期,转换成10进制日期</p>
-     * <p>
-     * pattern需跟date格式相同,才可进行转换.转换后的长整型.
-     * </p>
-     * <pre>
-     * DateUtil.convertStringToTimestamp(TimeConstants.YYYY_MM_DD, "2010-10-11") = 1286726400
-     * </pre>
-     *
-     * @param date    时间值
-     * @param pattern 描述日期与格式
-     * @return 返回10进制时间值字符串
-     * @throws NullPointerException
-     * @see #convertTimestampToString(long, String)
-     */
-    public static long convertStringToTimestamp(String date,
-                                                String pattern) {
 
-        if (StringUtil.isEmpty(date) || StringUtil.isEmpty(pattern)) {
-            throw new NullPointerException("参数为NULL");
-        }
 
-        long time = 0l;
-        simpleDateFormat = new SimpleDateFormat(pattern);
-        try {
-            time = simpleDateFormat.parse(date).getTime() / 1000;
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return time;
-
-    }
 
 
     /**
@@ -538,37 +508,7 @@ public final class DateUtil {
     }
 
 
-    /**
-     * <p>通过字符串日期类型,转换为Date类型日期.</p>
-     * <p>
-     * pattern格式，需跟提供的日期字符串格式相统一，否则解析异常返回NULL值。
-     * </P>
-     * <pre>
-     * DateUtil.convertStringToDate(TimeConstants.YYYY_MM_DD, "2010-09-11") = date类型日期
-     * DateUtil.convertStringToDate(TimeConstants.YYYY_MM_DD_HH_MM, "2010-09-11") = NULL.
-     * </pre>
-     *
-     * @param date    字符串类型日期.
-     * @param pattern 描述日期与时间格式.
-     * @return 返回解析后的{@link java.util.Date }类型日期.
-     * @throws NullPointerException
-     */
-    public static Date convertStringToDate(String date,
-                                           String pattern) {
 
-        if (StringUtil.isEmpty(date) || StringUtil.isEmpty(pattern)) {
-            throw new NullPointerException();
-        }
-        simpleDateFormat = new SimpleDateFormat(pattern);
-        Date parseDate = null;
 
-        try {
-            parseDate = simpleDateFormat.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return parseDate;
-    }
 
 }

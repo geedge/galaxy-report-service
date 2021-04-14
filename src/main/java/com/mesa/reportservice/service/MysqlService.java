@@ -10,15 +10,14 @@ import java.util.Map;
 public interface MysqlService {
 
 
-    List<JobEntity> getJobForExcute() throws Exception;
+    List<JobEntity> getJobForExcute() ;
 
 
-    List<JobEntity> getJobTask(int Rows) throws Exception;
+    List<JobEntity> getJobTask(int Rows) ;
 
 
     int updateProcesses(JobEntity job);
 
-    int updateStatue(JobEntity job);
 
     Map<String,Long> getJobCount()  throws Exception;
 
