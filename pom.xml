@@ -267,7 +267,7 @@
 						<phase>install</phase>
 						<configuration>
 							<!-- 配置加密密码 ，推荐使用命令指定 -->
-							<password>io.xjar</password>
+							<password>Geedge2020!</password>
 							<!-- 配置不加密项 -->
 							<excludes>
 								<exclude>
