@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.mesa</groupId>
 	<artifactId>galaxy-report-service</artifactId>
-	<version>21.04.07</version>
+	<version>21.09.13</version>
 	<name>galaxy-report-service</name>
 	<packaging>jar</packaging>
 	<description>Demo project for Spring Boot</description>
@@ -250,7 +250,7 @@
 						<goals>
 							<goal>strip-jar</goal>
 						</goals>
-						<phase>install</phase>
+						<phase>package</phase>
 					</execution>
 				</executions>
 			</plugin>
@@ -264,7 +264,7 @@
 						<goals>
 							<goal>build</goal>
 						</goals>
-						<phase>install</phase>
+						<phase>package</phase>
 						<configuration>
 							<!-- 配置加密密码 ，推荐使用命令指定 -->
 							<password>Geedge2020!</password>
@@ -292,7 +292,7 @@
 					<forceTags>true</forceTags>
 
 					<imageTags>
-						<imageTag>21.04.07</imageTag>
+						<imageTag>21.09.13</imageTag>
 					</imageTags>
 					<!--远程docker构建，供dockerfile使用-->
 					<dockerHost>http://192.168.40.153:2375</dockerHost>

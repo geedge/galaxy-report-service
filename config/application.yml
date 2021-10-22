@@ -2,8 +2,8 @@ nacos:
   config:
     type: yaml #配置集的配置格式
     server-addr: 192.168.44.12:8848 #配置中心地址
-    namespace: e9f176b1-0132-49ae-9310-3c504b0a3087 #命名空间
-    data-id: galaxy-report-service # 数据集ID
+    namespace: dev #命名空间
+    data-id: galaxy-report-service-local # 数据集ID
     auto-refresh: true #开启自动刷新
     group: Galaxy  #配置对应的分组
     username: nacos #Nacos认证用户
