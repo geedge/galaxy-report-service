@@ -9,6 +9,8 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.TimeZone;
+
 @ServletComponentScan
 
 @SpringBootApplication
@@ -16,6 +18,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class ReportserviceApplication {
 
     public static void main(String[] args) {
+        System.setProperty("jasypt.encryptor.password", "galaxy");
+        System.setProperty("user.timezone", "UTC");
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         SpringApplication.run(ReportserviceApplication.class, args);
     }
 
