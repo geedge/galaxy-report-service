@@ -142,10 +142,12 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                         long read_rows = Long.parseLong(map.get("rows_read").toString());
                         float elapsed = Float.parseFloat(map.get("elapsed").toString());
                         double persent = Double.parseDouble(map.get("percent").toString());
-                        int result = (int) (persent * 100);
+                        int process = (int) (persent * 100);
                         job.setExcuteTime((int) elapsed);
                         job.setExcuteRow(read_rows);
-                        job.setExcuteProcess(result);
+                        if(job.getExcuteProcess()<process){
+                            job.setExcuteProcess(process);
+                        }
                         if (job.getExcuteRow() != 0 || job.getExcuteTime() != 0) {
                             ms.updateProcesses(job);
                         }
