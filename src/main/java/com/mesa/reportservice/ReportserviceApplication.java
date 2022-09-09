@@ -1,5 +1,6 @@
 package com.mesa.reportservice;
 
+import com.mesa.reportservice.util.StringUtil;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -9,6 +10,9 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.util.List;
 import java.util.TimeZone;
 
 @ServletComponentScan
@@ -16,11 +20,19 @@ import java.util.TimeZone;
 @SpringBootApplication
 @EnableScheduling
 public class ReportserviceApplication {
+    public static final String TIMEZONE = "UTC";
 
     public static void main(String[] args) {
         System.setProperty("jasypt.encryptor.password", "galaxy");
-        System.setProperty("user.timezone", "UTC");
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+        List<String> inputArguments = runtimeMxBean.getInputArguments();
+        if (inputArguments.stream().noneMatch(o -> o.contains("user.timezone"))
+                && StringUtil.isEmpty(System.getenv().get("TZ"))) {
+            // java.util.Date
+            TimeZone.setDefault(TimeZone.getTimeZone(TIMEZONE));
+            // joda.time.DateTime
+            System.setProperty("user.timezone", TIMEZONE);
+        }
         SpringApplication.run(ReportserviceApplication.class, args);
     }
 

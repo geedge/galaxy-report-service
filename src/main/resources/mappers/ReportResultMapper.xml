@@ -4,8 +4,8 @@
   <resultMap type="com.mesa.reportservice.bean.JobEntity" id="BaseResultMap">
     <id property="resultId" column="result_id"/>
     <result property="resultName" column="result_name"/>
-    <result property="startTime" column="start_time"/>
-    <result property="endTime" column="end_time"/>
+<!--    <result property="startTime" column="start_time"/>
+    <result property="endTime" column="end_time"/>-->
     <result property="querySql" column="query_sql"/>
     <result property="status" column="status"/>
     <result property="excuteTime" column="excute_time"/>
@@ -19,21 +19,21 @@
 
   </resultMap>
   <sql id="Base_Column_List" >
-    result_id, result_name, DATE_FORMAT(start_time,'%Y-%m-%d %H:%i:%s') as start_time,DATE_FORMAT(end_time,'%Y-%m-%d %H:%i:%s') as end_time, query_sql, status, excute_time,
+    result_id, result_name, query_sql, status, excute_time,
     excute_row, excute_process, excute_detail, is_send_notice,DATE_FORMAT(op_time,'%Y-%m-%d %H:%i:%s') as op_time,DATE_FORMAT(issued_time,'%Y-%m-%d %H:%i:%s') as issued_time,result_rows,is_valid
   </sql>
   <select id="getJobForExcute" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
     <include refid="Base_Column_List" />
     from report_result
-    where status = 1  order by end_time  limit 10
+    where status = 1  order by issued_time  limit 10
   </select>
 
   <select id="getJobTask" resultMap="BaseResultMap" parameterType="hashmap">
     select
     <include refid="Base_Column_List" />
     from report_result
-    where status = 0 and is_valid = 1 and end_time &lt; #{endtime} order by end_time limit ${rows}
+    where status = 0 and is_valid = 1 and issued_time &lt; #{issuedtime} order by issued_time limit ${rows}
   </select>
 
   <update id="updateProcesses" parameterType="com.mesa.reportservice.bean.JobEntity" >
@@ -89,7 +89,7 @@
 
 
   <select id="getJobCount"  resultType="map" parameterType="hashmap">
-    SELECT (SELECT COUNT(1) FROM report_result where status = 0 and is_valid = 1 and end_time &lt; #{endtime}) as queueNum,
+    SELECT (SELECT COUNT(1) FROM report_result where status = 0 and is_valid = 1 and issued_time &lt; #{issuedtime}) as queueNum,
     (SELECT COUNT(1) FROM report_result where status = 1 and is_valid = 1 ) as excuteingNum,
     (SELECT COUNT(1) FROM report_result where status = 2 and op_time > #{optime} ) as todaySuccessNum,
     (SELECT COUNT(1) FROM report_result where status > 2 and op_time > #{optime} ) as todayErrorNum

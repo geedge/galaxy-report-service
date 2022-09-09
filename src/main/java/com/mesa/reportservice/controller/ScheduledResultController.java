@@ -51,9 +51,9 @@ public class ScheduledResultController {
                 List<JobEntity> joblist = ms.getJobForExcute();
                 for (JobEntity jobEntity : joblist) {
                     String sql = jobEntity.getQuerySql().trim();
-                    sql = sql.replace("$exe_time", "toDateTime('" + jobEntity.getIssuedTime().trim() + "')");
+              /*      sql = sql.replace("$exe_time", "toDateTime('" + jobEntity.getIssuedTime().trim() + "')");
                     sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
-                    sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");
+                    sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");*/
 
                     String queryid = cs.getQueryId(jobEntity.getResultId().toString(), sql);
                     jobEntity.setQuery_id(queryid);
@@ -101,9 +101,9 @@ public class ScheduledResultController {
                         long begintime = System.currentTimeMillis();
                         job.setBeginTime(begintime);
                         String sql = job.getQuerySql().trim();
-                        sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
+                      /*  sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
                         sql = sql.replace("$start_time", "toDateTime('" + job.getStartTime().trim() + "')");
-                        sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");
+                        sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");*/
                         job.setQuerySql(sql);
                         job.setStatus(1);
                         job.setExcute_status(1);

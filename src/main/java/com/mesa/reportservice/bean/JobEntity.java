@@ -11,9 +11,9 @@ public class JobEntity implements Cloneable {
 
     private Integer jobId;
 
-    private String startTime;
+/*    private String startTime;
 
-    private String endTime;
+    private String endTime;*/
 
     private String querySql;
 
@@ -79,7 +79,7 @@ public class JobEntity implements Cloneable {
         this.jobId = jobId;
     }
 
-    public String getStartTime() {
+/*    public String getStartTime() {
         return startTime;
     }
 
@@ -93,7 +93,7 @@ public class JobEntity implements Cloneable {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
-    }
+    }*/
 
     public String getQuerySql() {
         return querySql;
