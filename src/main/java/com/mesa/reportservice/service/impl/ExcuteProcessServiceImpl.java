@@ -41,55 +41,43 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                 je.setStatus(9);
                 je.setExcuteDetail("CANCEL");
             } else {
-                switch (je.getExcute_status()) {
 
-                    case 200666:
-                        Boolean isok = saveToHbase(je);
-                        if (isok) {
-                            je.setExcuteDetail("SUCCESS");
-                            je.setExcuteProcess(100);
-                            je.setStatus(2);
-                            logger.info("success save to hbase query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
-                        } else {
-                            je.setStatus(5);
-                            je.setExcuteDetail("Write Data Error");
-                            mons.addFail();
-                            logger.error("save hbase error query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
-                        }
-                        break;
 
-                    case 400001:
-                        je.setStatus(3);
-                        je.setExcuteDetail("Param Syntax Error");
-                        logger.error("Param Syntax Error query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
-                        break;
-                    case 400010:
-                        je.setStatus(3);
-                        je.setExcuteDetail("SQL Syntax Error");
-                        logger.error("SQL Syntax Error query_id="+je.getQuery_id()+"  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
-                        break;
-                    case 500001:
-                        je.setStatus(4);
-                        je.setExcuteDetail("SQL Execution Error");
-                        logger.error("SQL Execution Error query_id="+je.getQuery_id()+"  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
-                        break;
-                    case 500010:
-                        je.setStatus(6);
-                        je.setExcuteDetail("Engine Statistics Error");
-                        logger.error("Engine Statistics Error query_id="+je.getQuery_id()+"  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
-                        break;
-                    case 555999:
-                        je.setStatus(7);
-                        je.setExcuteDetail("Unknow Error");
-                        logger.error("Unknow Error query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
-                        break;
-                    default:
-                        je.setStatus(8);
-                        je.setExcuteDetail("System Error");
-                        logger.error("System Error query_id="+je.getQuery_id()+" resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                if (je.getExcute_status() >= 20000000 && je.getExcute_status() < 30000000) {
+
+                    Boolean isok = saveToHbase(je);
+                    if (isok) {
+                        je.setExcuteDetail("SUCCESS");
+                        je.setExcuteProcess(100);
+                        je.setStatus(2);
+                        logger.info("success save to hbase query_id=" + je.getQuery_id() + " resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                    } else {
+                        je.setStatus(5);
+                        je.setExcuteDetail("Write Data Error");
+                        mons.addFail();
+                        logger.error("save hbase error "+je.getExcute_status()+" query_id=" + je.getQuery_id() + " resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                    }
+                } else if (je.getExcute_status() >= 40000000 && je.getExcute_status() < 50000000) {
+
+                    je.setStatus(3);
+                    je.setExcuteDetail("Param Syntax Error");
+                    logger.error("Param Syntax Error "+je.getExcute_status()+" query_id=" + je.getQuery_id() + " resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+
+                } else if (je.getExcute_status() == 50001300) {
+
+                    je.setStatus(4);
+                    je.setExcuteDetail("SQL Execution Error");
+                    logger.error("SQL Execution Error ! ErrorCode  "+je.getExcute_status()+" query_id=" + je.getQuery_id() + "  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+
+                } else {
+
+                    je.setStatus(7);
+                    je.setExcuteDetail("Unknow Error");
+                    logger.error("Unknow Error ! ErrorCode  "+je.getExcute_status()+" query_id=" + je.getQuery_id() + " resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
                 }
 
             }
+
             int number = 0;
             int z = 3;
             do {
