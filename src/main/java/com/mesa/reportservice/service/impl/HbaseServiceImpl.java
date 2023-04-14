@@ -69,7 +69,7 @@ public class HbaseServiceImpl implements HbaseService {
                 put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("memory_usage"), Bytes.toBytes(jobEntity.getMemory_usage()));
             }
             if (cellTTL != null) {
-                put.setTTL(cellTTL);
+                put.setTTL(cellTTL * 86400 * 1000);
             }
             table.put(put);
             status = true;
