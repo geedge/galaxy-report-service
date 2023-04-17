@@ -24,6 +24,7 @@ public class ReportserviceApplication {
 
     public static void main(String[] args) {
         System.setProperty("jasypt.encryptor.password", "galaxy");
+        System.setProperty("JM.SNAPSHOT.PATH", "config");
         RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
         List<String> inputArguments = runtimeMxBean.getInputArguments();
         if (inputArguments.stream().noneMatch(o -> o.contains("user.timezone"))
