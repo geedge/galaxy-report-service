@@ -20,7 +20,7 @@ hbase:
     rpc_timeout: 100000
     connect_pool: 10
 #存入Hbase的cell级别生存时间 根据部署环境填写：1.TSG 不设置(永久有效); 2.CN 7(默认7天) 单位：Day
-    cell_ttl: 7
+    cell_ttl_d:
 #查询网关ip
 ck:
     gateway_ip: 192.168.44.55:9999

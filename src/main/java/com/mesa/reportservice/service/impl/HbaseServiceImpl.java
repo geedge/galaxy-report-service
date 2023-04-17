@@ -11,7 +11,6 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,9 +22,6 @@ import java.io.IOException;
 
 @Service
 public class HbaseServiceImpl implements HbaseService {
-
-    @Value("${hbase.cell_ttl}")
-    private Long cellTTL;
 
     @Autowired
     private Connection hbaseConnection;
@@ -68,8 +64,8 @@ public class HbaseServiceImpl implements HbaseService {
             if (jobEntity.getMemory_usage() != null) {
                 put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("memory_usage"), Bytes.toBytes(jobEntity.getMemory_usage()));
             }
-            if (cellTTL != null) {
-                put.setTTL(cellTTL * 86400 * 1000);
+            if (hbproperties.getCell_ttl_d() != null) {
+                put.setTTL(hbproperties.getCell_ttl_d() * 86400 * 1000);
             }
             table.put(put);
             status = true;

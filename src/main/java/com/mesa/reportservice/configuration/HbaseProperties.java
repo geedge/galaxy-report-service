@@ -31,6 +31,8 @@ public class HbaseProperties {
 
     private String table;
 
+    private Integer cell_ttl_d;
+
 
 
     public String getZookeeper_quorum() {
@@ -97,5 +99,13 @@ public class HbaseProperties {
 
     public void setTable(String table) {
         this.table = table;
+    }
+
+    public void setCell_ttl_d(Integer cell_ttl_d) {
+        this.cell_ttl_d = cell_ttl_d;
+    }
+
+    public Integer getCell_ttl_d() {
+        return cell_ttl_d;
     }
 }
