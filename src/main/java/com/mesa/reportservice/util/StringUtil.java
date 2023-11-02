@@ -2,7 +2,6 @@ package com.mesa.reportservice.util;
 
 
 import org.apache.commons.lang3.StringUtils;
-import sun.misc.BASE64Encoder;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
