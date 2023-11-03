@@ -51,7 +51,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         CloseableHttpResponse response = null;
         String query_id = "";
         try {
-            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/queryIds?resultId=" + resultId + "&query=");
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/v1/sql/query/query_id?resultId=" + resultId + "&query=");
             String sql = null;
             sql = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
             url = url + sql;
@@ -92,7 +92,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         // 发起请求
         HttpResult rs = null;
         try {
-            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/?option=long-term&resultId=" + resultId + "&query=");
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sql?option=long-term&resultId=" + resultId + "&query=");
             query = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
             String jobsql = url + query;
             HttpGet httpGet = new HttpGet(jobsql);
@@ -122,7 +122,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         // 发起请求
         HttpResult rs = null;
         try {
-            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/processes/" + queryId);
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/v1/sql/query/" + queryId + "/progress");
 
             HttpGet httpGet = new HttpGet(url);
             // 加入配置信息
@@ -148,7 +148,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         CloseableHttpResponse response = null;
         HttpResult rs = null;
         try {
-            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sys/engine/tasks/" + queryId);
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/v1/sql/query/" + queryId);
             // 声明httpPost请求
             HttpDelete HttpDelete = new HttpDelete(url);
             // 加入配置信息
