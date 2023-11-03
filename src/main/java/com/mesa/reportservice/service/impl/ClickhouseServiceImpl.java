@@ -11,6 +11,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,10 @@ public class ClickhouseServiceImpl implements ClickhouseService {
             String sql = null;
             sql = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
             url = url + sql;
-            HttpGet httpGet = new HttpGet(url);
+            HttpPost httpPost = new HttpPost(url);
             // 加入配置信息
-            httpGet.setConfig(RequestshortConfig);
-
-
-            response = this.httpClient.execute(httpGet);
+            httpPost.setConfig(RequestshortConfig);
+            response = this.httpClient.execute(httpPost);
             if (response.getStatusLine().getStatusCode() != 200) {
                 throw new IOException();
             } else {
