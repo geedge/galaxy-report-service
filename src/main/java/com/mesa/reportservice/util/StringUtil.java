@@ -418,7 +418,7 @@ public final class StringUtil extends StringUtils {
                                                    String destCodingFormat) throws UnsupportedEncodingException {
 
         if (!isSupported(sourceCodingFormat) || !isSupported(destCodingFormat)) {
-            throw new UnsupportedEncodingException("JVM 下不支持该字符集编码");
+            throw new UnsupportedEncodingException("This character set encoding is not supported under JVM");
         }
 
         if (isEmpty(value)) {

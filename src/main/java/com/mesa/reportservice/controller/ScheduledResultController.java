@@ -46,7 +46,7 @@ public class ScheduledResultController {
     public void getExcuteResult() {
         try {
             if (zs.isMaster()) {
-                logger.info("开始查看结果");
+                logger.info("start viewing results");
                 //先查询数据库是否有异常状态任务，killquery
                 List<JobEntity> joblist = ms.getJobForExcute();
                 for (JobEntity jobEntity : joblist) {
@@ -97,7 +97,7 @@ public class ScheduledResultController {
                 if (rows > 0) {
                     List<JobEntity> jobs = ms.getJobTask(rows);
                     for (JobEntity job : jobs) {
-                        logger.info("开始执行任务");
+                        logger.info("start executing task");
                         long begintime = System.currentTimeMillis();
                         job.setBeginTime(begintime);
                         String sql = job.getQuerySql().trim();
@@ -130,20 +130,20 @@ public class ScheduledResultController {
                                     }
                                 });
                             } else {
-                                logger.error("更新数据库状态失败");
+                                logger.error("failed to update database status");
 
                             }
                         } else {
                             if (ms.updateProcesses(job) != 0) {
-                                logger.error("任务不能执行");
+                                logger.error("task cannot be executed");
                             } else {
-                                logger.error("更新数据库状态失败");
+                                logger.error("failed to update database status");
 
                             }
                         }
                     }
                 } else {
-                    logger.info("无待执行任务");
+                    logger.info("no pending tasks");
                 }
             } else {
                 if (gc.getMapresult().size() > 0) {

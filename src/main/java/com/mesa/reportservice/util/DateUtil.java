@@ -85,7 +85,7 @@ public final class DateUtil {
     public static String getCurrentDate(String pattern) {
 
         if (StringUtil.isEmpty(pattern)) {
-            throw new NullPointerException("未规定时间格式.");
+            throw new NullPointerException("No specified time format.");
         }
         simpleDateFormat = new SimpleDateFormat(DateUtil.YYYY_MM_DD_HH_MM_SS);
         return simpleDateFormat.format(new Date());
@@ -292,7 +292,7 @@ public final class DateUtil {
      */
     public static String getDDFromDate(Date date) {
         if (null == date) {
-            throw new NullPointerException("未存储日期对象");
+            throw new NullPointerException("Date object not stored");
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -473,7 +473,7 @@ public final class DateUtil {
             long time10, String pattern) {
 
         if (StringUtil.isEmpty(pattern)) {
-            throw new NullPointerException("参数为NULL");
+            throw new NullPointerException("Parameter is NULL");
         }
         Date date = new Date();
         date.setTime(time10 * 1000);
@@ -500,7 +500,7 @@ public final class DateUtil {
     public static String getFormatDate(Date date, String pattern) {
 
         if (StringUtil.isEmpty(pattern) || StringUtil.isEmpty(date)) {
-            throw new NullPointerException("参数为NULL");
+            throw new NullPointerException("Parameter is NULL");
         }
         simpleDateFormat = new SimpleDateFormat(pattern);
 

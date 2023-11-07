@@ -163,7 +163,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                 isok = hs.put(entity);
                 break;
             } catch (Exception e) {
-                logger.error("写入hbase报错重试次数" + (3 - k) + e.toString());
+                logger.error("write HBase error retry count" + (3 - k) + e.toString());
                 k--;
             }
         }

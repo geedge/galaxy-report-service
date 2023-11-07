@@ -33,7 +33,7 @@ public class ZkServiceImpl implements ZkService {
             if (zp.getOpen() == 0) {
                 boolean isZkCuratorStarted = curatorConnect.isStarted();
                 String nodePath = "/masterip";
-                logger.debug("当前客户端的状态：" + (isZkCuratorStarted ? "连接中..." : "已关闭..."));
+                logger.debug("the current state of the client: " + (isZkCuratorStarted ? "connecting..." : "closed..."));
                 Stat statExist = curatorConnect.checkExists().forPath(nodePath);
                 if (statExist == null) {
                     byte[] data = GlobelConfig.zkuuid.getBytes();  // 节点数据
@@ -46,19 +46,19 @@ public class ZkServiceImpl implements ZkService {
                     return true;
 
                 } else {
-                    logger.debug(nodePath + " 节点存在");
+                    logger.debug(nodePath + " node exists");
                     Stat stat = new Stat();
 
                     byte[] nodeData = curatorConnect.getData().storingStatIn(stat).forPath(nodePath);
                     String masterid = new String(nodeData, "UTF-8").trim();
-                    logger.debug("uuid=" + GlobelConfig.zkuuid + " 节点 " + nodePath + " 的数据为：" + masterid);
+                    logger.debug("uuid=" + GlobelConfig.zkuuid + " node " + nodePath + " data is:" + masterid);
 
                     if (masterid.equals(GlobelConfig.zkuuid)) {
 
                         return true;
 
                     } else {
-                        logger.debug("不是主节点");
+                        logger.debug("not the main node");
                         return false;
                     }
                 }
