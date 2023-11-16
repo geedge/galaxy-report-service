@@ -52,7 +52,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         CloseableHttpResponse response = null;
         String query_id = "";
         try {
-            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/v1/sql/query/query_id?resultId=" + resultId + "&query=");
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/v1/sql/query/query_id?result_id=" + resultId + "&query=");
             String sql = null;
             sql = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
             url = url + sql;
@@ -91,7 +91,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         // 发起请求
         HttpResult rs = null;
         try {
-            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sql?option=long-term&resultId=" + resultId + "&query=");
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sql?option=long-term&result_id=" + resultId + "&query=");
             query = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
             String jobsql = url + query;
             HttpGet httpGet = new HttpGet(jobsql);
