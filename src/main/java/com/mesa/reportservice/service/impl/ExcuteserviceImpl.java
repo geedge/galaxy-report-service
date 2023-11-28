@@ -35,12 +35,12 @@ public class ExcuteserviceImpl implements ExcuteService {
     public void excuteCkTask(JobEntity job) {
 
 
-        logger.info("execute queryid=" + job.getQuery_id() + " sql=" + job.getQuerySql() + "mapresult size=" + gc.getMapresult().size());
+        logger.info("execute queryid=" + job.getQueryId() + " sql=" + job.getQuerySql() + "mapresult size=" + gc.getMapresult().size());
         HttpResult hr = new HttpResult();
         int k = 3;
         do {
             try {
-                hr = cs.queryForExcute(job.getResultId().toString(), job.getQuerySql());
+                hr = cs.queryForExcute(job.getQuerySql());
                 if (hr != null) {
                     Map mapresult = JSON.parseObject(hr.getBody());
                     int query_status = Integer.parseInt(mapresult.get("status").toString());
@@ -51,16 +51,16 @@ public class ExcuteserviceImpl implements ExcuteService {
                         mapresult = JSON.parseObject(hr.getBody());
 
                         Map rows = (Map) mapresult.get("statistics");
-                        job.setResultRows(Integer.parseInt(rows.get("result_rows").toString()));
-                        job.setExcuteRow(Long.parseLong(rows.get("rows_read").toString()));
+                        job.setResultRows(Long.parseLong(rows.get("result_rows").toString()));
+                        job.setRowsRead(Long.parseLong(rows.get("rows_read").toString()));
                         job.setResult(hr.getBody());
-                        job.setExcuteTime((int) Float.parseFloat(rows.get("elapsed").toString()));
-                        job.setExcute_status(Integer.parseInt(mapresult.get("code").toString()));
-                        logger.info("success resultid = " + job.getResultId() + " queryid=" + job.getQuery_id() + " sql=" + job.getQuerySql());
+                        job.setElapsed((int) Float.parseFloat(rows.get("elapsed").toString()));
+                        job.setExcuteStatus(Integer.parseInt(mapresult.get("code").toString()));
+                        logger.info("success resultid = " + job.getJobId() + " queryid=" + job.getQueryId() + " sql=" + job.getQuerySql());
 
                     } else {
                         k = 0;
-                        job.setExcute_status(Integer.parseInt(mapresult.get("code").toString()));
+                        job.setExcuteStatus(Integer.parseInt(mapresult.get("code").toString()));
                         logger.error("excute sql Error ");
                     }
                 } else {
@@ -68,11 +68,11 @@ public class ExcuteserviceImpl implements ExcuteService {
                 }
             } catch (SocketTimeoutException e) {
                 k--;
-                job.setExcuteDetail(e.toString());
+                job.setResultMessage(e.toString());
                 if (k == 0) {
-                    job.setExcute_status(500001);
-                    job.setExcuteDetail("SQL Execution Error excute query time out");
-                    logger.info("timeout resultid = " + job.getResultId() + " queryid=" + job.getQuery_id() + " sql=" + job.getQuerySql());
+                    job.setExcuteStatus(500001);
+                    job.setResultMessage("SQL Execution Error excute query time out");
+                    logger.info("timeout resultid = " + job.getJobId() + " queryid=" + job.getQueryId() + " sql=" + job.getQuerySql());
                 } else {
                     logger.info("Socket warn " + e.toString() + "retry time " + (3 - k));
                 }
@@ -80,32 +80,32 @@ public class ExcuteserviceImpl implements ExcuteService {
 
             } catch (ConnectTimeoutException e) {
 
-                job.setExcute_status(555999);
-                job.setExcuteDetail(e.toString());
+                job.setExcuteStatus(555999);
+                job.setResultMessage(e.toString());
                 logger.error("Unknow Error" + e.toString());
                 k = 0;
 
             } catch (OutOfMemoryError e) {
 
-                job.setExcute_status(555999);
-                job.setExcuteDetail("result too large");
+                job.setExcuteStatus(555999);
+                job.setResultMessage("result too large");
                 logger.error("outofmemery Error" + e.toString());
                 k = 0;
             } catch (Exception e) {
-                job.setExcute_status(555999);
-                job.setExcuteDetail(e.toString());
+                job.setExcuteStatus(555999);
+                job.setResultMessage(e.toString());
                 logger.error("Unknow Error" + e.toString());
                 k = 0;
             }
             try {
-                cs.queryForCancel(job.getQuery_id());
+                cs.queryForCancel(job.getQueryId());
             } catch (Exception e) {
                 logger.error("Kill Query Error" + e.toString());
             }
 
         }
         while (k > 0);
-        job.setStatus(2);
+        job.setState("DONE");
     }
 
 }

@@ -8,6 +8,7 @@ import com.mesa.reportservice.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,9 +49,7 @@ public class MysqlServiceImpl implements MysqlService {
     public int updateProcesses(JobEntity job){
 
             Date currentTime = new Date();
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String sDate = formatter.format(currentTime);
-            job.setOpTime(sDate);
+            job.setLastUpdateTime(currentTime.getTime());
             return rrm.updateProcesses(job);
     }
 

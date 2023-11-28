@@ -55,19 +55,19 @@ public class ScheduledResultController {
                     sql = sql.replace("$start_time", "toDateTime('" + jobEntity.getStartTime().trim() + "')");
                     sql = sql.replace("$end_time", "toDateTime('" + jobEntity.getEndTime().trim() + "')");*/
 
-                    String queryid = cs.getQueryId(jobEntity.getResultId().toString(), sql);
-                    jobEntity.setQuery_id(queryid);
+                    String queryid = cs.getQueryId(sql);
+                    jobEntity.setQueryId(queryid);
 
                     if (jobEntity.getIsValid() == 0) {
                         eps.killQuery(jobEntity);
-                        gc.getMapresult().get(jobEntity.getQuery_id()).setIsValid(0);
-                    } else if (!gc.getMapresult().containsKey(jobEntity.getQuery_id())) {
+                        gc.getMapresult().get(jobEntity.getQueryId()).setIsValid(0);
+                    } else if (!gc.getMapresult().containsKey(jobEntity.getQueryId())) {
                         eps.reSet(jobEntity);
                     }
-                    if (gc.getMapresult().containsKey(jobEntity.getQuery_id())) {
+                    if (gc.getMapresult().containsKey(jobEntity.getQueryId())) {
                         if (jobEntity.getIsValid() == 0) {
                             eps.killQuery(jobEntity);
-                            gc.getMapresult().get(jobEntity.getQuery_id()).setIsValid(0);
+                            gc.getMapresult().get(jobEntity.getQueryId()).setIsValid(0);
                         }
                     } else {
                         eps.reSet(jobEntity);
@@ -76,17 +76,17 @@ public class ScheduledResultController {
                 }
                 //遍历内存中的任务对状态1的更新进度，其他更新数据库的状态
                 for (Map.Entry<String, JobEntity> entry : gc.getMapresult().entrySet()) {
-                    logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getStatus());
+                    logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getState());
                     long currentTime = System.currentTimeMillis();
-                    long excutetime = currentTime - entry.getValue().getBeginTime();
+                    long excutetime = currentTime - entry.getValue().getStartTime();
                     logger.info("excute time=" + excutetime + "ttl_time=" + hc.getSocketTimeout());
-                    if (entry.getValue().getStatus() == 1 && excutetime > hc.getSocketTimeout()) {
-                        entry.getValue().setStatus(2);
-                        entry.getValue().setExcute_status(500001);
+                    if (("RUNNING").equals(entry.getValue().getState()) && excutetime > hc.getSocketTimeout()) {
+                        entry.getValue().setState("DONE");
+                        entry.getValue().setExcuteStatus(500001);
                         eps.killQuery(entry.getValue());
                         eps.updateResultMessage(entry.getValue());
                     } else {
-                        if (entry.getValue().getStatus() == 1) {
+                        if (("RUNNING").equals(entry.getValue().getState())) {
                             eps.updateProcessMessage(entry.getValue());
                         } else {
                             eps.updateResultMessage(entry.getValue());
@@ -99,28 +99,29 @@ public class ScheduledResultController {
                     for (JobEntity job : jobs) {
                         logger.info("start executing task");
                         long begintime = System.currentTimeMillis();
-                        job.setBeginTime(begintime);
+                        job.setStartTime(begintime);
                         String sql = job.getQuerySql().trim();
                       /*  sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
                         sql = sql.replace("$start_time", "toDateTime('" + job.getStartTime().trim() + "')");
                         sql = sql.replace("$end_time", "toDateTime('" + job.getEndTime().trim() + "')");*/
                         job.setQuerySql(sql);
-                        job.setStatus(1);
-                        job.setExcute_status(1);
-                        job.setExcuteDetail("EXECUTING");
-                        job.setExcuteRow(0L);
-                        job.setExcuteTime(0);
-                        job.setExcuteProcess(0);
-                        job.setResultRows(0);
+                        job.setState("RUNNING");
+                        job.setExcuteStatus(1);
+                        job.setResultMessage("EXECUTING");
+                        job.setRowsRead(0L);
+                        job.setElapsed(0);
+                        job.setDoneProgress(0);
+                        job.setResultRows(0L);
                         String queryid = "";
-                        queryid = cs.getQueryId(job.getResultId().toString(), sql);
-                        job.setQuery_id(queryid);
+                        queryid = cs.getQueryId(sql);
+                        job.setQueryId(queryid);
                         if (queryid.equals("") ) {
-                            job.setExcute_status(0);
-                            job.setStatus(7);
-                            job.setExcuteDetail("Unknow Error");
+                            job.setExcuteStatus(0);
+                            job.setState("DONE");
+                            //status = 7
+                            job.setResultMessage("Unknow Error");
                         }
-                        if (job.getStatus() == 1) {
+                        if (("RUNNING").equals(job.getState())) {
                             if (ms.updateProcesses(job) != 0) {
                                 gc.getMapresult().put(queryid, job);
                                 pool.execute(new Runnable() {
@@ -148,7 +149,7 @@ public class ScheduledResultController {
             } else {
                 if (gc.getMapresult().size() > 0) {
                     for (Map.Entry<String, JobEntity> entry : gc.getMapresult().entrySet()) {
-                        logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getStatus());
+                        logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getState());
                         eps.killQuery(entry.getValue());
                     }
                     gc.getMapresult().clear();

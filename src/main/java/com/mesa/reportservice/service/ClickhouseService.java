@@ -9,10 +9,10 @@ import java.io.IOException;
  */
 public interface ClickhouseService {
 
-    String  getQueryId(String resultId,String query) ;
+    String  getQueryId(String query) ;
 
 
-    HttpResult queryForExcute(String resultId,String query) throws IOException;
+    HttpResult queryForExcute(String query) throws IOException;
 
 
     HttpResult queryForProcess(String queryId) throws IOException;

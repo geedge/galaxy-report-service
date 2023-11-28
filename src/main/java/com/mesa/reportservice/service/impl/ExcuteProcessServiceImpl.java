@@ -38,42 +38,41 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
 
         try {
             if (je.getIsValid() == 0) {
-                je.setStatus(9);
-                je.setExcuteDetail("CANCEL");
+                //status = 9
+                je.setState("DONE");
+                je.setResultMessage("CANCEL");
             } else {
-
-
-                if (je.getExcute_status() >= 20000000 && je.getExcute_status() < 30000000) {
+                je.setState("DONE");
+                je.setIsFailed(1);
+                if (je.getExcuteStatus() >= 20000000 && je.getExcuteStatus() < 30000000) {
 
                     Boolean isok = saveToHbase(je);
                     if (isok) {
-                        je.setExcuteDetail("SUCCESS");
-                        je.setExcuteProcess(100);
-                        je.setStatus(2);
-                        logger.info("success save to hbase query_id=" + je.getQuery_id() + " resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        //status = 2
+                        je.setResultMessage("OK");
+                        je.setDoneProgress(1.00f);
+                        je.setIsFailed(0);
+                        logger.info("success save to hbase query_id=" + je.getQueryId() + " job_id =" + je.getJobId() + " excute_sql=" + je.getQuerySql());
                     } else {
-                        je.setStatus(5);
-                        je.setExcuteDetail("Write Data Error");
+                        //status = 5
+                        je.setResultMessage("Write Data Error");
                         mons.addFail();
-                        logger.error("save hbase error "+je.getExcute_status()+" query_id=" + je.getQuery_id() + " resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                        logger.error("save hbase error "+je.getExcuteStatus()+" query_id=" + je.getQueryId() + " job_id =" + je.getJobId() + " excute_sql=" + je.getQuerySql());
                     }
-                } else if (je.getExcute_status() >= 40000000 && je.getExcute_status() < 50000000) {
+                } else if (je.getExcuteStatus() >= 40000000 && je.getExcuteStatus() < 50000000) {
+                    //status = 3
+                    je.setResultMessage("Param Syntax Error");
+                    logger.error("Param Syntax Error "+je.getExcuteStatus()+" query_id=" + je.getQueryId() + " job_id =" + je.getJobId() + " excute_sql=" + je.getQuerySql());
 
-                    je.setStatus(3);
-                    je.setExcuteDetail("Param Syntax Error");
-                    logger.error("Param Syntax Error "+je.getExcute_status()+" query_id=" + je.getQuery_id() + " resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
-
-                } else if (je.getExcute_status() == 50001300) {
-
-                    je.setStatus(4);
-                    je.setExcuteDetail("SQL Execution Error");
-                    logger.error("SQL Execution Error ! ErrorCode  "+je.getExcute_status()+" query_id=" + je.getQuery_id() + "  resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                } else if (je.getExcuteStatus() == 50001300) {
+                    //status = 4
+                    je.setResultMessage("SQL Execution Error");
+                    logger.error("SQL Execution Error ! ErrorCode  "+je.getExcuteStatus()+" query_id=" + je.getQueryId() + "  job_id =" + je.getJobId() + " excute_sql=" + je.getQuerySql());
 
                 } else {
-
-                    je.setStatus(7);
-                    je.setExcuteDetail("Unknow Error");
-                    logger.error("Unknow Error ! ErrorCode  "+je.getExcute_status()+" query_id=" + je.getQuery_id() + " resultid =" + je.getResultId() + " excutesql=" + je.getQuerySql());
+                    //status = 7
+                    je.setResultMessage("Unknow Error");
+                    logger.error("Unknow Error ! ErrorCode  "+je.getExcuteStatus()+" query_id=" + je.getQueryId() + " job_id =" + je.getJobId() + " excute_sql=" + je.getQuerySql());
                 }
 
             }
@@ -86,14 +85,16 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
             }
             while (number != 1 && z >= 0);
         } catch (Exception e) {
-            je.setStatus(10);
-            je.setExcuteDetail("Database Error");
+            //status = 10
+            je.setState("DONE");
+            je.setIsFailed(1);
+            je.setResultMessage("Database Error");
             ms.updateProcesses(je);
-            logger.error("save database error resultid =" + je.getResultId()+" queryid=" + je.getResultId() + e.toString());
+            logger.error("save database error job_id =" + je.getJobId()+" query_id=" + je.getQueryId() + e.toString());
 
         } finally {
             saveToMonitor(je);
-            gc.getMapresult().remove(je.getQuery_id());
+            gc.getMapresult().remove(je.getQueryId());
         }
 
 
@@ -101,9 +102,9 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
 
     @Override
     public void reSet(JobEntity jobEntity) {
-
-            jobEntity.setStatus(0);
-            jobEntity.setExcuteDetail("Re Execution");
+            //status = 0
+            jobEntity.setState("PENDING");
+            jobEntity.setResultMessage("Re Execution");
             ms.updateProcesses(jobEntity);
 
     }
@@ -111,14 +112,14 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     @Override
     public void killQuery(JobEntity jobEntity) throws IOException {
 
-            cs.queryForCancel(jobEntity.getQuery_id());
+            cs.queryForCancel(jobEntity.getQueryId());
 
     }
 
     @Override
     public void updateProcessMessage(JobEntity job) throws IOException {
 
-            HttpResult hr = cs.queryForProcess(job.getQuery_id());
+            HttpResult hr = cs.queryForProcess(job.getQueryId());
             if (hr!=null) {
                 String rs = hr.getBody().trim();
                 Map data = JSON.parseObject(rs);
@@ -131,12 +132,12 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
                         float elapsed = Float.parseFloat(map.get("elapsed").toString());
                         double persent = Double.parseDouble(map.get("percent").toString());
                         int process = (int) (persent * 100);
-                        job.setExcuteTime((int) elapsed);
-                        job.setExcuteRow(read_rows);
-                        if(job.getExcuteProcess()<process){
-                            job.setExcuteProcess(process);
+                        job.setElapsed((int) elapsed);
+                        job.setRowsRead(read_rows);
+                        if(job.getDoneProgress()<process){
+                            job.setDoneProgress(process);
                         }
-                        if (job.getExcuteRow() != 0 || job.getExcuteTime() != 0) {
+                        if (job.getRowsRead() != 0 || job.getElapsed() != 0) {
                             ms.updateProcesses(job);
                         }
                     } else {
@@ -175,7 +176,7 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
      * promethus记录结果
      */
     public void saveToMonitor(JobEntity entity) {
-            if (entity.getStatus() == 2) {
+            if (("DONE").equals(entity.getState()) && entity.getIsFailed() == 0 && entity.getIsValid() == 1) {
 
                 mons.addSuccess();
             } else {

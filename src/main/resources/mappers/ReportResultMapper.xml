@@ -2,66 +2,68 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.mesa.reportservice.mapper.ReportResultMapper" >
   <resultMap type="com.mesa.reportservice.bean.JobEntity" id="BaseResultMap">
-    <id property="resultId" column="result_id"/>
-    <result property="resultName" column="result_name"/>
-<!--    <result property="startTime" column="start_time"/>
-    <result property="endTime" column="end_time"/>-->
+    <id property="jobId" column="job_id"/>
     <result property="querySql" column="query_sql"/>
-    <result property="status" column="status"/>
-    <result property="excuteTime" column="excute_time"/>
-    <result property="excuteRow" column="excute_row"/>
-    <result property="excuteProcess" column="excute_process"/>
-    <result property="excuteDetail" column="excute_detail"/>
-    <result property="opTime" column="op_time"/>
-    <result property="issuedTime" column="issued_time"/>
+    <result property="state" column="state"/>
+    <result property="doneProgress" column="done_progress"/>
+    <result property="isFailed" column="is_failed"/>
+    <result property="resultMessage" column="result_message"/>
+    <result property="elapsed" column="elapsed"/>
+    <result property="rowsRead" column="rows_read"/>
+    <result property="bytesRead" column="bytes_read"/>
     <result property="resultRows" column="result_rows"/>
+    <result property="resultBytes" column="result_bytes"/>
     <result property="isValid" column="is_valid"/>
+    <result property="startTime" column="start_time"/>
+    <result property="endTime" column="end_time"/>
+    <result property="lastUpdateTime" column="last_update_time"/>
+    <result property="generatedTime" column="generated_time"/>
 
   </resultMap>
   <sql id="Base_Column_List" >
-    result_id, result_name, query_sql, status, excute_time,
-    excute_row, excute_process, excute_detail, is_send_notice,DATE_FORMAT(op_time,'%Y-%m-%d %H:%i:%s') as op_time,DATE_FORMAT(issued_time,'%Y-%m-%d %H:%i:%s') as issued_time,result_rows,is_valid
+    job_id,query_sql,state,done_progress,is_failed,result_message,elapsed,rows_read,
+    bytes_read,result_rows,result_bytes,is_valid,start_time,end_time,last_update_time,generated_time
   </sql>
   <select id="getJobForExcute" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
     <include refid="Base_Column_List" />
-    from report_result
-    where status = 1  order by issued_time  limit 10
+    from saved_query_job
+    where state = 'RUNNING' order by generated_time limit 10
   </select>
 
   <select id="getJobTask" resultMap="BaseResultMap" parameterType="hashmap">
     select
     <include refid="Base_Column_List" />
-    from report_result
-    where status = 0 and is_valid = 1 and issued_time &lt; #{issuedtime} order by issued_time limit ${rows}
+    from saved_query_job
+    where state = 'PENDING' and is_valid = 1 order by generated_time limit ${rows}
   </select>
 
   <update id="updateProcesses" parameterType="com.mesa.reportservice.bean.JobEntity" >
-    update report_result
+    update saved_query_job
     <set >
-      <if test="status != null" >
-        status = #{status,jdbcType=INTEGER},
+      <if test="state != null" >
+        state = #{state,jdbcType=VARCHAR},
       </if>
-      <if test="excuteTime != null" >
-        excute_time = #{excuteTime,jdbcType=INTEGER},
+      <if test="elapsed != null" >
+        elapsed = #{elapsed,jdbcType=INTEGER},
       </if>
-      <if test="excuteRow != null" >
-        excute_row = #{excuteRow,jdbcType=BIGINT},
+      <if test="rowsRead != null" >
+        rows_read = #{rowsRead,jdbcType=BIGINT},
       </if>
-      <if test="excuteProcess != null" >
-        excute_process = #{excuteProcess,jdbcType=INTEGER},
+      <if test="doneProgress != null" >
+        done_progress = #{doneProgress,jdbcType=FLOAT},
       </if>
-      <if test="excuteDetail != null" >
-        excute_detail = #{excuteDetail,jdbcType=VARCHAR},
+      <if test="resultMessage != null" >
+        result_message = #{resultMessage,jdbcType=VARCHAR},
       </if>
-      <if test="opTime != null" >
-        op_time = #{opTime,jdbcType=TIMESTAMP},
+      <if test="lastUpdateTime != null" >
+        last_update_time = #{lastUpdateTime,jdbcType=BIGINT},
       </if>
       <if test="resultRows != null" >
         result_rows = #{resultRows,jdbcType=INTEGER},
       </if>
     </set>
-    where result_id = #{resultId,jdbcType=INTEGER}
+    where job_id = #{jobId,jdbcType=VARCHAR}
   </update>
 
 
@@ -69,29 +71,29 @@
 
 
   <update id="updateStatue" parameterType="com.mesa.reportservice.bean.JobEntity" >
-    update report_result
+    update saved_query_job
     <set >
-      <if test="status != null" >
-        status = #{status,jdbcType=INTEGER},
+      <if test="state != null" >
+        state = #{state,jdbcType=VARCHAR},
       </if>
-      <if test="excuteDetail != null" >
-        excute_detail = #{excuteDetail,jdbcType=VARCHAR},
+      <if test="resultMessage != null" >
+        result_message = #{resultMessage,jdbcType=VARCHAR},
       </if>
-      <if test="opTime != null" >
-        op_time = #{opTime,jdbcType=TIMESTAMP},
+      <if test="lastUpdateTime != null" >
+        last_update_time = #{lastUpdateTime,jdbcType=BIGINT},
       </if>
       <if test="resultRows != null" >
         result_rows = #{resultRows,jdbcType=INTEGER},
       </if>
     </set>
-    where result_id = #{resultId,jdbcType=INTEGER}
+    where job_id = #{jobId,jdbcType=VARCHAR}
   </update>
 
 
   <select id="getJobCount"  resultType="map" parameterType="hashmap">
-    SELECT (SELECT COUNT(1) FROM report_result where status = 0 and is_valid = 1 and issued_time &lt; #{issuedtime}) as queueNum,
-    (SELECT COUNT(1) FROM report_result where status = 1 and is_valid = 1 ) as excuteingNum,
-    (SELECT COUNT(1) FROM report_result where status = 2 and op_time > #{optime} ) as todaySuccessNum,
-    (SELECT COUNT(1) FROM report_result where status > 2 and op_time > #{optime} ) as todayErrorNum
+    SELECT (SELECT COUNT(1) FROM saved_query_job  where state = 'PENDING' and is_valid = 1) as queueNum,
+    (SELECT COUNT(1) FROM saved_query_job  where state = 'RUNNING' and is_valid = 1) as excuteingNum,
+    (SELECT COUNT(1) FROM saved_query_job  where state = 'DONE' and is_failed = 0 and last_update_time > #{lastUpdateTime}) as todaySuccessNum,
+    (SELECT COUNT(1) FROM saved_query_job  where is_failed = 1 and last_update_time > #{lastUpdateTime} ) as todayErrorNum
   </select>
 </mapper>

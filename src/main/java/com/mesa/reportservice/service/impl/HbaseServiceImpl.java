@@ -30,16 +30,6 @@ public class HbaseServiceImpl implements HbaseService {
     private HbaseProperties hbproperties;
     Log logger = Log.get();
 
-
-    private String getRowKey(String query_id) {
-
-        String rowKey = "";
-        String[] queryIdArray = query_id.split(":");
-        rowKey = queryIdArray[1];
-        return rowKey;
-
-    }
-
     @Override
     public Boolean put(JobEntity jobEntity) {
 
@@ -48,21 +38,20 @@ public class HbaseServiceImpl implements HbaseService {
         Table table = null;
         try {
             table = hbaseConnection.getTable(TableName.valueOf(hbproperties.getTable()));
-            Put put = new Put(Bytes.toBytes(getRowKey(jobEntity.getQuery_id())));
+            Put put = new Put(Bytes.toBytes(jobEntity.getJobId()));
             put.addColumn(Bytes.toBytes("response"), Bytes.toBytes("result"), Bytes.toBytes(jobEntity.getResult()));
-            put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("result_id"), Bytes.toBytes(jobEntity.getResultId()));
 
             put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("excute_sql"), Bytes.toBytes(jobEntity.getQuerySql()));
             //put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("format_sql"), Bytes.toBytes(jobEntity.getFormatSql()));
 
-            if (jobEntity.getExcuteRow() != null) {
-                put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("read_rows"), Bytes.toBytes(jobEntity.getExcuteRow()));
+            if (jobEntity.getRowsRead() != 0) {
+                put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("read_rows"), Bytes.toBytes(jobEntity.getRowsRead()));
             }
-            if (jobEntity.getQuery_duration_ms() != null) {
-                put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("query_duration_ms"), Bytes.toBytes(jobEntity.getQuery_duration_ms()));
+            if (jobEntity.getQueryDurationMs() != null) {
+                put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("query_duration_ms"), Bytes.toBytes(jobEntity.getQueryDurationMs()));
             }
-            if (jobEntity.getMemory_usage() != null) {
-                put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("memory_usage"), Bytes.toBytes(jobEntity.getMemory_usage()));
+            if (jobEntity.getMemoryUsage() != null) {
+                put.addColumn(Bytes.toBytes("detail"), Bytes.toBytes("memory_usage"), Bytes.toBytes(jobEntity.getMemoryUsage()));
             }
             if (hbproperties.getCell_ttl_d() != null) {
                 put.setTTL(hbproperties.getCell_ttl_d() * 86400 * 1000);

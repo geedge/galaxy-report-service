@@ -47,12 +47,12 @@ public class ClickhouseServiceImpl implements ClickhouseService {
 
 
     @Override
-    public String getQueryId(String resultId, String query) {
+    public String getQueryId(String query) {
 
         CloseableHttpResponse response = null;
         String query_id = "";
         try {
-            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/v1/sql/query/query_id?result_id=" + resultId + "&query=");
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/v1/sql/query/query_id?query=");
             String sql = null;
             sql = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
             url = url + sql;
@@ -85,13 +85,13 @@ public class ClickhouseServiceImpl implements ClickhouseService {
      * @throws Exception
      */
     @Override
-    public HttpResult queryForExcute(String resultId, String query) throws UnsupportedEncodingException {
+    public HttpResult queryForExcute(String query) throws UnsupportedEncodingException {
         // 声明httpPost请求
         CloseableHttpResponse response = null;
         // 发起请求
         HttpResult rs = null;
         try {
-            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sql?option=long-term&result_id=" + resultId + "&query=");
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sql?query=");
             query = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
             String jobsql = url + query;
             HttpGet httpGet = new HttpGet(jobsql);
