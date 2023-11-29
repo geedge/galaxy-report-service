@@ -44,6 +44,9 @@
       <if test="state != null" >
         state = #{state,jdbcType=VARCHAR},
       </if>
+      <if test="isFailed != null" >
+        is_failed = #{isFailed,jdbcType=INTEGER},
+      </if>
       <if test="elapsed != null" >
         elapsed = #{elapsed,jdbcType=INTEGER},
       </if>
@@ -55,6 +58,18 @@
       </if>
       <if test="resultMessage != null" >
         result_message = #{resultMessage,jdbcType=VARCHAR},
+      </if>
+      <if test="bytesRead != null" >
+        bytes_read = #{bytesRead,jdbcType=BIGINT},
+      </if>
+      <if test="resultBytes != null" >
+        result_bytes = #{resultBytes,jdbcType=BIGINT},
+      </if>
+      <if test="startTime != null" >
+        start_time = #{startTime,jdbcType=BIGINT},
+      </if>
+      <if test="endTime != null" >
+        end_time = #{endTime,jdbcType=BIGINT},
       </if>
       <if test="lastUpdateTime != null" >
         last_update_time = #{lastUpdateTime,jdbcType=BIGINT},
@@ -75,6 +90,9 @@
     <set >
       <if test="state != null" >
         state = #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="isFailed != null" >
+        is_failed = #{isFailed,jdbcType=INTEGER},
       </if>
       <if test="resultMessage != null" >
         result_message = #{resultMessage,jdbcType=VARCHAR},

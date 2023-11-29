@@ -13,7 +13,7 @@ globle:
 #Hbase的表名等配置通畅不需要更改
 hbase:
     table: tsg:report_result
-    zookeeper_quorum: 192.168.44.55
+    zookeeper_quorum: 192.168.44.12
     zookeeper_property_clientPort: 2181
     zookeeper_znode_parent: /hbase
     client_retries_number: 3
@@ -23,7 +23,7 @@ hbase:
     cell_ttl_d:
 #查询网关ip
 ck:
-    gateway_ip: 192.168.44.55:9999
+    gateway_ip: localhost:9999
 
 #zk集群的ip
 zookeeper:
@@ -57,11 +57,11 @@ spring:
         name: galaxy_report_service
 
     datasource:
-        url: jdbc:mariadb://192.168.44.55:3306/tsg-bifang?serverTimezone=GMT&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false
+        url: jdbc:mariadb://192.168.44.12:3306/cn_olap?serverTimezone=GMT&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false
 #mariadb的用户名
         username: root
 #mariadb的密码
-        password: ceiec2019
+        password: galaxy2019
 
 #以下配置不需要更改通常
         name: druidDataSource

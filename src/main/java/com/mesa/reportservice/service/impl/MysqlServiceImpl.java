@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,8 +50,8 @@ public class MysqlServiceImpl implements MysqlService {
     @Override
     public int updateProcesses(JobEntity job){
 
-            Date currentTime = new Date();
-            job.setLastUpdateTime(currentTime.getTime());
+            long currentTime = System.currentTimeMillis()/1000;
+            job.setLastUpdateTime(currentTime);
             return rrm.updateProcesses(job);
     }
 
@@ -57,11 +59,10 @@ public class MysqlServiceImpl implements MysqlService {
 
     @Override
     public Map<String,Long> getJobCount()   {
-        String current_time = DateUtil.getDate();
-        String today_time = DateUtil.getCurrentDate();
+        LocalDate currentDate = LocalDate.now();
+        long current_date = currentDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
         HashMap map = new HashMap();
-        map.put("issuedtime", current_time);
-        map.put("optime", today_time);
+        map.put("lastUpdateTime", current_date);
         return rrm.getJobCount(map);
     }
 

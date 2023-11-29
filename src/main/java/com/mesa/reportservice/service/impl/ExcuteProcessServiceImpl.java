@@ -34,23 +34,21 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
     private GlobelConfig gc;
     @Override
     public void updateResultMessage(JobEntity je) {
-
-
+        je.setState("DONE");
+        je.setEndTime(System.currentTimeMillis()/1000);
+        je.setDoneProgress(1.00f);
+        je.setIsFailed(1);
         try {
             if (je.getIsValid() == 0) {
                 //status = 9
-                je.setState("DONE");
                 je.setResultMessage("CANCEL");
             } else {
-                je.setState("DONE");
-                je.setIsFailed(1);
                 if (je.getExcuteStatus() >= 20000000 && je.getExcuteStatus() < 30000000) {
 
                     Boolean isok = saveToHbase(je);
                     if (isok) {
                         //status = 2
                         je.setResultMessage("OK");
-                        je.setDoneProgress(1.00f);
                         je.setIsFailed(0);
                         logger.info("success save to hbase query_id=" + je.getQueryId() + " job_id =" + je.getJobId() + " excute_sql=" + je.getQuerySql());
                     } else {
@@ -86,8 +84,6 @@ public class ExcuteProcessServiceImpl implements ExcuteProcessService {
             while (number != 1 && z >= 0);
         } catch (Exception e) {
             //status = 10
-            je.setState("DONE");
-            je.setIsFailed(1);
             je.setResultMessage("Database Error");
             ms.updateProcesses(je);
             logger.error("save database error job_id =" + je.getJobId()+" query_id=" + je.getQueryId() + e.toString());

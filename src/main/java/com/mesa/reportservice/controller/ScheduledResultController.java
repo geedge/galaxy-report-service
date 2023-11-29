@@ -74,7 +74,7 @@ public class ScheduledResultController {
                     }
 
                 }
-                //遍历内存中的任务对状态1的更新进度，其他更新数据库的状态
+                //遍历内存中的任务对状态RUNNING的更新进度，其他更新数据库的状态
                 for (Map.Entry<String, JobEntity> entry : gc.getMapresult().entrySet()) {
                     logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getState());
                     long currentTime = System.currentTimeMillis();
@@ -98,7 +98,7 @@ public class ScheduledResultController {
                     List<JobEntity> jobs = ms.getJobTask(rows);
                     for (JobEntity job : jobs) {
                         logger.info("start executing task");
-                        long begintime = System.currentTimeMillis();
+                        long begintime = System.currentTimeMillis()/1000;
                         job.setStartTime(begintime);
                         String sql = job.getQuerySql().trim();
                       /*  sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
@@ -118,7 +118,10 @@ public class ScheduledResultController {
                         if (queryid.equals("") ) {
                             job.setExcuteStatus(0);
                             job.setState("DONE");
+                            job.setEndTime(System.currentTimeMillis()/1000);
                             //status = 7
+                            job.setDoneProgress(1.00f);
+                            job.setIsFailed(1);
                             job.setResultMessage("Unknow Error");
                         }
                         if (("RUNNING").equals(job.getState())) {

@@ -53,6 +53,8 @@ public class ExcuteserviceImpl implements ExcuteService {
                         Map rows = (Map) mapresult.get("statistics");
                         job.setResultRows(Long.parseLong(rows.get("result_rows").toString()));
                         job.setRowsRead(Long.parseLong(rows.get("rows_read").toString()));
+                        job.setBytesRead(Long.parseLong(rows.get("bytes_read").toString()));
+                        job.setResultBytes(Long.parseLong(rows.get("result_bytes").toString()));
                         job.setResult(hr.getBody());
                         job.setElapsed((int) Float.parseFloat(rows.get("elapsed").toString()));
                         job.setExcuteStatus(Integer.parseInt(mapresult.get("code").toString()));
@@ -106,6 +108,7 @@ public class ExcuteserviceImpl implements ExcuteService {
         }
         while (k > 0);
         job.setState("DONE");
+        job.setEndTime(System.currentTimeMillis()/1000);
     }
 
 }
