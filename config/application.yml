@@ -3,7 +3,7 @@ nacos:
     type: yaml #配置集的配置格式
     server-addr: 127.0.0.1:8848 #配置中心地址
     namespace: dev #命名空间
-    data-id: galaxy-report-service.yml # 数据集ID
+    data-id: saved-query-scheduler.yml # 数据集ID
     auto-refresh: true #开启自动刷新
     group: Galaxy  #配置对应的分组
     username: nacos #Nacos认证用户

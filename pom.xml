@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.mesa</groupId>
-	<artifactId>galaxy-report-service</artifactId>
+	<artifactId>saved-query-scheduler</artifactId>
 	<version>22.12.07</version>
-	<name>galaxy-report-service</name>
+	<name>saved-query-scheduler</name>
 	<packaging>jar</packaging>
 	<description>Demo project for Spring Boot</description>
 
