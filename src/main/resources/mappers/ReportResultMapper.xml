@@ -65,13 +65,13 @@
       <if test="resultBytes != null" >
         result_bytes = #{resultBytes,jdbcType=BIGINT},
       </if>
-      <if test="startTime != null" >
+      <if test="startTime != null and startTime != 0" >
         start_time = #{startTime,jdbcType=BIGINT},
       </if>
-      <if test="endTime != null" >
+      <if test="endTime != null and endTime != 0" >
         end_time = #{endTime,jdbcType=BIGINT},
       </if>
-      <if test="lastUpdateTime != null" >
+      <if test="lastUpdateTime != null and lastUpdateTime != 0" >
         last_update_time = #{lastUpdateTime,jdbcType=BIGINT},
       </if>
       <if test="resultRows != null" >
@@ -97,7 +97,7 @@
       <if test="resultMessage != null" >
         result_message = #{resultMessage,jdbcType=VARCHAR},
       </if>
-      <if test="lastUpdateTime != null" >
+      <if test="lastUpdateTime != null and lastUpdateTime != 0" >
         last_update_time = #{lastUpdateTime,jdbcType=BIGINT},
       </if>
       <if test="resultRows != null" >
