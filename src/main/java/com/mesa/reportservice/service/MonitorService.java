@@ -10,5 +10,8 @@ public interface MonitorService {
 
 
      void  addSuccess();
+
      void  addFail();
+
+     String getReportStatus();
 }

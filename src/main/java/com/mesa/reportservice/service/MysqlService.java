@@ -19,6 +19,6 @@ public interface MysqlService {
     int updateProcesses(JobEntity job);
 
 
-    Map<String,Long> getJobCount()  throws Exception;
+    Map<String,Long> getJobCount() ;
 
-    }
+}
