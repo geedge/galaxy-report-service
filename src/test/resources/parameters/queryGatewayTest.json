@@ -1,0 +1,6 @@
+{
+  "querySqlSuccess": "select 1 from session_record limit 1",
+  "querySqlError": "select 1 from session_record_cn limit 1",
+  "queryForProcessIdError": "",
+  "queryForCancelIdError": "1:1"
+}

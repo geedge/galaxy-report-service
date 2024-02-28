@@ -1,61 +1,75 @@
 package com.mesa.reportservice.service.impl;
 
-import cn.hutool.log.Log;
-import com.mesa.reportservice.configuration.GlobelConfig;
-import com.mesa.reportservice.configuration.ZkProperties;
+import com.alibaba.fastjson.JSONArray;
+import com.mesa.reportservice.bean.MonitorEntity;
+import com.mesa.reportservice.configuration.SchedulerProperties;
+import com.mesa.reportservice.service.JobService;
 import com.mesa.reportservice.service.MonitorService;
-import com.mesa.reportservice.service.ZkService;
+import com.mesa.reportservice.service.ZookeeperService;
 import io.micrometer.core.instrument.*;
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.api.ExistsBuilder;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
-import java.net.InetAddress;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Created by wk1 on 2020/1/6.
+ *
+ * @author lijinyang
+ * @date 2024/1/24
  */
 @Service
 public class MonitorServiceImpl implements MonitorService {
 
-    Log logger = Log.get();
+    @Autowired
+    private JobService mysqlService;
 
     @Autowired
-    MeterRegistry registry;
+    private ZookeeperService zookeeperService;
 
-    private Counter counter_report_success;
-    private Counter counter_report_fail;
+    @Autowired
+    private SchedulerProperties schedulerProperties;
+
+    @Autowired
+    private MeterRegistry meterRegistry;
+
+    private Counter counterReportSuccess;
+
+    private Counter counterReportFail;
 
     @PostConstruct
     public void init(){
-
-        counter_report_success = registry.counter("report_success_count", "reportJob", "report_success");
-
-        counter_report_fail = registry.counter("report_fail_count", "reportJob", "report_error");
+        counterReportSuccess = meterRegistry.counter("report_success_count", "reportJob", "report_success");
+        counterReportFail = meterRegistry.counter("report_fail_count", "reportJob", "report_error");
     }
+
     @Override
     public void addSuccess() {
-            counter_report_success.increment();
+        counterReportSuccess.increment();
     }
+
     @Override
     public void addFail() {
-            counter_report_fail.increment();
+        counterReportFail.increment();
     }
 
-
-    public MeterRegistry getRegistry() {
-        return registry;
-    }
-
-    public void setRegistry(MeterRegistry registry) {
-        this.registry = registry;
+    @Override
+    public String getJobCount() {
+        String json="";
+        MonitorEntity monitorEntity = new MonitorEntity();
+        Map<String,Long> numMap = mysqlService.getJobCount();
+        monitorEntity.setQueueJobNum(numMap.get("queueNum"));
+        monitorEntity.setExecutingJobNum(numMap.get("executingNum"));
+        monitorEntity.setTodaySuccessJobNum(numMap.get("todaySuccessNum"));
+        monitorEntity.setTodayErrorJobNum(numMap.get("todayErrorNum"));
+        monitorEntity.setJobList(schedulerProperties.getMapResult());
+        if(zookeeperService.isMaster()){
+            monitorEntity.setStatus("active");
+        }else{
+            monitorEntity.setStatus("standby");
+        }
+        Object obj = JSONArray.toJSON(monitorEntity);
+        json = obj.toString();
+        return json;
     }
 }

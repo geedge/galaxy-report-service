@@ -2,6 +2,7 @@ package com.mesa.reportservice.configuration;
 
 import com.alibaba.nacos.api.config.ConfigType;
 import com.alibaba.nacos.api.config.annotation.NacosConfigurationProperties;
+import lombok.Data;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -12,12 +13,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by wk1 on 2019/5/15.
+ *
+ * @author lijinyang
+ * @date 2024/1/24
  */
+@Data
 @Component
-//@ConfigurationProperties(prefix = "http")
 @NacosConfigurationProperties(prefix = "http", dataId = "${nacos.config.data-id}", groupId = "${nacos.config.group}", type = ConfigType.YAML, autoRefreshed = true)
-
 public class HttpClientPool {
 
     private Integer maxTotal;
@@ -33,39 +35,6 @@ public class HttpClientPool {
     private boolean staleConnectionCheckEnabled;
 
     private Integer socketTimeoutShort;
-
-
-    public void setMaxTotal(Integer maxTotal) {
-        this.maxTotal = maxTotal;
-    }
-
-    public void setDefaultMaxPerRoute(Integer defaultMaxPerRoute) {
-        this.defaultMaxPerRoute = defaultMaxPerRoute;
-    }
-
-    public void setConnectTimeout(Integer connectTimeout) {
-        this.connectTimeout = connectTimeout;
-    }
-
-    public void setConnectionRequestTimeout(Integer connectionRequestTimeout) {
-        this.connectionRequestTimeout = connectionRequestTimeout;
-    }
-
-    public void setSocketTimeout(Integer socketTimeout) {
-        this.socketTimeout = socketTimeout;
-    }
-
-    public void setStaleConnectionCheckEnabled(boolean staleConnectionCheckEnabled) {
-        this.staleConnectionCheckEnabled = staleConnectionCheckEnabled;
-    }
-
-    public void setSocketTimeoutShort(Integer socketTimeoutShort) {
-        this.socketTimeoutShort = socketTimeoutShort;
-    }
-
-    public Integer getSocketTimeout() {
-        return socketTimeout;
-    }
 
     /**
      * 首先实例化一个连接池管理器，设置最大连接数、并发连接数
@@ -94,9 +63,7 @@ public class HttpClientPool {
 
         //HttpClientBuilder中的构造方法被protected修饰，所以这里不能直接使用new来实例化一个HttpClientBuilder，可以使用HttpClientBuilder提供的静态方法create()来获取HttpClientBuilder对象
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-
         httpClientBuilder.setConnectionManager(httpClientConnectionManager);
-
         return httpClientBuilder;
     }
 
@@ -128,8 +95,6 @@ public class HttpClientPool {
                 .setStaleConnectionCheckEnabled(staleConnectionCheckEnabled);
     }
 
-
-
     @Bean(name = "builderShort")
     public RequestConfig.Builder getBuilderShort() {
         RequestConfig.Builder builder = RequestConfig.custom();
@@ -138,6 +103,7 @@ public class HttpClientPool {
                 .setSocketTimeout(socketTimeoutShort)
                 .setStaleConnectionCheckEnabled(staleConnectionCheckEnabled);
     }
+
     /**
      * 使用builder构建一个RequestConfig对象
      *
@@ -160,6 +126,5 @@ public class HttpClientPool {
     public RequestConfig getRequestShortConfig(@Qualifier("builderShort") RequestConfig.Builder builder) {
         return builder.build();
     }
-
 }
 

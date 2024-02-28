@@ -1,14 +1,15 @@
 package com.mesa.reportservice.service;
 
-
-import org.springframework.stereotype.Service;
-
 /**
- * Created by wk1 on 2020/1/6.
+ *
+ * @author lijinyang
+ * @date 2024/1/24
  */
 public interface MonitorService {
 
-
      void  addSuccess();
+
      void  addFail();
+
+     String getJobCount();
 }

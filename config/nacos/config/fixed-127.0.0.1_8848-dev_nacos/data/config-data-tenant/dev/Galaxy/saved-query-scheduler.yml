@@ -6,13 +6,13 @@ scan:
     result:
         scheduled:
             plan: 0/15 * * * * ?
-#同时间执行是线程数
-globle:
+#同时间执行线程数
+scheduler:
     job_thread: 2
 #Hbasehttp的端口
 #Hbase的表名等配置通畅不需要更改
 hbase:
-    table: tsg:report_result
+    table: tsg_galaxy:saved_query_result
     zookeeper_quorum: 192.168.44.12
     zookeeper_property_clientPort: 2181
     zookeeper_znode_parent: /hbase
@@ -22,12 +22,12 @@ hbase:
 #存入Hbase的cell级别生存时间 根据部署环境填写：1.TSG 不设置(永久有效); 2.CN 7(默认7天) 单位：Day
     cell_ttl_d:
 #查询网关ip
-ck:
-    gateway_ip: localhost:9999
+query-gateway:
+    gateway_ip: 192.168.44.12:9999
 
 #zk集群的ip
 zookeeper:
-    connectString: 192.168.44.55
+    connectString: 192.168.44.12
 #是否启用zookeeper 0启用(集群) 1禁用(单机)
     open: 1
     retryCount: 5
@@ -109,7 +109,7 @@ spring:
                         login-password: admin
             #Spring监控，对内部各接口调用的监控,需要导入aop相关包
             aop-patterns: com.mesa.reportservice.controller.*,com.mesa.reportservice.service.*,com.mesa.reportservice.mapper.*
-mybatis:
+mybatis-plus:
     typeAliasesPackage: com.mesa.reportservice.bean
     mapperLocations: classpath*:/mappers/*.xml
 management:

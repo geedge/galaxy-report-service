@@ -1,0 +1,133 @@
+#http的端口
+server:
+    port: 9093
+#更新进度条的时间10s
+scan:
+    result:
+        scheduled:
+            plan: 0/15 * * * * ?
+#同时间执行线程数
+scheduler:
+    job_thread: 2
+#Hbasehttp的端口
+#Hbase的表名等配置通畅不需要更改
+hbase:
+    table: tsg_galaxy:saved_query_result
+    zookeeper_quorum: 192.168.44.12
+    zookeeper_property_clientPort: 2181
+    zookeeper_znode_parent: /hbase
+    client_retries_number: 3
+    rpc_timeout: 100000
+    connect_pool: 10
+#存入Hbase的cell级别生存时间 根据部署环境填写：1.TSG 不设置(永久有效); 2.CN 7(默认7天) 单位：Day
+    cell_ttl_d:
+#查询网关ip
+query-gateway:
+    gateway_ip: 192.168.44.12:9999
+
+#zk集群的ip
+zookeeper:
+    connectString: 192.168.44.12
+#是否启用zookeeper 0启用(集群) 1禁用(单机)
+    open: 1
+    retryCount: 5
+    elapsedTimeMs: 10000
+    sessionTimeoutMs: 50000
+    connectionTimeoutMs: 50000
+    nameSpace: reportservice
+
+#最大连接数
+http:
+    maxTotal: 300
+#并发数
+    defaultMaxPerRoute: 100
+#创建连接的最长时间
+    connectTimeout: 10000
+#从连接池中获取到连接的最长时间
+    connectionRequestTimeout: 10000
+#数据传输的最长时间
+    socketTimeout: 21605000
+#提交请求前测试连接是否可用
+    staleConnectionCheckEnabled: true
+    socketTimeoutShort: 30000
+
+#mariadb的url
+spring:
+    application:
+        name: saved-query-scheduler
+
+    datasource:
+        url: jdbc:mariadb://192.168.44.12:3306/olap_test?serverTimezone=GMT&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&failOverReadOnly=false
+#mariadb的用户名
+        username: root
+#mariadb的密码
+        password: galaxy2019
+
+#以下配置不需要更改通常
+        name: druidDataSource
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: org.mariadb.jdbc.Driver
+
+#配置监控统计拦截的filters，去掉后监控界面SQL无法进行统计，’wall’用于防火墙
+        druid:
+            filters:
+                stat:
+                    enabled: true
+                slf4j:
+                    enabled: true
+                wall:
+                    enabled: true
+                    config:
+                        comment-allow: true
+            #最大连接数
+            max-active: 30
+            #最小连接数
+            min-idle: 1
+            #初始化连接数
+            initial-size: 2
+            #获取连接最大超时时间
+            max-wait: 600000
+            #间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+            time-between-eviction-runs-millis: 60000
+            # 一个连接在池中最小生存的时间，单位是毫秒
+            min-evictable-idle-time-millis: 300000
+            #验证连接是否可用,在数据库中执行一条sql
+            validation-query: select 1
+            #建议配置为true，不影响性能，并且保证安全性。申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，
+            # 执行validationQuery检测连接是否有效
+            test-while-idle: true
+            #申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
+            test-on-borrow: true
+            test-on-return: false
+            connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+            #是否开启WebStatFilter
+            web-stat-filter:
+                        enabled: true
+            #设置不统计哪些URL(用于排除一些不必要的url)
+                        exclusions: "*.js,*.gif,*.jpg,*..ng,*.css,*.ico,/druid/*"
+            #是否开启Druid监控信息显示页面
+            stat-view-servlet:
+                        enabled: true
+            #甚至浏览器访问路径
+                        url-pattern: /druid/*
+            #禁止手动重置监控数据
+                        reset-enable: false
+            #durid-ui页面账户密码
+                        login-username: admin
+                        login-password: admin
+            #Spring监控，对内部各接口调用的监控,需要导入aop相关包
+            aop-patterns: com.mesa.reportservice.controller.*,com.mesa.reportservice.service.*,com.mesa.reportservice.mapper.*
+mybatis-plus:
+    typeAliasesPackage: com.mesa.reportservice.bean
+    mapperLocations: classpath*:/mappers/*.xml
+management:
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+    metrics:
+        tags:
+            application: saved-query-scheduler
+
+logging:
+    config: ./config/log4j2-dev.xml
