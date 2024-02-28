@@ -1,0 +1,26 @@
+{
+  "putJob": {
+    "jobId": "0450dd9248d172aed6aac55e62f7d128",
+    "querySql": "SELECT count(apn) AS \"APN\" FROM security_event WHERE recv_time >= UNIX_TIMESTAMP('2023-12-27T09:05:44Z') AND recv_time < UNIX_TIMESTAMP('2024-01-03T09:05:44Z') AND security_event.vsys_id IN (1) ORDER BY \"APN\" DESC",
+    "state": "DONE",
+    "resultName": "",
+    "doneProgress": 1.00,
+    "isFailed": 0,
+    "resultMessage": "OK",
+    "elapsed": 1,
+    "rowsRead": 100,
+    "bytesRead": 100,
+    "resultRows": 1,
+    "resultBytes": 100,
+    "isValid": "",
+    "startTime": 1703399415,
+    "endTime": 1703399430,
+    "lastUpdateTime": "",
+    "generatedTime": "",
+    "queryId": "",
+    "executeStatus": "",
+    "result": "",
+    "memoryUsage": "",
+    "queryDurationMs": ""
+  }
+}

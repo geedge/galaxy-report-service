@@ -1,11 +1,17 @@
 package com.mesa.reportservice.bean;
 
+import cn.hutool.log.LogFactory;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import org.apache.log4j.spi.LoggerFactory;
 
 /**
- * Created by wk1 on 2019/5/20.
+ *
+ * @author lijinyang
+ * @date 2024/1/24
  */
 @Data
+@TableName("saved_query_job")
 public class JobEntity implements Cloneable {
 
     private String jobId;
@@ -44,7 +50,7 @@ public class JobEntity implements Cloneable {
 
     private String queryId;
 
-    private Integer excuteStatus;
+    private Integer executeStatus;
 
     private String result;
 
@@ -58,6 +64,7 @@ public class JobEntity implements Cloneable {
         try {
             o = (JobEntity) super.clone();
         } catch (CloneNotSupportedException e) {
+            LogFactory.get().error(e);
         }
         return o;
     }

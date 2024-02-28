@@ -1,35 +1,19 @@
 package com.mesa.reportservice.bean;
 
+import lombok.Data;
+
 /**
- * Created by wk1 on 2019/5/15.
+ *
+ * @author lijinyang
+ * @date 2024/1/24
  */
+@Data
 public class HttpResult {
 
     private int code;
+
     private String body;
-   // private byte[] bodybyte;
-
-
 
     public HttpResult() {
-
-    }
-
-
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
     }
 }
