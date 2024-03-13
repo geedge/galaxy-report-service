@@ -1,4 +1,4 @@
-package com.mesa.reportservice;
+package com.mesa.reportservice.service.impl;
 
 import com.mesa.ReportServiceApplicationTests;
 import com.mesa.reportservice.service.ZookeeperService;
@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
  * @Date: 2024/01/10/14:20
  */
 @EnableAutoConfiguration
-public class zookeeperTest extends ReportServiceApplicationTests {
+public class ZookeeperServiceImplTest extends ReportServiceApplicationTests {
 
     @Autowired
     private ZookeeperService zookeeperService;

@@ -1,4 +1,4 @@
-package com.mesa.reportservice;
+package com.mesa.reportservice.service.impl;
 
 import com.mesa.ReportServiceApplicationTests;
 import org.junit.Test;
@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @EnableAutoConfiguration
 @AutoConfigureMockMvc
-public class MonitorTest extends ReportServiceApplicationTests {
+public class MonitorServiceImplTest extends ReportServiceApplicationTests {
 
     @Autowired
     private MockMvc mockMvc;

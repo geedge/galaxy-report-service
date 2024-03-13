@@ -1,4 +1,4 @@
-package com.mesa.reportservice;
+package com.mesa.reportservice.service.impl;
 
 import com.mesa.ReportServiceApplicationTests;
 import com.mesa.reportservice.bean.HttpResult;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * @Date: 2024/01/04/17:05
  */
 @EnableAutoConfiguration
-public class QueryGatewayTest extends ReportServiceApplicationTests {
+public class QueryGatewayServiceImplTest extends ReportServiceApplicationTests {
 
     private static final String QUERY_ID_PATTERN = "^[a-f0-9]{32}:[a-f0-9]{32}$";
 

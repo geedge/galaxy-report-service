@@ -1,4 +1,4 @@
-package com.mesa.reportservice;
+package com.mesa.reportservice.service.impl;
 
 import com.mesa.ReportServiceApplicationTests;
 import com.mesa.reportservice.bean.JobEntity;
@@ -17,7 +17,7 @@ import java.util.Map;
  * @Date: 2024/01/08/17:22
  */
 @EnableAutoConfiguration
-public class JobTest extends ReportServiceApplicationTests {
+public class JobServiceImplTest extends ReportServiceApplicationTests {
 
     private static final int rows = 10;
 
