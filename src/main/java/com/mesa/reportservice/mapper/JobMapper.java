@@ -24,6 +24,7 @@ public interface JobMapper extends BaseMapper<JobEntity> {
 
     int updateStatue(JobEntity job);
 
-    Map<String,Long>  getJobCount(Map<String, Object> map);
+    Map<String,Long> getJobCount(long lastUpdateTime);
 
+    Map<String,Object> getJobDetail(String jobId);
 }

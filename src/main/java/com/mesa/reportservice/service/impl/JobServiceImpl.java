@@ -1,7 +1,10 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mesa.reportservice.bean.JobEntity;
+import com.mesa.reportservice.exception.SQSCode;
+import com.mesa.reportservice.exception.SQSException;
 import com.mesa.reportservice.mapper.JobMapper;
 import com.mesa.reportservice.service.JobService;
 import org.springframework.stereotype.Service;
@@ -42,10 +45,16 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, JobEntity> implements
     @Override
     public Map<String,Long> getJobCount(){
         LocalDate currentDate = LocalDate.now();
-        long lastUpdateTime = currentDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
-        Map map = new HashMap<String,Object>();
-        map.put("lastUpdateTime", lastUpdateTime);
-        return this.baseMapper.getJobCount(map);
+        long lastUpdateTime = currentDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()/1000;
+        return this.baseMapper.getJobCount(lastUpdateTime);
     }
 
+    @Override
+    public Map<String,Object> getJobDetail(String jobId){
+        Map<String,Object> jobState = this.baseMapper.getJobDetail(jobId);
+        if (ObjectUtil.isEmpty(jobState)) {
+            throw new SQSException(SQSCode.JOB_IS_NOT_EXIST);
+        }
+        return jobState;
+    }
 }

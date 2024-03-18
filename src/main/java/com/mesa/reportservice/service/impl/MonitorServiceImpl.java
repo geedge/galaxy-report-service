@@ -22,7 +22,7 @@ import java.util.Map;
 public class MonitorServiceImpl implements MonitorService {
 
     @Autowired
-    private JobService mysqlService;
+    private JobService jobService;
 
     @Autowired
     private ZookeeperService zookeeperService;
@@ -54,10 +54,9 @@ public class MonitorServiceImpl implements MonitorService {
     }
 
     @Override
-    public String getJobCount() {
-        String json="";
+    public MonitorEntity getJobCount() {
         MonitorEntity monitorEntity = new MonitorEntity();
-        Map<String,Long> numMap = mysqlService.getJobCount();
+        Map<String,Long> numMap = jobService.getJobCount();
         monitorEntity.setQueueJobNum(numMap.get("queueNum"));
         monitorEntity.setExecutingJobNum(numMap.get("executingNum"));
         monitorEntity.setTodaySuccessJobNum(numMap.get("todaySuccessNum"));
@@ -68,8 +67,6 @@ public class MonitorServiceImpl implements MonitorService {
         }else{
             monitorEntity.setStatus("standby");
         }
-        Object obj = JSONArray.toJSON(monitorEntity);
-        json = obj.toString();
-        return json;
+        return monitorEntity;
     }
 }

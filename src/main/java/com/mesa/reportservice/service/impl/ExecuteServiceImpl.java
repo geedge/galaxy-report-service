@@ -48,6 +48,8 @@ public class ExecuteServiceImpl implements ExecuteService {
                 if (httpResult != null) {
                     Map mapresult = JSON.parseObject(httpResult.getBody());
                     int queryStatus = Integer.parseInt(mapresult.get("status").toString());
+                    job.setExecuteStatus(Integer.parseInt(mapresult.get("code").toString()));
+                    job.setResultMessage(mapresult.get("message").toString());
                     logger.info("httpCode=" + httpResult.getCode() +" status="+queryStatus);
                     if (httpResult.getCode() == HttpStatus.OK.value() && queryStatus == HttpStatus.OK.value()) {
                         k = 0;
@@ -59,11 +61,9 @@ public class ExecuteServiceImpl implements ExecuteService {
                         job.setResultBytes(Long.parseLong(rows.get("result_bytes").toString()));
                         job.setResult(httpResult.getBody());
                         job.setElapsed((int) Float.parseFloat(rows.get("elapsed").toString()));
-                        job.setExecuteStatus(Integer.parseInt(mapresult.get("code").toString()));
                         logger.info("success resultId = " + job.getJobId() + " queryId=" + job.getQueryId() + " sql=" + job.getQuerySql());
                     } else {
                         k = 0;
-                        job.setExecuteStatus(Integer.parseInt(mapresult.get("code").toString()));
                         logger.error("SQL Execution Error ");
                     }
                 } else {
@@ -71,34 +71,34 @@ public class ExecuteServiceImpl implements ExecuteService {
                 }
             } catch (SocketTimeoutException e) {
                 k--;
-                job.setResultMessage(e.toString());
+                job.setResultMessage(e.getMessage());
                 if (k == 0) {
                     job.setExecuteStatus(Constant.JOB_EXECUTION_TIMEOUT);
                     job.setResultMessage(Constant.QUERY_TIME_OUT);
                     logger.info("timeout resultId = " + job.getJobId() + " queryId=" + job.getQueryId() + " sql=" + job.getQuerySql());
                 } else {
-                    logger.info("Socket warn " + e.toString() + "retry time " + (3 - k));
+                    logger.info("Socket warn " + e.getMessage() + "retry time " + (3 - k));
                 }
             } catch (ConnectTimeoutException e) {
                 job.setExecuteStatus(Constant.JOB_ERROR);
-                job.setResultMessage(e.toString());
-                logger.error(SQSCode.UNKNOWN_ERROR.getMsg() + e.toString());
+                job.setResultMessage(e.getMessage());
+                logger.error(SQSCode.UNKNOWN_ERROR.getMsg() + e.getMessage());
                 k = 0;
             } catch (OutOfMemoryError e) {
                 job.setExecuteStatus(Constant.JOB_ERROR);
-                job.setResultMessage(Constant.RESULT_TOO_LARGE);
-                logger.error(SQSCode.OUT_OF_MEMORY_ERROR.getMsg() + e.toString());
+                job.setResultMessage(e.getMessage());
+                logger.error(SQSCode.OUT_OF_MEMORY_ERROR.getMsg() + e.getMessage());
                 k = 0;
             } catch (Exception e) {
                 job.setExecuteStatus(Constant.JOB_ERROR);
-                job.setResultMessage(e.toString());
-                logger.error(SQSCode.UNKNOWN_ERROR.getMsg() + e.toString());
+                job.setResultMessage(e.getMessage());
+                logger.error(SQSCode.UNKNOWN_ERROR.getMsg() + e.getMessage());
                 k = 0;
             }
             try {
                 queryGatewayService.deleteJob(job.getQueryId());
             } catch (Exception e) {
-                logger.error(SQSCode.KILL_QUERY_ERROR.getMsg() + e.toString());
+                logger.error(SQSCode.KILL_QUERY_ERROR.getMsg() + e.getMessage());
                 throw new SQSException(SQSCode.KILL_QUERY_ERROR);
             }
         }

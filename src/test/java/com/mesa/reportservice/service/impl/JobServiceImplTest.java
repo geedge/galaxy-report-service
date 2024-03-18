@@ -1,8 +1,11 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.mesa.ReportServiceApplicationTests;
 import com.mesa.reportservice.bean.JobEntity;
 import com.mesa.reportservice.enums.JobStates;
+import com.mesa.reportservice.exception.SQSCode;
+import com.mesa.reportservice.exception.SQSException;
 import com.mesa.reportservice.service.JobService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,15 +51,29 @@ public class JobServiceImplTest extends ReportServiceApplicationTests {
 
     @Test
     public void testUpdateProcessesSuccess() {
-        JobEntity job = this.jsonToInParameter("parameters/mysqlTest.json", "updateProcessesSuccessJob", JobEntity.class);
+        JobEntity job = this.jsonToInParameter("parameters/jobTest.json", "updateProcessesSuccessJob", JobEntity.class);
         int i = jobService.updateProcesses(job);
         Assert.assertEquals(updateProcessesSuccess,i);
     }
 
     @Test
     public void testUpdateProcessesError() {
-        JobEntity job = this.jsonToInParameter("parameters/mysqlTest.json", "updateProcessesErrorJob", JobEntity.class);
+        JobEntity job = this.jsonToInParameter("parameters/jobTest.json", "updateProcessesErrorJob", JobEntity.class);
         int i = jobService.updateProcesses(job);
         Assert.assertNotEquals(updateProcessesSuccess,i);
+    }
+
+    @Test
+    public void testGetJobState() {
+        String successId = this.jsonToInParameter("parameters/jobTest.json", "getJobDetailSuccessId", String.class);
+        Map<String, Object> success = jobService.getJobDetail(successId);
+        Assert.assertTrue(ObjectUtil.isNotEmpty(success));
+
+        String errorId = this.jsonToInParameter("parameters/jobTest.json", "getJobDetailErrorId", String.class);
+        try {
+            jobService.getJobDetail(errorId);
+        } catch (SQSException e) {
+            Assert.assertTrue(e.getCode()==SQSCode.JOB_IS_NOT_EXIST.getCode());
+        }
     }
 }

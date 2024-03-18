@@ -22,4 +22,6 @@ public interface JobService  extends IService<JobEntity> {
     int updateProcesses(JobEntity job);
 
     Map<String,Long> getJobCount();
+
+    Map<String,Object> getJobDetail(String jobId);
 }

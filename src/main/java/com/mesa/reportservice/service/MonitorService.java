@@ -1,5 +1,7 @@
 package com.mesa.reportservice.service;
 
+import com.mesa.reportservice.bean.MonitorEntity;
+
 /**
  *
  * @author lijinyang
@@ -11,5 +13,5 @@ public interface MonitorService {
 
      void  addFail();
 
-     String getJobCount();
+     MonitorEntity getJobCount();
 }

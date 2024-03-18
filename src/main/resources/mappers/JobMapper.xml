@@ -81,10 +81,6 @@
     where job_id = #{jobId,jdbcType=VARCHAR}
   </update>
 
-
-
-
-
   <update id="updateStatue" parameterType="com.mesa.reportservice.bean.JobEntity" >
     update saved_query_job
     <set >
@@ -107,11 +103,16 @@
     where job_id = #{jobId,jdbcType=VARCHAR}
   </update>
 
-
-  <select id="getJobCount"  resultType="map" parameterType="hashmap">
+  <select id="getJobCount"  resultType="map" parameterType="long">
     SELECT (SELECT COUNT(1) FROM saved_query_job  where state = 'PENDING' and is_valid = 1) as queueNum,
     (SELECT COUNT(1) FROM saved_query_job  where state = 'RUNNING' and is_valid = 1) as executingNum,
     (SELECT COUNT(1) FROM saved_query_job  where state = 'DONE' and is_failed = 0 and last_update_time > #{lastUpdateTime}) as todaySuccessNum,
     (SELECT COUNT(1) FROM saved_query_job  where is_failed = 1 and last_update_time > #{lastUpdateTime} ) as todayErrorNum
+  </select>
+
+  <select id="getJobDetail"  resultType="map" parameterType="String">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM saved_query_job WHERE job_id = #{jobId}
   </select>
 </mapper>

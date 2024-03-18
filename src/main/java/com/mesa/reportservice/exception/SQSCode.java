@@ -31,6 +31,7 @@ public enum SQSCode {
 	TASK_CANNOT_EXECUTED(500010,"task cannot be executed"),
 	UNKNOWN_ERROR(500999,"Unknown Error"),
 
+	JOB_IS_NOT_EXIST(510000, "job is not exist"),
 	//成功
     SUCCESS(200, "success"),
 	//失败

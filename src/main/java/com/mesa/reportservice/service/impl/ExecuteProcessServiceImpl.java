@@ -1,5 +1,6 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import com.alibaba.fastjson.JSON;
@@ -50,6 +51,7 @@ public class ExecuteProcessServiceImpl implements ExecuteProcessService {
         jobEntity.setEndTime(System.currentTimeMillis()/1000);
         jobEntity.setDoneProgress(1.00f);
         jobEntity.setIsFailed(1);
+        String resultMessage = jobEntity.getResultMessage();
         try {
             if (jobEntity.getIsValid() == 0) {
                 jobEntity.setResultMessage(Constant.CANCEL);
@@ -61,21 +63,21 @@ public class ExecuteProcessServiceImpl implements ExecuteProcessService {
                         jobEntity.setIsFailed(0);
                         logger.info(MessageFormat.format(Constant.LOG_SUCCESS_SAVE_TO_HBASE,jobEntity.getQueryId(),jobEntity.getJobId(),jobEntity.getQuerySql()));
                     } else {
-                        jobEntity.setResultMessage(Constant.WRITE_DATA_ERROR);
+                        jobEntity.setResultMessage(StrUtil.concat(false,Constant.WRITE_DATA_ERROR,StrUtil.COLON,resultMessage));
                         monitorService.addFail();
                         msg = MessageFormat.format(SQSCode.TEMPLATE_SAVE_HBASE_ERROR.getMsg(),jobEntity.getExecuteStatus(),jobEntity.getQueryId(),jobEntity.getJobId(),jobEntity.getQuerySql());
                         logger.error(msg);
                     }
                 } else if (jobEntity.getExecuteStatus() >= Constant.JOB_BAD_REQUEST_THRESHOLD && jobEntity.getExecuteStatus() < Constant.JOB_INTERNAL_SERVER_ERROR_THRESHOLD) {
-                    jobEntity.setResultMessage(Constant.PARAM_SYNTAX_ERROR);
+                    jobEntity.setResultMessage(StrUtil.concat(false,Constant.PARAM_SYNTAX_ERROR,StrUtil.COLON,resultMessage));
                     msg = MessageFormat.format(SQSCode.PARAM_SYNTAX_ERROR.getMsg(),jobEntity.getExecuteStatus(),jobEntity.getQueryId(),jobEntity.getJobId(),jobEntity.getQuerySql());
                     logger.error(msg);
                 } else if (jobEntity.getExecuteStatus() == Constant.JOB_SQL_EXECUTION_ERROR_CODE) {
-                    jobEntity.setResultMessage(Constant.SQL_EXECUTION_ERROR);
+                    jobEntity.setResultMessage(StrUtil.concat(false,Constant.SQL_EXECUTION_ERROR,StrUtil.COLON,resultMessage));
                     msg = MessageFormat.format(SQSCode.TEMPLATE_SQL_EXECUTION_ERROR.getMsg(),jobEntity.getExecuteStatus(),jobEntity.getQueryId(),jobEntity.getJobId(),jobEntity.getQuerySql());
                     logger.error(msg);
                 } else {
-                    jobEntity.setResultMessage(Constant.UNKNOWN_ERROR);
+                    jobEntity.setResultMessage(StrUtil.concat(false,Constant.UNKNOWN_ERROR,StrUtil.COLON,resultMessage));
                     msg = MessageFormat.format(SQSCode.UNKNOWN_ERROR.getMsg(),jobEntity.getQueryId(),jobEntity.getJobId(),jobEntity.getQuerySql());
                     logger.error(msg);
                 }
@@ -88,9 +90,9 @@ public class ExecuteProcessServiceImpl implements ExecuteProcessService {
             }
             while (number != 1 && z >= 0);
         } catch (Exception e) {
-            jobEntity.setResultMessage(Constant.DATABASE_ERROR);
+            jobEntity.setResultMessage(StrUtil.concat(false,Constant.DATABASE_ERROR,StrUtil.COLON,e.getMessage()));
             jobService.updateProcesses(jobEntity);
-            msg = MessageFormat.format(SQSCode.TEMPLATE_SAVE_DATABASE_ERROR.getMsg(),jobEntity.getQueryId(),jobEntity.getJobId(),e.toString());
+            msg = MessageFormat.format(SQSCode.TEMPLATE_SAVE_DATABASE_ERROR.getMsg(),jobEntity.getQueryId(),jobEntity.getJobId(),e.getMessage());
             logger.error(msg);
         } finally {
             saveToMonitor(jobEntity);

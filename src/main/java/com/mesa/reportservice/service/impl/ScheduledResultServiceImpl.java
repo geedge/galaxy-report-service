@@ -1,5 +1,6 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.Log;
 import cn.hutool.log.LogFactory;
 import com.mesa.reportservice.bean.JobEntity;
@@ -71,8 +72,8 @@ public class ScheduledResultServiceImpl implements ScheduledResultService {
                 }
             }
         } catch (Exception e) {
-            logger.error(e.toString());
-            throw new SQSException(e.toString());
+            logger.error(e.getMessage());
+            throw new SQSException(e.getMessage());
         }
     }
 
@@ -104,7 +105,7 @@ public class ScheduledResultServiceImpl implements ScheduledResultService {
         //遍历内存中的任务对状态RUNNING的更新进度，其他更新数据库的状态
         for (Map.Entry<String, JobEntity> entry : schedulerProperties.getMapResult().entrySet()) {
             logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getState());
-            long currentTime = System.currentTimeMillis();
+            long currentTime = System.currentTimeMillis()/1000;
             long executeTime = currentTime - entry.getValue().getStartTime();
             logger.info("execute time=" + executeTime + "ttlTime=" + httpClientPool.getSocketTimeout());
             if (JobStates.RUNNING.getValue().equals(entry.getValue().getState()) && executeTime > httpClientPool.getSocketTimeout()) {
@@ -148,7 +149,7 @@ public class ScheduledResultServiceImpl implements ScheduledResultService {
                     job.setEndTime(System.currentTimeMillis()/1000);
                     job.setDoneProgress(1.00f);
                     job.setIsFailed(1);
-                    job.setResultMessage(Constant.UNKNOWN_ERROR);
+                    job.setResultMessage(StrUtil.concat(false,Constant.UNKNOWN_ERROR,": queryId is null"));
                 }
                 if ((JobStates.RUNNING.getValue()).equals(job.getState())) {
                     if (jobService.updateProcesses(job) != 0) {
