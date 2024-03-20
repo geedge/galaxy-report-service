@@ -23,7 +23,7 @@ public class MonitorServiceImplTest extends ReportServiceApplicationTests {
 
     @Test
     public void testGetReportStatus() throws Exception{
-        mockMvc.perform(get("/monitor"))
+        mockMvc.perform(get("/v1/monitor"))
                 .andExpect(status().isOk());
     }
 }

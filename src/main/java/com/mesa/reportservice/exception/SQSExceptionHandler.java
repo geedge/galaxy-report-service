@@ -1,11 +1,3 @@
-/**
-
- *
-
- *
-
- */
-
 package com.mesa.reportservice.exception;
 
 import cn.hutool.log.Log;
@@ -33,7 +25,7 @@ public class SQSExceptionHandler {
 	public R handleSQSException(SQSException e){
 		R r = new R();
 		r.put("code", e.getCode());
-		r.put("message", e.getMsg());
+		r.put("msg", e.getMsg());
 		return r;
 	}
 
@@ -41,6 +33,6 @@ public class SQSExceptionHandler {
 	@ResponseStatus(value=HttpStatus.INTERNAL_SERVER_ERROR)
 	public R handleException(Exception e){
 		logger.error(e);
-		return R.error().put("message", e.getMessage());
+		return R.error().put("msg", e.getMessage());
 	}
 }

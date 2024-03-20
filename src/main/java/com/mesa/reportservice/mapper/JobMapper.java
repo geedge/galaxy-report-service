@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.mesa.reportservice.bean.JobEntity;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ public interface JobMapper extends BaseMapper<JobEntity> {
 
     int updateStatue(JobEntity job);
 
-    Map<String,Long> getJobCount(long lastUpdateTime);
+    Map<String,Object> getJobCount(long lastUpdateTime);
 
     Map<String,Object> getJobDetail(String jobId);
 }

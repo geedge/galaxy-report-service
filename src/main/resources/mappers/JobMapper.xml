@@ -104,10 +104,11 @@
   </update>
 
   <select id="getJobCount"  resultType="map" parameterType="long">
-    SELECT (SELECT COUNT(1) FROM saved_query_job  where state = 'PENDING' and is_valid = 1) as queueNum,
-    (SELECT COUNT(1) FROM saved_query_job  where state = 'RUNNING' and is_valid = 1) as executingNum,
-    (SELECT COUNT(1) FROM saved_query_job  where state = 'DONE' and is_failed = 0 and last_update_time > #{lastUpdateTime}) as todaySuccessNum,
-    (SELECT COUNT(1) FROM saved_query_job  where is_failed = 1 and last_update_time > #{lastUpdateTime} ) as todayErrorNum
+    SELECT (SELECT COUNT(1) FROM saved_query_job  where state = 'PENDING' and is_valid = 1) as pending_count,
+    (SELECT COUNT(1) FROM saved_query_job  where state = 'RUNNING' and is_valid = 1) as running_count,
+    (SELECT COUNT(1) FROM saved_query_job  where state = 'DONE' and is_failed = 0 and last_update_time > #{lastUpdateTime}) as done_count,
+    (SELECT COUNT(1) FROM saved_query_job  where is_failed = 1 and last_update_time > #{lastUpdateTime} ) as failed_count,
+    (SELECT COUNT(1) FROM saved_query_job  where is_valid = 0 and last_update_time > #{lastUpdateTime} ) as canceled_count
   </select>
 
   <select id="getJobDetail"  resultType="map" parameterType="String">

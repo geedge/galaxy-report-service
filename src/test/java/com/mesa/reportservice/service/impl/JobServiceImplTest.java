@@ -7,6 +7,7 @@ import com.mesa.reportservice.enums.JobStates;
 import com.mesa.reportservice.exception.SQSCode;
 import com.mesa.reportservice.exception.SQSException;
 import com.mesa.reportservice.service.JobService;
+import com.mesa.reportservice.util.R;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +45,9 @@ public class JobServiceImplTest extends ReportServiceApplicationTests {
     }
 
     @Test
-    public void testGetJobCount() {
-        Map<String, Long> jobCount = jobService.getJobCount();
-        Assert.assertNotNull(jobCount);
+    public void testGetJobStatus() {
+        R jobStatus = jobService.getJobStatus();
+        Assert.assertNotNull(jobStatus);
     }
 
     @Test
