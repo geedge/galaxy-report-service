@@ -12,6 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -67,6 +71,32 @@ public class ZookeeperServiceImpl implements ZookeeperService {
             logger.error(e.toString());
             return false;
         }
+    }
+
+    @Override
+    public Map<String,Object> status() throws Exception {
+        Map<String, Object> status = new HashMap<>();
+        status.put("status","UP");
+        if (zookeeperProperties.getOpen() == 0) {
+            List<Map> nodeList = new ArrayList<>();
+            Map<String, Object> node = new HashMap<>();
+            List<String> children = curatorConnect.getChildren().forPath("/");
+            boolean isDown = true;
+            for (String child : children) {
+                Stat stat = curatorConnect.checkExists().forPath("/" + child);
+                node.put("url",child);
+                node.put("status",stat != null?"UP":"DOWN");
+                nodeList.add(node);
+                if (stat != null) {
+                    isDown = false;
+                }
+            }
+            if(isDown){
+                status.put("status","DOWN");
+            }
+            status.put("nodeStatus",nodeList);
+        }
+        return status;
     }
 }
 

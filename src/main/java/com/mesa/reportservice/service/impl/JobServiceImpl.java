@@ -58,13 +58,18 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, JobEntity> implements
     @Override
     public R getJobStatus() {
         Map<String,Object> numMap = getJobCount();
+        Map<String, Object> status = null;
+        try {
+            status = zookeeperService.status();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(ObjectUtil.isNotEmpty(status.get("nodeStatus"))){
+            numMap.put("nodeStatus",status.get("nodeStatus"));
+        }
         R r = new R();
         r.put("data",numMap);
-        if(zookeeperService.isMaster()){
-            r.put("status","UP");
-        }else{
-            r.put("status","DOWN");
-        }
+        r.put("status",status.get("status"));
         return r;
     }
 
