@@ -64,12 +64,9 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, JobEntity> implements
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if(ObjectUtil.isNotEmpty(status.get("nodeStatus"))){
-            numMap.put("nodeStatus",status.get("nodeStatus"));
-        }
         R r = new R();
         r.put("data",numMap);
-        r.put("status",status.get("status"));
+        r.putAll(status);
         return r;
     }
 
