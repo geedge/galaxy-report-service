@@ -44,7 +44,7 @@ public class Constant {
      * URL
      */
     public static final String URL_GET_QUERY_ID = "{0}/v1/sql/query/query_id?query=";
-    public static final String URL_QUERY_FOR_EXECUTE = "{0}/sql?originalSQL=";
+    public static final String URL_QUERY_FOR_EXECUTE = "{0}/sql?option=long_term&originalSQL=";
     public static final String URL_QUERY_FOR_PROCESS = "{0}/v1/sql/query/{1}/progress";
     public static final String URL_QUERY_FOR_CANCEL = "{0}/v1/sql/query/{1}";
 }
