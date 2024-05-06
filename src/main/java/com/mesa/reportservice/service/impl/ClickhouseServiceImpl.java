@@ -91,7 +91,7 @@ public class ClickhouseServiceImpl implements ClickhouseService {
         // 发起请求
         HttpResult rs = null;
         try {
-            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sql?originalSQL=");
+            String url = URLUtil.normalize(clickhouseConfig.getGateway_ip().trim() + "/sql?option=long_term&originalSQL=");
             query = URLEncoder.encode(query, "utf8").replaceAll("\\+", "%20");
             String jobsql = url + query;
             HttpGet httpGet = new HttpGet(jobsql);
