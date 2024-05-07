@@ -105,10 +105,10 @@ public class ScheduledResultServiceImpl implements ScheduledResultService {
         //遍历内存中的任务对状态RUNNING的更新进度，其他更新数据库的状态
         for (Map.Entry<String, JobEntity> entry : schedulerProperties.getMapResult().entrySet()) {
             logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getState());
-            long currentTime = System.currentTimeMillis()/1000;
+            long currentTime = convertToSeconds(System.currentTimeMillis());
             long executeTime = currentTime - entry.getValue().getStartTime();
-            logger.info("execute time=" + executeTime + "ttlTime=" + httpClientPool.getSocketTimeout());
-            if (JobStates.RUNNING.getValue().equals(entry.getValue().getState()) && executeTime > httpClientPool.getSocketTimeout()) {
+            logger.info("execute time=" + executeTime + "ttlTime=" + convertToSeconds(httpClientPool.getSocketTimeout()));
+            if (JobStates.RUNNING.getValue().equals(entry.getValue().getState()) && executeTime > convertToSeconds(httpClientPool.getSocketTimeout())) {
                 entry.getValue().setState(JobStates.DONE.getValue());
                 entry.getValue().setExecuteStatus(Constant.JOB_EXECUTION_TIMEOUT);
                 executeProcessService.killQuery(entry.getValue());
@@ -129,7 +129,7 @@ public class ScheduledResultServiceImpl implements ScheduledResultService {
             List<JobEntity> jobs = jobService.getJobTask(rows);
             for (JobEntity job : jobs) {
                 logger.info(Constant.LOG_START_EXECUTING_TASKS);
-                long startTime = System.currentTimeMillis()/1000;
+                long startTime = convertToSeconds(System.currentTimeMillis());
                 job.setStartTime(startTime);
                 String sql = job.getQuerySql().trim();
                 job.setQuerySql(sql);
@@ -146,7 +146,7 @@ public class ScheduledResultServiceImpl implements ScheduledResultService {
                 if (queryId.equals("") ) {
                     job.setExecuteStatus(0);
                     job.setState(JobStates.DONE.getValue());
-                    job.setEndTime(System.currentTimeMillis()/1000);
+                    job.setEndTime(convertToSeconds(System.currentTimeMillis()));
                     job.setDoneProgress(1.00f);
                     job.setIsFailed(1);
                     job.setResultMessage(StrUtil.concat(false,Constant.UNKNOWN_ERROR,": queryId is null"));
@@ -178,4 +178,9 @@ public class ScheduledResultServiceImpl implements ScheduledResultService {
             logger.info(Constant.LOG_NO_PENDING_TASKS);
         }
     }
+
+    private long convertToSeconds(long millis) {
+        return millis/1000;
+    }
+
 }
