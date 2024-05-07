@@ -77,10 +77,10 @@ public class ScheduledResultController {
                 //遍历内存中的任务对状态RUNNING的更新进度，其他更新数据库的状态
                 for (Map.Entry<String, JobEntity> entry : gc.getMapresult().entrySet()) {
                     logger.info("key = " + entry.getKey() + ", value = " + entry.getValue().getState());
-                    long currentTime = System.currentTimeMillis();
+                    long currentTime = convertToSeconds(System.currentTimeMillis());
                     long excutetime = currentTime - entry.getValue().getStartTime();
-                    logger.info("excute time=" + excutetime + "ttl_time=" + hc.getSocketTimeout());
-                    if (("RUNNING").equals(entry.getValue().getState()) && excutetime > hc.getSocketTimeout()) {
+                    logger.info("excute time=" + excutetime + "ttl_time=" + convertToSeconds(hc.getSocketTimeout()));
+                    if (("RUNNING").equals(entry.getValue().getState()) && excutetime > convertToSeconds(hc.getSocketTimeout())) {
                         entry.getValue().setState("DONE");
                         entry.getValue().setExcuteStatus(500001);
                         eps.killQuery(entry.getValue());
@@ -98,7 +98,7 @@ public class ScheduledResultController {
                     List<JobEntity> jobs = ms.getJobTask(rows);
                     for (JobEntity job : jobs) {
                         logger.info("start executing task");
-                        long begintime = System.currentTimeMillis()/1000;
+                        long begintime = convertToSeconds(System.currentTimeMillis());
                         job.setStartTime(begintime);
                         String sql = job.getQuerySql().trim();
                       /*  sql = sql.replace("$exe_time", "toDateTime('" + job.getIssuedTime().trim() + "')");
@@ -118,7 +118,7 @@ public class ScheduledResultController {
                         if (queryid.equals("") ) {
                             job.setExcuteStatus(0);
                             job.setState("DONE");
-                            job.setEndTime(System.currentTimeMillis()/1000);
+                            job.setEndTime(convertToSeconds(System.currentTimeMillis()));
                             //status = 7
                             job.setDoneProgress(1.00f);
                             job.setIsFailed(1);
@@ -163,4 +163,7 @@ public class ScheduledResultController {
         }
     }
 
+    private long convertToSeconds(long millis) {
+        return millis/1000;
+    }
 }
