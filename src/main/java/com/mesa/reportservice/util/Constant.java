@@ -19,7 +19,7 @@ public class Constant {
     public static final String UNKNOWN_ERROR = "Unknown Error";
     public static final String DATABASE_ERROR = "Database Error";
     public static final String RE_EXECUTION = "Re Execution";
-    public static final String QUERY_TIME_OUT = "SQL Execution Error execute query time out";
+    public static final String SOCKET_HANG_UP = "SQL Execution Error socket hang up";
     public static final String RESULT_TOO_LARGE = "Result Too Large";
 
     /**

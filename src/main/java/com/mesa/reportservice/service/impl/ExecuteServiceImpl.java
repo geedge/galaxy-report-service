@@ -74,7 +74,7 @@ public class ExecuteServiceImpl implements ExecuteService {
                 job.setResultMessage(e.getMessage());
                 if (k == 0) {
                     job.setExecuteStatus(Constant.JOB_EXECUTION_TIMEOUT);
-                    job.setResultMessage(Constant.QUERY_TIME_OUT);
+                    job.setResultMessage(Constant.SOCKET_HANG_UP);
                     logger.info("timeout resultId = " + job.getJobId() + " queryId=" + job.getQueryId() + " sql=" + job.getQuerySql());
                 } else {
                     logger.info("Socket warn " + e.getMessage() + "retry time " + (3 - k));

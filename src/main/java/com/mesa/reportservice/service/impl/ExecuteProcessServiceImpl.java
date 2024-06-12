@@ -124,12 +124,11 @@ public class ExecuteProcessServiceImpl implements ExecuteProcessService {
                     Map map = JSON.parseObject(JSON.toJSONString(listData.get(0)));
                     long readRows = Long.parseLong(map.get("rows_read").toString());
                     float elapsed = Float.parseFloat(map.get("elapsed").toString());
-                    double percent = Double.parseDouble(map.get("percent").toString());
-                    int process = (int) (percent * 100);
+                    float percent = Float.parseFloat(map.get("percent").toString());
                     jobEntity.setElapsed((int) elapsed);
                     jobEntity.setRowsRead(readRows);
-                    if(jobEntity.getDoneProgress()<process){
-                        jobEntity.setDoneProgress(process);
+                    if(jobEntity.getDoneProgress()<percent){
+                        jobEntity.setDoneProgress(percent);
                     }
                     if (jobEntity.getRowsRead() != 0 || jobEntity.getElapsed() != 0) {
                         jobService.updateProcesses(jobEntity);
