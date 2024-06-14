@@ -2,5 +2,7 @@
   "querySqlSuccess": "select 1 from session_record limit 1",
   "querySqlError": "select 1 from session_record_cn limit 1",
   "queryForProcessIdError": "",
-  "queryForCancelIdError": "1:1"
+  "queryForCancelIdError": "1:1",
+  "highLatencyQuerySuccess": "SELECT app,sleepEachRow(3) FROM traffic_sketch_metric LIMIT 100",
+  "highLatencyQueryCancel": "SELECT * FROM traffic_sketch_metric ORDER BY bytes DESC LIMIT 20"
 }

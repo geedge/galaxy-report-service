@@ -1,7 +1,10 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.log.Log;
+import cn.hutool.log.LogFactory;
 import com.mesa.ReportServiceApplicationTests;
 import com.mesa.reportservice.bean.HttpResult;
+import com.mesa.reportservice.exception.SQSException;
 import com.mesa.reportservice.service.QueryGatewayService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,6 +16,8 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.mesa.reportservice.exception.SQSCode.ERROR;
+
 /**
  * @Auther: lijinyang
  * @Date: 2024/01/04/17:05
@@ -21,6 +26,8 @@ import java.util.regex.Pattern;
 public class QueryGatewayServiceImplTest extends ReportServiceApplicationTests {
 
     private static final String QUERY_ID_PATTERN = "^[a-f0-9]{32}:[a-f0-9]{32}$";
+
+    private static final Log logger = LogFactory.get();
 
     @Autowired
     private QueryGatewayService queryGatewayService;
@@ -92,5 +99,42 @@ public class QueryGatewayServiceImplTest extends ReportServiceApplicationTests {
         HttpResult httpResult = null;
         httpResult = queryGatewayService.deleteJob(queryId);
         Assert.assertTrue(httpResult.getCode() == HttpStatus.NOT_FOUND.value());
+    }
+
+    @Test
+    public void highLatencyQuerySuccess() throws IOException {
+        String sql = this.jsonToInParameter("parameters/queryGatewayTest.json", "highLatencyQuerySuccess", String.class);
+        HttpResult httpResult = queryGatewayService.queryJob(sql);
+        Assert.assertTrue(httpResult.getCode() == HttpStatus.OK.value());
+    }
+
+    @Test
+    public void highLatencyQueryCancel() throws IOException {
+        try {
+            String sql = this.jsonToInParameter("parameters/queryGatewayTest.json", "highLatencyQueryCancel", String.class);
+            String queryId = queryGatewayService.getQueryId(sql);
+            Thread thread = new Thread(() -> {
+                try {
+                    HttpResult result = queryGatewayService.queryJob(sql);
+                    logger.info(result.getBody());
+                    if(!result.getBody().contains("Error in SQL execution: Code: 394. DB::Exception: Query was cancelled. (QUERY_WAS_CANCELLED)")) {
+                        throw new SQSException("Job not cancelled", ERROR.getCode());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            thread.start();
+            thread.sleep(5000);
+            HttpResult process = queryGatewayService.queryJobProcess(queryId);
+            logger.info(process.getBody());
+            Assert.assertTrue(process.getBody().contains("elapsed"));
+            HttpResult httpResult = queryGatewayService.deleteJob(queryId);
+            Assert.assertTrue(httpResult.getCode() == HttpStatus.OK.value());
+            thread.checkAccess();
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
