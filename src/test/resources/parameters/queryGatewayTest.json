@@ -3,6 +3,6 @@
   "querySqlError": "select 1 from session_record_cn limit 1",
   "queryForProcessIdError": "",
   "queryForCancelIdError": "1:1",
-  "highLatencyQuerySuccess": "SELECT app,sleepEachRow(3) FROM traffic_sketch_metric LIMIT 100",
-  "highLatencyQueryCancel": "SELECT * FROM traffic_sketch_metric ORDER BY bytes DESC LIMIT 20"
+  "highLatencyQuerySuccess": "SELECT sleepEachRow(3) FROM tables_cluster LIMIT 150",
+  "highLatencyQueryCancel": "SELECT sleepEachRow(3) FROM tables_cluster LIMIT 150"
 }
