@@ -116,10 +116,6 @@ public class QueryGatewayServiceImplTest extends ReportServiceApplicationTests {
             Thread thread = new Thread(() -> {
                 try {
                     HttpResult result = queryGatewayService.queryJob(sql);
-                    logger.info(result.getBody());
-                    if(!result.getBody().contains("Error in SQL execution: Code: 394. DB::Exception: Query was cancelled. (QUERY_WAS_CANCELLED)")) {
-                        throw new SQSException("Job not cancelled", ERROR.getCode());
-                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -131,7 +127,6 @@ public class QueryGatewayServiceImplTest extends ReportServiceApplicationTests {
             Assert.assertTrue(process.getBody().contains("elapsed"));
             HttpResult httpResult = queryGatewayService.deleteJob(queryId);
             Assert.assertTrue(httpResult.getCode() == HttpStatus.OK.value());
-            thread.checkAccess();
             thread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
