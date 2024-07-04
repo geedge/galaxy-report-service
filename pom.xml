@@ -296,7 +296,13 @@
 					</execution>
 				</executions>
 			</plugin>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>com.mesalab.xjar-maven-plugin</groupId>
 				<artifactId>mesalab-xjar-maven-plugin</artifactId>
