@@ -1,5 +1,6 @@
 package com.mesa.reportservice.service.impl;
 
+import cn.hutool.Hutool;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -9,6 +10,7 @@ import com.mesa.reportservice.exception.SQSCode;
 import com.mesa.reportservice.exception.SQSException;
 import com.mesa.reportservice.mapper.JobMapper;
 import com.mesa.reportservice.service.JobService;
+import com.mesa.reportservice.service.QueryGatewayService;
 import com.mesa.reportservice.service.ZookeeperService;
 import com.mesa.reportservice.util.R;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,12 +75,14 @@ public class JobServiceImpl extends ServiceImpl<JobMapper, JobEntity> implements
     private Map<String,Object> getJobCount(){
         long lastUpdateTime = System.currentTimeMillis()/1000 - convertDaysToSeconds(1);
         Map<String, Object> jobCount = this.baseMapper.getJobCount(lastUpdateTime);
-        LambdaQueryWrapper<JobEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.select(JobEntity::getJobId).eq(JobEntity::getIsFailed,1).ge(JobEntity::getLastUpdateTime,lastUpdateTime);
-        List<String> failedJobIdList = this.baseMapper.selectObjs(lambdaQueryWrapper).stream().map(o -> (String) o).collect(Collectors.toList());
+        LambdaQueryWrapper<JobEntity> failed = new LambdaQueryWrapper<>();
+        failed.select(JobEntity::getJobId).eq(JobEntity::getIsFailed,1).ge(JobEntity::getLastUpdateTime,lastUpdateTime);
+        List<String> failedJobIdList = this.baseMapper.selectObjs(failed).stream().map(o -> (String) o).collect(Collectors.toList());
+        List<String> slowJobIdList = this.baseMapper.getSlowQuerySql(lastUpdateTime);
         Map<String, Object> jobs = new HashMap<>();
         jobs.put("running",schedulerProperties.getMapResult());
         jobs.put("failed",failedJobIdList);
+        jobs.put("slow_query",slowJobIdList);
         jobCount.put("jobs",jobs);
         return jobCount;
     }

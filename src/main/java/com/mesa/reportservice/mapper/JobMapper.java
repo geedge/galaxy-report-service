@@ -28,4 +28,6 @@ public interface JobMapper extends BaseMapper<JobEntity> {
     Map<String,Object> getJobCount(long lastUpdateTime);
 
     Map<String,Object> getJobDetail(String jobId);
+
+    List<String> getSlowQuerySql(long lastUpdateTime);
 }
