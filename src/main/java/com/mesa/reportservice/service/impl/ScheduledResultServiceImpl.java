@@ -84,18 +84,11 @@ public class ScheduledResultServiceImpl implements ScheduledResultService {
             String sql = jobEntity.getQuerySql().trim();
             String queryId = queryGatewayService.getQueryId(sql);
             jobEntity.setQueryId(queryId);
-            if (jobEntity.getIsValid() == 0) {
+            if (schedulerProperties.getMapResult().containsKey(jobEntity.getQueryId()) && jobEntity.getIsValid() == 0) {
                 executeProcessService.killQuery(jobEntity);
                 schedulerProperties.getMapResult().get(jobEntity.getQueryId()).setIsValid(0);
-            } else if (!schedulerProperties.getMapResult().containsKey(jobEntity.getQueryId())) {
-                executeProcessService.reSet(jobEntity);
             }
-            if (schedulerProperties.getMapResult().containsKey(jobEntity.getQueryId())) {
-                if (jobEntity.getIsValid() == 0) {
-                    executeProcessService.killQuery(jobEntity);
-                    schedulerProperties.getMapResult().get(jobEntity.getQueryId()).setIsValid(0);
-                }
-            } else {
+            if(!schedulerProperties.getMapResult().containsKey(jobEntity.getQueryId())) {
                 executeProcessService.reSet(jobEntity);
             }
         }
@@ -162,15 +155,12 @@ public class ScheduledResultServiceImpl implements ScheduledResultService {
                         });
                     } else {
                         logger.error(SQSCode.UPDATE_STATUS_ERROR.getMsg());
-                        throw new SQSException(SQSCode.UPDATE_STATUS_ERROR);
                     }
                 } else {
                     if (jobService.updateProcesses(job) != 0) {
                         logger.error(SQSCode.TASK_CANNOT_EXECUTED.getMsg());
-                        throw new SQSException(SQSCode.TASK_CANNOT_EXECUTED);
                     } else {
                         logger.error(SQSCode.UPDATE_STATUS_ERROR.getMsg());
-                        throw new SQSException(SQSCode.UPDATE_STATUS_ERROR);
                     }
                 }
             }
