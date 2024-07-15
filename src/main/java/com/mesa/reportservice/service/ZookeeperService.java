@@ -4,6 +4,7 @@ package com.mesa.reportservice.service;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
+import java.util.Map;
 
 /**
  *
@@ -14,4 +15,6 @@ import java.net.InetAddress;
 public interface ZookeeperService {
 
      boolean isMaster();
+
+     Map<String,Object> status() throws Exception;
 }

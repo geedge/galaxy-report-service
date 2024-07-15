@@ -28,9 +28,10 @@ public enum SQSCode {
 	KILL_QUERY_ERROR(500008,"Kill Query Error"),
 	TEMPLATE_UNKNOWN_ERROR(500009,"Unknown Error ! ErrorCode = {0} queryId = {1}  jobId = {2} executeSql = {3}"),
 	UPDATE_STATUS_ERROR(500010,"failed to update database status"),
-	TASK_CANNOT_EXECUTED(500010,"task cannot be executed"),
+	TASK_CANNOT_EXECUTED(500011,"task cannot be executed"),
 	UNKNOWN_ERROR(500999,"Unknown Error"),
 
+	JOB_IS_NOT_EXIST(510000, "job is not exist"),
 	//成功
     SUCCESS(200, "success"),
 	//失败

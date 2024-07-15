@@ -46,5 +46,7 @@
     "result": "",
     "memoryUsage": "",
     "queryDurationMs": ""
-  }
+  },
+  "getJobDetailSuccessId": "00838b9d94552afecc6fa29cde033714",
+  "getJobDetailErrorId": "00838b9d94552afecc6fa29cde033715"
 }

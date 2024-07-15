@@ -1,11 +1,10 @@
 package com.mesa.reportservice.service.impl;
 
-import com.alibaba.fastjson.JSONArray;
-import com.mesa.reportservice.bean.MonitorEntity;
 import com.mesa.reportservice.configuration.SchedulerProperties;
 import com.mesa.reportservice.service.JobService;
 import com.mesa.reportservice.service.MonitorService;
 import com.mesa.reportservice.service.ZookeeperService;
+import com.mesa.reportservice.util.R;
 import io.micrometer.core.instrument.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,15 +19,6 @@ import java.util.Map;
  */
 @Service
 public class MonitorServiceImpl implements MonitorService {
-
-    @Autowired
-    private JobService mysqlService;
-
-    @Autowired
-    private ZookeeperService zookeeperService;
-
-    @Autowired
-    private SchedulerProperties schedulerProperties;
 
     @Autowired
     private MeterRegistry meterRegistry;
@@ -51,25 +41,5 @@ public class MonitorServiceImpl implements MonitorService {
     @Override
     public void addFail() {
         counterReportFail.increment();
-    }
-
-    @Override
-    public String getJobCount() {
-        String json="";
-        MonitorEntity monitorEntity = new MonitorEntity();
-        Map<String,Long> numMap = mysqlService.getJobCount();
-        monitorEntity.setQueueJobNum(numMap.get("queueNum"));
-        monitorEntity.setExecutingJobNum(numMap.get("executingNum"));
-        monitorEntity.setTodaySuccessJobNum(numMap.get("todaySuccessNum"));
-        monitorEntity.setTodayErrorJobNum(numMap.get("todayErrorNum"));
-        monitorEntity.setJobList(schedulerProperties.getMapResult());
-        if(zookeeperService.isMaster()){
-            monitorEntity.setStatus("active");
-        }else{
-            monitorEntity.setStatus("standby");
-        }
-        Object obj = JSONArray.toJSON(monitorEntity);
-        json = obj.toString();
-        return json;
     }
 }

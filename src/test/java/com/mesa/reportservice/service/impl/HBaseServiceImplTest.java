@@ -1,4 +1,4 @@
-package com.mesa.reportservice;
+package com.mesa.reportservice.service.impl;
 
 import com.mesa.ReportServiceApplicationTests;
 import com.mesa.reportservice.bean.JobEntity;
@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
  * @Date: 2024/01/10/14:48
  */
 @EnableAutoConfiguration
-public class HBaseTest extends ReportServiceApplicationTests {
+public class HBaseServiceImplTest extends ReportServiceApplicationTests {
 
     @Autowired
     private HBaseService hBaseService;

@@ -3,6 +3,7 @@ package com.mesa.reportservice.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.mesa.reportservice.bean.JobEntity;
+import com.mesa.reportservice.util.R;
 
 import java.util.List;
 import java.util.Map;
@@ -21,5 +22,7 @@ public interface JobService  extends IService<JobEntity> {
 
     int updateProcesses(JobEntity job);
 
-    Map<String,Long> getJobCount();
+    R getJobStatus();
+
+    Map<String,Object> getJobDetail(String jobId);
 }

@@ -62,7 +62,9 @@ spring:
         username: root
 #mariadb的密码
         password: galaxy2019
-
+#初始化数据库表和数据
+        initialization-mode: always
+        schema: classpath:sql/monitorInit.sql
 #以下配置不需要更改通常
         name: druidDataSource
         type: com.alibaba.druid.pool.DruidDataSource

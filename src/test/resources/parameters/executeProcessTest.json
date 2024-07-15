@@ -166,5 +166,29 @@
     "result": "",
     "memoryUsage": "",
     "queryDurationMs": ""
+  },
+  "updateProcessJob": {
+    "jobId": "014f9d6e1f17227ce8d837003bc3bedb",
+    "querySql": "SELECT AVG(sent_bytes) AS \"Bytes Sent\", AVG(received_bytes) AS \"Bytes Received\", FROM_UNIXTIME(TIME_FLOOR_WITH_FILL(start_timestamp_ms, 'PT5M', 'zero')) AS \"Start Time\" FROM security_event WHERE recv_time >= UNIX_TIMESTAMP('2023-12-18T13:18:01Z') AND recv_time < UNIX_TIMESTAMP('2023-12-19T13:18:01Z') AND security_event.vsys_id IN (1) GROUP BY \"Start Time\" ORDER BY \"Start Time\" ASC",
+    "state": "RUNNING",
+    "resultName": "",
+    "doneProgress": 0,
+    "isFailed": 0,
+    "resultMessage": "",
+    "elapsed": 1,
+    "rowsRead": 100,
+    "bytesRead": 100,
+    "resultRows": 1,
+    "resultBytes": 100,
+    "isValid": 1,
+    "startTime": 1702991925,
+    "endTime": 1703399430,
+    "lastUpdateTime": 1702991940,
+    "generatedTime": 1702991921,
+    "queryId": "",
+    "executeStatus": 200,
+    "result": "",
+    "memoryUsage": "",
+    "queryDurationMs": ""
   }
 }

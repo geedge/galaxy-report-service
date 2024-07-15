@@ -1,5 +1,6 @@
 package com.mesa.reportservice.service;
 
+
 /**
  *
  * @author lijinyang
@@ -10,6 +11,4 @@ public interface MonitorService {
      void  addSuccess();
 
      void  addFail();
-
-     String getJobCount();
 }

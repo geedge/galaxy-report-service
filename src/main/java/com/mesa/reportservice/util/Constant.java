@@ -19,7 +19,7 @@ public class Constant {
     public static final String UNKNOWN_ERROR = "Unknown Error";
     public static final String DATABASE_ERROR = "Database Error";
     public static final String RE_EXECUTION = "Re Execution";
-    public static final String QUERY_TIME_OUT = "SQL Execution Error execute query time out";
+    public static final String SOCKET_HANG_UP = "SQL Execution Error socket hang up";
     public static final String RESULT_TOO_LARGE = "Result Too Large";
 
     /**
@@ -44,7 +44,7 @@ public class Constant {
      * URL
      */
     public static final String URL_GET_QUERY_ID = "{0}/v1/sql/query/query_id?query=";
-    public static final String URL_QUERY_FOR_EXECUTE = "{0}/sql?originalSQL=";
+    public static final String URL_QUERY_FOR_EXECUTE = "{0}/sql?option=long_term&originalSQL=";
     public static final String URL_QUERY_FOR_PROCESS = "{0}/v1/sql/query/{1}/progress";
     public static final String URL_QUERY_FOR_CANCEL = "{0}/v1/sql/query/{1}";
 }

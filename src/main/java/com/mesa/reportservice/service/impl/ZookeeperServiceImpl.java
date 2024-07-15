@@ -6,12 +6,17 @@ import com.mesa.reportservice.configuration.SchedulerProperties;
 import com.mesa.reportservice.configuration.ZookeeperProperties;
 import com.mesa.reportservice.service.ZookeeperService;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.api.GetChildrenBuilder;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -67,6 +72,26 @@ public class ZookeeperServiceImpl implements ZookeeperService {
             logger.error(e.toString());
             return false;
         }
+    }
+
+    @Override
+    public Map<String,Object> status() throws Exception {
+        Map<String, Object> status = new HashMap<>();
+        status.put("status","UP");
+        if (zookeeperProperties.getOpen() == 0) {
+            List<String> children = curatorConnect.getChildren().forPath("/");
+            boolean isDown = true;
+            for (String child : children) {
+                Stat stat = curatorConnect.checkExists().forPath("/" + child);
+                if (stat != null) {
+                    isDown = false;
+                }
+            }
+            if(isDown){
+                status.put("status","DOWN");
+            }
+        }
+        return status;
     }
 }
 
