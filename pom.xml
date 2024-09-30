@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.mesa</groupId>
 	<artifactId>saved-query-scheduler</artifactId>
-	<version>22.12.07</version>
+	<version>3.2.0</version>
 	<name>saved-query-scheduler</name>
 	<packaging>jar</packaging>
 	<description>Demo project for Spring Boot</description>
